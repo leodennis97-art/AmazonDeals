@@ -151,6 +151,10 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") }
             "Elektronik Bot" -> allDeals.filter { it.title.contains("Elektronik") || it.description.lowercase().contains("anker") || it.description.lowercase().contains("usb") || it.description.lowercase().contains("led") }
             "Haushalt Bot" -> allDeals.filter { it.title.contains("Haushalt") || it.description.lowercase().contains("kaffee") || it.description.lowercase().contains("küche") || it.description.lowercase().contains("tabs") }
+            "Gaming Bot" -> allDeals.filter { it.title.contains("Gaming") || it.description.lowercase().contains("ps5") || it.description.lowercase().contains("xbox") || it.description.lowercase().contains("switch") }
+            "Fashion Bot" -> allDeals.filter { it.title.contains("Fashion") || it.description.lowercase().contains("nike") || it.description.lowercase().contains("adidas") || it.description.lowercase().contains("schuhe") }
+            "Tierwelt Bot" -> allDeals.filter { it.title.contains("Tierwelt") || it.description.lowercase().contains("katze") || it.description.lowercase().contains("hund") || it.description.lowercase().contains("felix") }
+            "Baumarkt Bot" -> allDeals.filter { it.title.contains("Baumarkt") || it.description.lowercase().contains("bosch") || it.description.lowercase().contains("makita") || it.description.lowercase().contains("werkzeug") }
             "Favoriten" -> allDeals.filter { repository.isFavorite(it.id) }
             else -> allDeals
         }
