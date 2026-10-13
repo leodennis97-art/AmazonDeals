@@ -106,7 +106,7 @@ class DealRepository(private val context: Context) {
                 description = "Aktiviere den Gutschein im Bezahlvorgang. Kombinierbar mit Spar-Abo.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/coupons",
+                dealUrl = "https://www.amazon.de/dp/B08N5WRWNW",
                 timestamp = now - 300000,
                 isGlitch = true
             ),
@@ -116,7 +116,7 @@ class DealRepository(private val context: Context) {
                 description = "Coupons im Checkout aktivieren. 50% Ersparnis durch Rabattgutschein.",
                 price = "0.01 €",
                 couponText = "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-                dealUrl = "https://www.amazon.de/coupons",
+                dealUrl = "https://www.amazon.de/dp/B09XYZ1234",
                 timestamp = now - 1800000,
                 isGlitch = true
             ),
@@ -126,7 +126,7 @@ class DealRepository(private val context: Context) {
                 description = "Aktionsgutschein auf der Produktseite anhaken.",
                 price = "12.49 €",
                 couponText = "50% Rabatt Gutschein",
-                dealUrl = "https://www.amazon.de/coupons",
+                dealUrl = "https://www.amazon.de/dp/B07R123456",
                 timestamp = now - 3600000,
                 isGlitch = false
             ),
@@ -136,7 +136,7 @@ class DealRepository(private val context: Context) {
                 description = "Rabattcode beim Bezahlen eingeben.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/coupons",
+                dealUrl = "https://www.amazon.de/dp/B08ABC9876",
                 timestamp = now - 7200000,
                 isGlitch = true
             )

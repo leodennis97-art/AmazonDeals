@@ -39,8 +39,9 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun sendDealNotification(deal: Deal) {
-        val intent = if (deal.dealUrl.isNotEmpty()) {
-            Intent(Intent.ACTION_VIEW, Uri.parse(deal.dealUrl))
+        val targetUrl = deal.getDirectCartUrl()
+        val intent = if (targetUrl.isNotEmpty()) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         } else {
             Intent(context, MainActivity::class.java)
         }

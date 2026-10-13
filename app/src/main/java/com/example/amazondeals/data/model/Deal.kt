@@ -10,4 +10,33 @@ data class Deal(
     val imageUrl: String = "",
     val timestamp: Long = System.currentTimeMillis(),
     val isGlitch: Boolean = false
-)
+) {
+    fun getAsin(): String? {
+        val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
+        val match = regex.find(dealUrl)
+        if (match != null) {
+            return match.groupValues[1].uppercase()
+        }
+        val fallbackRegex = Regex("""\b(B[0-9A-Z]{9})\b""")
+        return fallbackRegex.find(dealUrl)?.groupValues?.get(1)?.uppercase()
+    }
+
+    fun getSuggestedQuantity(): Int {
+        val combinedText = "$title $description $couponText".lowercase()
+        return when {
+            combinedText.contains("3 für") || combinedText.contains("kaufe 3") -> 3
+            combinedText.contains("2 für") || combinedText.contains("erhalte 2") || combinedText.contains("2x") -> 2
+            else -> 1
+        }
+    }
+
+    fun getDirectCartUrl(): String {
+        val asin = getAsin()
+        return if (asin != null) {
+            val qty = getSuggestedQuantity()
+            "https://www.amazon.de/gp/aws/cart/add.html?ASIN.1=$asin&Quantity.1=$qty"
+        } else {
+            dealUrl
+        }
+    }
+}

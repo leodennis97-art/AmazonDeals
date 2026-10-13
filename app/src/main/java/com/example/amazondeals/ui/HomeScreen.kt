@@ -295,7 +295,28 @@ fun DealCard(deal: Deal, context: Context) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            val directCartUrl = deal.getDirectCartUrl()
+            val qty = deal.getSuggestedQuantity()
+
             Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(directCartUrl))
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+            ) {
+                Text(
+                    text = "🛒 Direkt in Warenkorb legen (${qty}x)",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            OutlinedButton(
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deal.dealUrl))
                     context.startActivity(intent)
@@ -303,9 +324,9 @@ fun DealCard(deal: Deal, context: Context) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Auf Amazon öffnen & Gutschein aktivieren")
+                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Produktseite öffnen", fontSize = 13.sp)
             }
         }
     }
