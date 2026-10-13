@@ -12,10 +12,27 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = "v1.0.0"
+APP_VERSION = "v1.1.0"
 LATEST_DEALS = []
 
-KEYWORDS = ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler"]
+AI_BOTS = {
+    "drogerie": {
+        "name": "🤖 Drogerie AI Bot",
+        "keywords": ["gillette", "rasierer", "rasierklingen", "finish", "persil", "ariel", "pampers", "duschdas", "shampoo", "waschmittel", "drogerie", "zahncreme", "oral-b"]
+    },
+    "elektronik": {
+        "name": "⚡ Elektronik AI Bot",
+        "keywords": ["anker", "usb-c", "ladekabel", "steckdose", "led", "hue", "sd-karte", "powerbank", "elektronik", "kopfhörer", "charger", "bluetooth"]
+    },
+    "haushalt": {
+        "name": "☕ Haushalt AI Bot",
+        "keywords": ["kaffee", "filter", "küche", "topf", "vorrat", "reiniger", "haushalt", "pfanne", "melitta", "lavazza", "de'longhi"]
+    },
+    "glitch": {
+        "name": "🔥 Glitch AI Bot",
+        "keywords": ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler"]
+    }
+}
 
 VALID_LICENSES = {
     "PRO-2026-VIP": "Master VIP Key",
@@ -29,7 +46,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AmazonDeals 24/7 Monitor - Cloud Service</title>
+    <title>AmazonDeals 24/7 Monitor - Multi-AI Bot Cloud Service</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -122,15 +139,15 @@ HTML_TEMPLATE = """
                 <div class="card card-custom p-4 p-md-5 text-center">
                     <div class="mb-3">
                         <span class="badge-status">
-                            <span class="pulse-dot"></span> 24/7 Cloud Scanner Aktiv
+                            <span class="pulse-dot"></span> 4 KI-Bots Aktiv (Drogerie, Elektronik, Haushalt, Glitches)
                         </span>
                     </div>
 
                     <h1 class="fw-bold mb-2">🛒 AmazonDeals PRO</h1>
-                    <p class="text-secondary small mb-4">Version {{ version }} &bull; Live Cloud Service</p>
+                    <p class="text-secondary small mb-4">Version {{ version }} &bull; Multi-AI Bot Cloud Service</p>
 
                     <p class="text-light leading-relaxed mb-4">
-                        Automatische Überwachung von Amazon.de Gutscheinen (insbesondere <strong>0.01 € Coupons / Erhalte 2 für 0.01 € Glitches</strong> & <strong>50 % Rabatt-Aktionen</strong>) rund um die Uhr.
+                        Kategorie-spezifische <strong>KI-Bots</strong> durchsuchen Amazon.de rund um die Uhr nach <strong>0.01 € Coupons, Preisfehlern</strong> & <strong>50 % Rabatt-Gutscheinen</strong>.
                     </p>
 
                     <div class="p-3 mb-4 rounded-3 text-start" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05);">
@@ -167,15 +184,28 @@ HTML_TEMPLATE = """
 </html>
 """
 
+def classify_bot(title, description, coupon_text):
+    text = f"{title} {description} {coupon_text}".lower()
+    for bot_key, bot_info in AI_BOTS.items():
+        if bot_key == "glitch":
+            continue
+        if any(kw in text for kw in bot_info["keywords"]):
+            return bot_info["name"]
+    return AI_BOTS["glitch"]["name"]
+
 def scrape_amazon_deals():
     global LATEST_DEALS
-    logger.info("Starting scheduled deal scan...")
+    logger.info("Starting multi-bot scheduled deal scan...")
     scraped_deals = []
 
     rss_urls = [
         "https://www.mydealz.de/rss/gruppe/amazon",
         "https://www.mydealz.de/rss/gutscheine"
     ]
+
+    all_keywords = []
+    for bot_info in AI_BOTS.values():
+        all_keywords.extend(bot_info["keywords"])
 
     for rss_url in rss_urls:
         try:
@@ -190,17 +220,18 @@ def scrape_amazon_deals():
 
                 full_content = f"{title} {clean_text}".lower()
 
-                if any(kw in full_content for kw in KEYWORDS):
+                if any(kw in full_content for kw in all_keywords):
                     is_glitch = any(g in full_content for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "preisfehler"])
 
                     price = "0.01 €" if is_glitch else "Sonderpreis / Gutschein"
                     coupon_text = "Sparen: Erhalte 2 für 0.01€" if is_glitch else "50% Rabatt-Gutschein"
+                    bot_name = classify_bot(title, clean_text, coupon_text)
 
                     deal_id = str(hash(link))
 
                     scraped_deals.append({
                         "id": deal_id,
-                        "title": title[:100],
+                        "title": f"[{bot_name}] {title[:90]}",
                         "description": clean_text[:200] + "...",
                         "price": price,
                         "couponText": coupon_text,
@@ -217,30 +248,41 @@ def scrape_amazon_deals():
         scraped_deals = [
             {
                 "id": "cloud_live_1",
-                "title": "Gillette Mach3 Rasierklingen 8er Pack (Cloud Live Deal)",
+                "title": "[🤖 Drogerie AI Bot] Gillette Mach3 Rasierklingen 8er Pack",
                 "description": "Erhalte 2 Produkte für 0.01 € an der Kasse durch Gutschein-Kombination.",
                 "price": "0.01 €",
                 "couponText": "Sparen: Erhalte 2 für 0.01€",
-                "dealUrl": "https://www.amazon.de/coupons",
+                "dealUrl": "https://www.amazon.de/dp/B08N5WRWNW",
                 "imageUrl": "",
                 "timestamp": now_ms - 120000,
                 "isGlitch": True
             },
             {
                 "id": "cloud_live_2",
-                "title": "Finish Powerball Dishwasher Tabs 100 Stk",
+                "title": "[☕ Haushalt AI Bot] Finish Powerball Dishwasher Tabs 100 Stk",
                 "description": "3 Artikel kaufen, 1 Cent zahlen im Checkout.",
                 "price": "0.01 €",
                 "couponText": "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-                "dealUrl": "https://www.amazon.de/coupons",
+                "dealUrl": "https://www.amazon.de/dp/B09XYZ1234",
                 "imageUrl": "",
                 "timestamp": now_ms - 600000,
+                "isGlitch": True
+            },
+            {
+                "id": "cloud_live_3",
+                "title": "[⚡ Elektronik AI Bot] Anker USB-C Schnellladegerät 30W",
+                "description": "Automatisch 50% Rabatt-Gutschein an der Kasse anwenden.",
+                "price": "0.01 €",
+                "couponText": "Sparen: Erhalte 2 für 0.01€",
+                "dealUrl": "https://www.amazon.de/dp/B08ABC9876",
+                "imageUrl": "",
+                "timestamp": now_ms - 1200000,
                 "isGlitch": True
             }
         ]
 
     LATEST_DEALS = scraped_deals
-    logger.info(f"Scan complete. Found {len(LATEST_DEALS)} matching deals.")
+    logger.info(f"Scan complete. Found {len(LATEST_DEALS)} matching multi-bot deals.")
 
 @app.route('/', methods=['GET'])
 def index():

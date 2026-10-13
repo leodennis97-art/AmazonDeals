@@ -148,6 +148,9 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
             "50% Rabatt" -> allDeals.filter { it.couponText.contains("50%") || it.description.contains("50%") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }
+            "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") }
+            "Elektronik Bot" -> allDeals.filter { it.title.contains("Elektronik") || it.description.lowercase().contains("anker") || it.description.lowercase().contains("usb") || it.description.lowercase().contains("led") }
+            "Haushalt Bot" -> allDeals.filter { it.title.contains("Haushalt") || it.description.lowercase().contains("kaffee") || it.description.lowercase().contains("küche") || it.description.lowercase().contains("tabs") }
             "Favoriten" -> allDeals.filter { repository.isFavorite(it.id) }
             else -> allDeals
         }

@@ -347,9 +347,11 @@ fun FilterChipsRow(
     onSelectFilter: (String) -> Unit
 ) {
     val filters = listOf(
-        "Alle" to "⚡ Alle",
+        "Alle" to "⚡ Alle Bots",
+        "Drogerie Bot" to "🤖 Drogerie Bot",
+        "Elektronik Bot" to "⚡ Elektronik Bot",
+        "Haushalt Bot" to "☕ Haushalt Bot",
         "0.01€ / 1ct" to "💥 0.01€ / 1ct",
-        "50% Rabatt" to "🏷️ 50% Rabatt",
         "Glitch Deals" to "🔥 Glitches",
         "Favoriten" to "❤️ Favoriten ($favoritesCount)"
     )
