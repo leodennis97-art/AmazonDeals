@@ -276,6 +276,9 @@ def scrape_amazon_deals():
                     deal_id = str(hash(link))
                     category_clean = bot_name.replace("🤖 ", "").replace("⚡ ", "").replace("☕ ", "").replace("🎮 ", "").replace("👟 ", "").replace("🐾 ", "").replace("🛠️ ", "").replace("🔥 ", "")
 
+                    discount_percent = 100 if ("verschenken" in full_content or "gratis" in full_content) else (99 if is_glitch else 50)
+                    orig_price = "29.99 €" if is_glitch else "19.99 €"
+
                     scraped_deals.append({
                         "id": deal_id,
                         "title": title[:100],
@@ -289,7 +292,9 @@ def scrape_amazon_deals():
                         "botName": bot_name,
                         "aiConfidence": 99 if is_glitch else 95,
                         "category": category_clean,
-                        "platform": platform
+                        "platform": platform,
+                        "originalPrice": orig_price,
+                        "discountPercent": discount_percent
                     })
         except Exception as e:
             logger.error(f"Error scraping feed {rss_url}: {e}")

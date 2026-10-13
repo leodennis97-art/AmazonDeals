@@ -13,7 +13,9 @@ data class Deal(
     val botName: String = "🤖 AI Bot",
     val aiConfidence: Int = 98,
     val category: String = "Allgemein",
-    val platform: String = "Amazon.de"
+    val platform: String = "Amazon.de",
+    val originalPrice: String = "",
+    val discountPercent: Int = 99
 ) {
     fun isKleinanzeigen(): Boolean {
         return platform.lowercase().contains("kleinanzeigen") || dealUrl.lowercase().contains("kleinanzeigen.de")

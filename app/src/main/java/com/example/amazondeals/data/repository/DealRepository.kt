@@ -201,7 +201,9 @@ class DealRepository(private val context: Context) {
                                 botName = obj.optString("botName", "🤖 AI Bot"),
                                 aiConfidence = obj.optInt("aiConfidence", 98),
                                 category = obj.optString("category", "Allgemein"),
-                                platform = obj.optString("platform", defaultPlatform)
+                                platform = obj.optString("platform", defaultPlatform),
+                                originalPrice = obj.optString("originalPrice", ""),
+                                discountPercent = obj.optInt("discountPercent", if (obj.optBoolean("isGlitch")) 99 else 50)
                             )
                         )
                     }
@@ -233,18 +235,22 @@ class DealRepository(private val context: Context) {
                 dealUrl = "https://www.amazon.de/dp/B0011883F6",
                 timestamp = now - 300000,
                 isGlitch = true,
-                platform = "Amazon.de"
+                platform = "Amazon.de",
+                originalPrice = "24.99 €",
+                discountPercent = 99
             ),
             Deal(
                 id = "mock_2",
                 title = "[🏷️ Kleinanzeigen Bot] PS5 DualSense Controller Midnight Black",
                 description = "Zu verschenken / Starker Preisnachlass VB auf Kleinanzeigen.de in deiner Nähe.",
-                price = "0.00 € (Zu verschenken)",
+                price = "0.00 € (Gratis)",
                 couponText = "100% Preisnachlass / Verschenken",
-                dealUrl = "https://www.kleinanzeigen.de/s-ps5-controller/k0",
+                dealUrl = "https://www.kleinanzeigen.de",
                 timestamp = now - 900000,
                 isGlitch = true,
-                platform = "Kleinanzeigen.de"
+                platform = "Kleinanzeigen.de",
+                originalPrice = "69.99 €",
+                discountPercent = 100
             ),
             Deal(
                 id = "mock_3",
@@ -255,18 +261,22 @@ class DealRepository(private val context: Context) {
                 dealUrl = "https://www.amazon.de/dp/B073X2T4X2",
                 timestamp = now - 1800000,
                 isGlitch = true,
-                platform = "Amazon.de"
+                platform = "Amazon.de",
+                originalPrice = "19.99 €",
+                discountPercent = 99
             ),
             Deal(
                 id = "mock_4",
-                title = "[🏷️ Kleinanzeigen Bot] Anker Powerbank 20.000mAh Schnelllade-Station",
-                description = "Schnäppchen & Starker Preisnachlass wegen Haushaltsauflösung auf Kleinanzeigen.de.",
-                price = "5.00 €",
-                couponText = "85% Preisnachlass VB",
-                dealUrl = "https://www.kleinanzeigen.de/s-anker-powerbank/k0",
+                title = "[⚡ Elektronik Bot] Anker USB-C Schnellladegerät 30W PowerPort",
+                description = "Schnäppchen & Starker Preisnachlass mit 50% Coupon auf Amazon.de.",
+                price = "9.99 €",
+                couponText = "50% Rabatt Gutschein",
+                dealUrl = "https://www.amazon.de/dp/B07GYRN82L",
                 timestamp = now - 3600000,
-                isGlitch = true,
-                platform = "Kleinanzeigen.de"
+                isGlitch = false,
+                platform = "Amazon.de",
+                originalPrice = "19.99 €",
+                discountPercent = 50
             )
         )
     }

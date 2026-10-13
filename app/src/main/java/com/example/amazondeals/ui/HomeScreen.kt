@@ -26,7 +26,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amazondeals.data.model.Deal
@@ -554,7 +556,20 @@ fun DealCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (deal.isGlitch) {
+                    if (deal.isKleinanzeigen()) {
+                        Surface(
+                            color = Color(0xFF86D000),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                "🏷️ Kleinanzeigen.de",
+                                color = Color.Black,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    } else if (deal.isGlitch) {
                         Surface(
                             color = Color(0xFFEF4444),
                             shape = RoundedCornerShape(6.dp)
@@ -585,28 +600,38 @@ fun DealCard(
                     Spacer(modifier = Modifier.width(6.dp))
 
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = Color(0xFFEF4444).copy(alpha = 0.15f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "${deal.botName} (${deal.aiConfidence}% Score)",
+                            text = "-${deal.discountPercent}%",
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFFEF4444)
                         )
                     }
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deal.originalPrice.isNotEmpty()) {
+                        Text(
+                            text = deal.originalPrice,
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = TextStyle(textDecoration = TextDecoration.LineThrough)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+
                     Text(
                         text = deal.price,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
 
                     IconButton(
                         onClick = onToggleFavorite,
