@@ -18,7 +18,7 @@ class DealRepository(private val context: Context) {
     companion object {
         private const val KEY_NOTIFIED_DEALS = "notified_deal_ids"
         private const val KEY_BACKEND_URL = "backend_url"
-        private const val DEFAULT_BACKEND_URL = "https://amazon-deals-scraper.onrender.com"
+        private const val DEFAULT_BACKEND_URL = "https://amazondeals.onrender.com"
         private const val KEY_KEYWORDS = "search_keywords"
         private const val DEFAULT_KEYWORDS = "0.01€,2 für 0.01€,1ct,Sparen,50% Rabatt,Gutschein"
     }
