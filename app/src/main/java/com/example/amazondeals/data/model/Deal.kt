@@ -12,20 +12,29 @@ data class Deal(
     val isGlitch: Boolean = false,
     val botName: String = "🤖 AI Bot",
     val aiConfidence: Int = 98,
-    val category: String = "Allgemein"
+    val category: String = "Allgemein",
+    val platform: String = "Amazon.de"
 ) {
+    fun isEbay(): Boolean {
+        return platform.lowercase().contains("ebay") || dealUrl.lowercase().contains("ebay.de")
+    }
+
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()
-        if (trimmed.isEmpty()) return "https://www.amazon.de/coupons"
+        if (trimmed.isEmpty()) {
+            return if (isEbay()) "https://www.ebay.de" else "https://www.amazon.de/coupons"
+        }
         return when {
             trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
             trimmed.startsWith("www.") -> "https://$trimmed"
             trimmed.startsWith("amazon.de") -> "https://www.$trimmed"
+            trimmed.startsWith("ebay.de") -> "https://www.$trimmed"
             else -> "https://$trimmed"
         }
     }
 
     fun getAsin(): String? {
+        if (isEbay()) return null
         val url = getFormattedUrl()
         val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
         val match = regex.find(url)
@@ -46,6 +55,7 @@ data class Deal(
     }
 
     fun getDirectCartUrl(): String {
+        if (isEbay()) return getFormattedUrl()
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()

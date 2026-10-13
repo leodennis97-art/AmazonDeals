@@ -58,7 +58,6 @@ class DealRepository(private val context: Context) {
             return@withContext Pair(false, "Bitte gib deine E-Mail-Adresse ein.")
         }
 
-        // Lifetime Free VIP Access for Owner
         if (trimmedEmail == "leodennis97@gmail.com") {
             val lifetimeMs = System.currentTimeMillis() + (36500L * 24 * 60 * 60 * 1000)
             saveLicense(trimmedEmail, if (trimmedKey.isEmpty()) "VIP-LIFETIME" else trimmedKey, lifetimeMs)
@@ -186,20 +185,23 @@ class DealRepository(private val context: Context) {
                     val jsonArray = JSONArray(responseText)
                     for (i in 0 until jsonArray.length()) {
                         val obj = jsonArray.getJSONObject(i)
+                        val dealLink = obj.optString("dealUrl", "https://www.amazon.de/coupons")
+                        val defaultPlatform = if (dealLink.lowercase().contains("ebay")) "eBay.de" else "Amazon.de"
                         deals.add(
                             Deal(
                                 id = obj.optString("id", System.currentTimeMillis().toString()),
-                                title = obj.optString("title", "Amazon Angebot"),
+                                title = obj.optString("title", "Angebot"),
                                 description = obj.optString("description", ""),
                                 price = obj.optString("price", "0.01 €"),
                                 couponText = obj.optString("couponText", "Gutschein aktiv"),
-                                dealUrl = obj.optString("dealUrl", "https://www.amazon.de/coupons"),
+                                dealUrl = dealLink,
                                 imageUrl = obj.optString("imageUrl", ""),
                                 timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
                                 isGlitch = obj.optBoolean("isGlitch", false),
                                 botName = obj.optString("botName", "🤖 AI Bot"),
                                 aiConfidence = obj.optInt("aiConfidence", 98),
-                                category = obj.optString("category", "Allgemein")
+                                category = obj.optString("category", "Allgemein"),
+                                platform = obj.optString("platform", defaultPlatform)
                             )
                         )
                     }
@@ -225,62 +227,46 @@ class DealRepository(private val context: Context) {
             Deal(
                 id = "mock_1",
                 title = "[🤖 Drogerie Bot] Gillette Mach3 Rasierklingen 8er Pack",
-                description = "Aktiviere den Gutschein im Bezahlvorgang. Kombinierbar mit Spar-Abo.",
+                description = "Aktiviere den Gutschein im Bezahlvorgang auf Amazon.de. Kombinierbar mit Spar-Abo.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
                 dealUrl = "https://www.amazon.de/dp/B0011883F6",
                 timestamp = now - 300000,
-                isGlitch = true
+                isGlitch = true,
+                platform = "Amazon.de"
             ),
             Deal(
                 id = "mock_2",
+                title = "[🛍️ eBay Bot] Anker USB-C Schnellladegerät 30W PowerPort",
+                description = "eBay Gutscheincode direkt an der Kasse einlösen für 0.01 € Endpreis.",
+                price = "0.01 €",
+                couponText = "100% Rabatt Gutscheincode auf eBay.de",
+                dealUrl = "https://www.ebay.de",
+                timestamp = now - 900000,
+                isGlitch = true,
+                platform = "eBay.de"
+            ),
+            Deal(
+                id = "mock_3",
                 title = "[☕ Haushalt Bot] Finish Powerball Dishwasher Tabs 100 Stk",
                 description = "Coupons im Checkout aktivieren. 50% Ersparnis durch Rabattgutschein.",
                 price = "0.01 €",
                 couponText = "Kaufe 3 zahle 1ct (Auto-Gutschein)",
                 dealUrl = "https://www.amazon.de/dp/B073X2T4X2",
                 timestamp = now - 1800000,
-                isGlitch = true
-            ),
-            Deal(
-                id = "mock_3",
-                title = "[⚡ Elektronik Bot] Anker USB-C Schnellladegerät 30W",
-                description = "Rabattcode beim Bezahlen eingeben.",
-                price = "0.01 €",
-                couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/dp/B07GYRN82L",
-                timestamp = now - 3600000,
-                isGlitch = true
+                isGlitch = true,
+                platform = "Amazon.de"
             ),
             Deal(
                 id = "mock_4",
-                title = "[🎮 Gaming Bot] PS5 DualSense Wireless Controller Midnight Black",
-                description = "Aktionsgutschein auf der Produktseite anhaken für maximale Ersparnis.",
-                price = "49.99 €",
-                couponText = "25% Aktionsgutschein im Checkout",
-                dealUrl = "https://www.amazon.de/dp/B08H99BPJN",
-                timestamp = now - 5400000,
-                isGlitch = false
-            ),
-            Deal(
-                id = "mock_5",
-                title = "[👟 Fashion Bot] Amazon Coupon Übersichtsseite (Aktive Rabatte)",
-                description = "Alle aktuell aktiven 50% Rabattgutscheine direkt auf Amazon.de aktivieren.",
-                price = "Gutscheine",
-                couponText = "50% Rabatt Coupons",
-                dealUrl = "https://www.amazon.de/coupons",
-                timestamp = now - 7200000,
-                isGlitch = false
-            ),
-            Deal(
-                id = "mock_6",
-                title = "[🛠️ Baumarkt Bot] Bosch Professional 18V System Akkusauger",
-                description = "Preisfehler / Gutschein Glitch an der Kasse.",
-                price = "0.01 €",
-                couponText = "Kaufe 2 zahle 1ct (Glitch Code)",
-                dealUrl = "https://www.amazon.de/coupons",
-                timestamp = now - 9000000,
-                isGlitch = true
+                title = "[🛍️ eBay Bot] PS5 DualSense Wireless Controller Midnight Black",
+                description = "eBay Refurbished & B-Ware Top Deal mit 10% Extra-Rabatt.",
+                price = "44.99 €",
+                couponText = "10% Rabattcode auf eBay.de",
+                dealUrl = "https://www.ebay.de",
+                timestamp = now - 3600000,
+                isGlitch = false,
+                platform = "eBay.de"
             )
         )
     }

@@ -253,16 +253,18 @@ def scrape_amazon_deals():
 
                 full_content = f"{title} {clean_text}".lower()
 
-                # Include any Amazon link OR any deal matching our keywords/coupons
+                # STRICT FILTER: ONLY Amazon.de and eBay.de allowed
                 is_amazon = "amazon" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
-                has_keywords = any(kw in full_content for kw in all_keywords)
+                is_ebay = "ebay" in full_content or "ebay" in link.lower()
 
-                if is_amazon or has_keywords:
+                if is_amazon or is_ebay:
                     seen_urls.add(link)
                     is_glitch = any(g in full_content for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "preisfehler", "gratis"])
 
+                    platform = "eBay.de" if is_ebay else "Amazon.de"
+
                     asin = extract_asin(link) or extract_asin(full_content)
-                    if asin:
+                    if is_amazon and asin:
                         deal_url = f"https://www.amazon.de/dp/{asin}"
                     else:
                         deal_url = link
@@ -286,7 +288,8 @@ def scrape_amazon_deals():
                         "isGlitch": is_glitch,
                         "botName": bot_name,
                         "aiConfidence": 99 if is_glitch else 95,
-                        "category": category_clean
+                        "category": category_clean,
+                        "platform": platform
                     })
         except Exception as e:
             logger.error(f"Error scraping feed {rss_url}: {e}")
