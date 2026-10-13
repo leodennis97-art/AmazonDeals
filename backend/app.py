@@ -300,6 +300,17 @@ def verify_license():
 
     if not email:
         return jsonify({"status": "ERROR", "error": "Bitte E-Mail-Adresse angeben."}), 400
+
+    # Lifetime Free VIP Access for Owner
+    if email == "leodennis97@gmail.com":
+        expiry_ms = int((time.time() + (36500 * 24 * 3600)) * 1000)
+        return jsonify({
+            "status": "ACTIVE",
+            "message": "Willkommen Dennis! VIP-Zugang lebenslang freigeschaltet.",
+            "expiryMs": expiry_ms,
+            "email": email
+        })
+
     if not license_key:
         return jsonify({"status": "ERROR", "error": "Bitte Lizenzcode angeben."}), 400
 

@@ -56,6 +56,14 @@ class DealRepository(private val context: Context) {
         if (trimmedEmail.isEmpty()) {
             return@withContext Pair(false, "Bitte gib deine E-Mail-Adresse ein.")
         }
+
+        // Lifetime VIP Free Access for Owner Account
+        if (trimmedEmail == "leodennis97@gmail.com") {
+            val lifetimeMs = System.currentTimeMillis() + (36500L * 24 * 60 * 60 * 1000) // 100 Years
+            saveLicense(trimmedEmail, if (trimmedKey.isEmpty()) "VIP-LIFETIME" else trimmedKey, lifetimeMs)
+            return@withContext Pair(true, "Willkommen Dennis! VIP-Zugang lebenslang aktiviert.")
+        }
+
         if (trimmedKey.isEmpty()) {
             return@withContext Pair(false, "Bitte gib deinen Lizenzcode ein.")
         }
