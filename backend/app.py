@@ -18,19 +18,35 @@ LATEST_DEALS = []
 AI_BOTS = {
     "drogerie": {
         "name": "🤖 Drogerie AI Bot",
-        "keywords": ["gillette", "rasierer", "rasierklingen", "finish", "persil", "ariel", "pampers", "duschdas", "shampoo", "waschmittel", "drogerie", "zahncreme", "oral-b"]
+        "keywords": ["gillette", "rasierer", "rasierklingen", "finish", "persil", "ariel", "pampers", "duschdas", "shampoo", "waschmittel", "drogerie", "zahncreme", "oral-b", "sagrotan", "nivea", "balea", "dove"]
     },
     "elektronik": {
         "name": "⚡ Elektronik AI Bot",
-        "keywords": ["anker", "usb-c", "ladekabel", "steckdose", "led", "hue", "sd-karte", "powerbank", "elektronik", "kopfhörer", "charger", "bluetooth"]
+        "keywords": ["anker", "usb-c", "ladekabel", "steckdose", "led", "hue", "sd-karte", "powerbank", "elektronik", "kopfhörer", "charger", "bluetooth", "ugreen", "sandisk", "monitore", "router"]
     },
     "haushalt": {
         "name": "☕ Haushalt AI Bot",
-        "keywords": ["kaffee", "filter", "küche", "topf", "vorrat", "reiniger", "haushalt", "pfanne", "melitta", "lavazza", "de'longhi"]
+        "keywords": ["kaffee", "filter", "küche", "topf", "vorrat", "reiniger", "haushalt", "pfanne", "melitta", "lavazza", "de'longhi", "barilla", "schokolade", "snack"]
+    },
+    "gaming": {
+        "name": "🎮 Gaming AI Bot",
+        "keywords": ["playstation", "xbox", "nintendo", "switch", "controller", "gaming", "maus", "tastatur", "headset", "pc", "game", "ps5"]
+    },
+    "fashion": {
+        "name": "👟 Fashion AI Bot",
+        "keywords": ["nike", "adidas", "puma", "schuhe", "socken", "t-shirt", "jacke", "hose", "unterwäsche", "fashion", "kleidung", "levis"]
+    },
+    "pets": {
+        "name": "🐾 Tierwelt AI Bot",
+        "keywords": ["katzenfutter", "hundefutter", "whiskas", "pedigree", "felix", "sheba", "tiere", "katze", "hund", "streu", "spielzeug"]
+    },
+    "tools": {
+        "name": "🛠️ Baumarkt AI Bot",
+        "keywords": ["bosch", "makita", "werkzeug", "bohrer", "akkuschrauber", "dübel", "fein", "wera", "knipex", "einhell", "klebeband", "akku"]
     },
     "glitch": {
         "name": "🔥 Glitch AI Bot",
-        "keywords": ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler"]
+        "keywords": ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler", "rabattcode"]
     }
 }
 

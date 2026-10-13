@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.Payment
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +40,8 @@ fun LockScreen(
     val context = LocalContext.current
     var email by remember { mutableStateOf(savedEmail) }
     var licenseKey by remember { mutableStateOf(savedKey) }
+
+    val isOwner = email.trim().lowercase() == "leodennis97@gmail.com"
 
     Box(
         modifier = Modifier
@@ -134,7 +136,7 @@ fun LockScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Divider(color = Color(0xFF334155))
+                HorizontalDivider(color = Color(0xFF334155))
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -149,20 +151,48 @@ fun LockScreen(
                     shape = RoundedCornerShape(10.dp)
                 )
 
+                if (isOwner) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        color = Color(0xFF10B981).copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color(0xFF10B981),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "👑 VIP Owner Account (Kein Lizenzschlüssel nötig)",
+                                color = Color(0xFF10B981),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // License Key
                 OutlinedTextField(
-                    value = licenseKey,
+                    value = if (isOwner && licenseKey.isEmpty()) "VIP-LIFETIME-OWNER" else licenseKey,
                     onValueChange = { licenseKey = it },
-                    label = { Text("Lizenzcode (z. B. PRO-2026-VIP)") },
+                    label = { Text(if (isOwner) "Lizenzcode (Nicht erforderlich)" else "Lizenzcode (z. B. PRO-2026-VIP)") },
                     leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                     singleLine = true,
+                    enabled = !isOwner,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp)
                 )
 
-                if (errorMessage != null) {
+                if (errorMessage != null && !isOwner) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = errorMessage,
@@ -177,7 +207,7 @@ fun LockScreen(
 
                 // Activate Button
                 Button(
-                    onClick = { onVerifyLicense(email, licenseKey) },
+                    onClick = { onVerifyLicense(email, if (isOwner && licenseKey.isEmpty()) "VIP-LIFETIME-OWNER" else licenseKey) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isVerifying,
                     shape = RoundedCornerShape(12.dp),
@@ -193,7 +223,7 @@ fun LockScreen(
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Black)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Lizenz aktivieren & Starten",
+                            text = if (isOwner) "👑 Als VIP starten" else "Lizenz aktivieren & Starten",
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
