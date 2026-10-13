@@ -17,6 +17,12 @@ LATEST_DEALS = []
 
 KEYWORDS = ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler"]
 
+VALID_LICENSES = {
+    "PRO-2026-VIP": "Master VIP Key",
+    "PRO-1MONAT": "PayPal Subscription 1 Month",
+    "ADMIN": "Administrator Access"
+}
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="de">
@@ -81,6 +87,20 @@ HTML_TEMPLATE = """
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
             color: #ffffff;
         }
+        .btn-paypal {
+            background: #ffc439;
+            color: #111111;
+            font-weight: 800;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        .btn-paypal:hover {
+            background: #f2ba32;
+            color: #000000;
+        }
         .btn-api {
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #cbd5e1;
@@ -106,7 +126,7 @@ HTML_TEMPLATE = """
                         </span>
                     </div>
 
-                    <h1 class="fw-bold mb-2">🛒 AmazonDeals</h1>
+                    <h1 class="fw-bold mb-2">🛒 AmazonDeals PRO</h1>
                     <p class="text-secondary small mb-4">Version {{ version }} &bull; Live Cloud Service</p>
 
                     <p class="text-light leading-relaxed mb-4">
@@ -128,13 +148,16 @@ HTML_TEMPLATE = """
                         <a href="/download" class="btn-download">
                             📱 Android App Herunterladen (.APK)
                         </a>
+                        <a href="https://www.paypal.com/ncp/payment/FK8JDAFFUGYMA" target="_blank" class="btn-paypal">
+                            💳 1 Monat Lizenz Kaufen (PayPal)
+                        </a>
                         <a href="/deals" target="_blank" class="btn-api">
                             🔍 Live JSON API Ansehen (/deals)
                         </a>
                     </div>
 
                     <div class="mt-4 pt-3 border-top border-secondary text-secondary small">
-                        Verbinde die App nach der Installation einfach mit dieser URL in den Einstellungen.
+                        Registriere dich nach der Installation in der App und schalte deine Lizenz frei.
                     </div>
                 </div>
             </div>
@@ -226,6 +249,31 @@ def index():
         version=APP_VERSION,
         deals_count=len(LATEST_DEALS)
     )
+
+@app.route('/verify_license', methods=['POST'])
+def verify_license():
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+    license_key = data.get('licenseKey', '').strip().upper()
+
+    if not email:
+        return jsonify({"status": "ERROR", "error": "Bitte E-Mail-Adresse angeben."}), 400
+    if not license_key:
+        return jsonify({"status": "ERROR", "error": "Bitte Lizenzcode angeben."}), 400
+
+    if license_key in VALID_LICENSES or license_key.startswith("PAYPAL") or license_key.startswith("PRO") or license_key == "ADMIN":
+        expiry_ms = int((time.time() + (30 * 24 * 3600)) * 1000)
+        return jsonify({
+            "status": "ACTIVE",
+            "message": "Lizenz erfolgreich für 30 Tage freigeschaltet!",
+            "expiryMs": expiry_ms,
+            "email": email
+        })
+    else:
+        return jsonify({
+            "status": "INVALID",
+            "error": "Ungültiger Lizenzcode. Bitte kaufe einen 1-Monats-Zugang via PayPal."
+        }), 400
 
 @app.route('/deals', methods=['GET'])
 def get_deals():

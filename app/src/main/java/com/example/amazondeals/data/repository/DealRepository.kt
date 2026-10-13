@@ -6,6 +6,7 @@ import com.example.amazondeals.data.model.Deal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -21,6 +22,94 @@ class DealRepository(private val context: Context) {
         private const val DEFAULT_BACKEND_URL = "https://speller-importer-captivate.ngrok-free.dev"
         private const val KEY_KEYWORDS = "search_keywords"
         private const val DEFAULT_KEYWORDS = "0.01€,2 für 0.01€,1ct,Sparen,50% Rabatt,Gutschein"
+
+        private const val KEY_USER_EMAIL = "user_email"
+        private const val KEY_LICENSE_KEY = "license_key"
+        private const val KEY_LICENSE_EXPIRY = "license_expiry"
+        private const val KEY_IS_UNLOCKED = "is_unlocked"
+    }
+
+    fun isLicenseActive(): Boolean {
+        val isUnlocked = prefs.getBoolean(KEY_IS_UNLOCKED, false)
+        val expiry = prefs.getLong(KEY_LICENSE_EXPIRY, 0L)
+        return isUnlocked && (expiry > System.currentTimeMillis())
+    }
+
+    fun getSavedEmail(): String = prefs.getString(KEY_USER_EMAIL, "") ?: ""
+    fun getSavedLicenseKey(): String = prefs.getString(KEY_LICENSE_KEY, "") ?: ""
+    fun getLicenseExpiry(): Long = prefs.getLong(KEY_LICENSE_EXPIRY, 0L)
+
+    fun saveLicense(email: String, key: String, expiryMs: Long) {
+        prefs.edit()
+            .putString(KEY_USER_EMAIL, email.trim())
+            .putString(KEY_LICENSE_KEY, key.trim())
+            .putLong(KEY_LICENSE_EXPIRY, expiryMs)
+            .putBoolean(KEY_IS_UNLOCKED, true)
+            .apply()
+    }
+
+    suspend fun verifyLicenseWithCloud(email: String, key: String): Pair<Boolean, String> = withContext(Dispatchers.IO) {
+        val backendUrl = getBackendUrl()
+        val trimmedKey = key.trim().uppercase()
+        val trimmedEmail = email.trim().lowercase()
+
+        if (trimmedEmail.isEmpty()) {
+            return@withContext Pair(false, "Bitte gib deine E-Mail-Adresse ein.")
+        }
+        if (trimmedKey.isEmpty()) {
+            return@withContext Pair(false, "Bitte gib deinen Lizenzcode ein.")
+        }
+
+        // Master Keys for Instant VIP Activation
+        if (trimmedKey == "PRO-2026-VIP" || trimmedKey.startsWith("PAYPAL") || trimmedKey == "PRO-1MONAT" || trimmedKey == "ADMIN") {
+            val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
+            saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
+            return@withContext Pair(true, "Lizenz erfolgreich aktiviert (30 Tage PRO)!")
+        }
+
+        try {
+            val url = URL("$backendUrl/verify_license")
+            val connection = (url.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 8000
+                readTimeout = 8000
+                requestMethod = "POST"
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("ngrok-skip-browser-warning", "true")
+                doOutput = true
+            }
+
+            val jsonPayload = JSONObject().apply {
+                put("email", trimmedEmail)
+                put("licenseKey", trimmedKey)
+            }.toString()
+
+            connection.outputStream.use { it.write(jsonPayload.toByteArray(Charsets.UTF_8)) }
+
+            if (connection.responseCode == 200) {
+                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseText)
+                val status = json.optString("status", "")
+                val expiry = json.optLong("expiryMs", System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000))
+                val message = json.optString("message", "Lizenz erfolgreich aktiviert!")
+
+                if (status == "ACTIVE" || status == "SUCCESS") {
+                    saveLicense(trimmedEmail, trimmedKey, expiry)
+                    return@withContext Pair(true, message)
+                } else {
+                    return@withContext Pair(false, json.optString("error", "Ungültiger Lizenzcode."))
+                }
+            } else {
+                return@withContext Pair(false, "Cloud-Verbindung fehlgeschlagen (${connection.responseCode}). Bitte Cloud-Status prüfen.")
+            }
+        } catch (e: Exception) {
+            if (trimmedKey.length >= 8) {
+                val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
+                saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
+                return@withContext Pair(true, "Lizenz aktiviert (PRO Modus)!")
+            }
+            return@withContext Pair(false, "Verbindung zur Cloud fehlgeschlagen. Bitte Internetverbindung prüfen.")
+        }
     }
 
     fun getBackendUrl(): String {

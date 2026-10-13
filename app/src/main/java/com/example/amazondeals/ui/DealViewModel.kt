@@ -22,7 +22,12 @@ data class DealUiState(
     val lastUpdated: Long = 0L,
     val backendUrl: String = "",
     val keywords: List<String> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isLicenseActive: Boolean = false,
+    val isVerifyingLicense: Boolean = false,
+    val savedEmail: String = "",
+    val savedLicenseKey: String = "",
+    val licenseErrorMessage: String? = null
 )
 
 class DealViewModel(application: Application) : AndroidViewModel(application) {
@@ -35,6 +40,7 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         loadSettings()
+        checkLicenseState()
         refreshDeals()
         DealCheckWorker.schedule(application)
     }
@@ -42,8 +48,43 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     fun loadSettings() {
         _uiState.value = _uiState.value.copy(
             backendUrl = repository.getBackendUrl(),
-            keywords = repository.getKeywords()
+            keywords = repository.getKeywords(),
+            savedEmail = repository.getSavedEmail(),
+            savedLicenseKey = repository.getSavedLicenseKey(),
+            isLicenseActive = repository.isLicenseActive()
         )
+    }
+
+    fun checkLicenseState() {
+        _uiState.value = _uiState.value.copy(
+            isLicenseActive = repository.isLicenseActive()
+        )
+    }
+
+    fun verifyLicense(email: String, key: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isVerifyingLicense = true,
+                licenseErrorMessage = null
+            )
+            val (success, message) = repository.verifyLicenseWithCloud(email, key)
+            if (success) {
+                _uiState.value = _uiState.value.copy(
+                    isVerifyingLicense = false,
+                    isLicenseActive = true,
+                    savedEmail = email,
+                    savedLicenseKey = key,
+                    licenseErrorMessage = null
+                )
+                refreshDeals()
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    isVerifyingLicense = false,
+                    isLicenseActive = false,
+                    licenseErrorMessage = message
+                )
+            }
+        }
     }
 
     fun updateBackendUrl(url: String) {
