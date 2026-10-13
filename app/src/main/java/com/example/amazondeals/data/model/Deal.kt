@@ -22,29 +22,41 @@ data class Deal(
     }
 
     fun getFormattedUrl(): String {
-        val trimmed = dealUrl.trim()
-        if (trimmed.isEmpty()) {
-            return if (isKleinanzeigen()) "https://www.kleinanzeigen.de" else "https://www.amazon.de/coupons"
+        if (isKleinanzeigen()) {
+            val trimmed = dealUrl.trim()
+            if (trimmed.isEmpty()) return "https://www.kleinanzeigen.de"
+            return when {
+                trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+                trimmed.startsWith("www.") -> "https://$trimmed"
+                else -> "https://www.$trimmed"
+            }
         }
+
+        val asin = getAsin()
+        if (asin != null) {
+            return "https://www.amazon.de/dp/$asin"
+        }
+
+        val trimmed = dealUrl.trim()
+        if (trimmed.isEmpty()) return "https://www.amazon.de/coupons"
         return when {
             trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
             trimmed.startsWith("www.") -> "https://$trimmed"
             trimmed.startsWith("amazon.de") -> "https://www.$trimmed"
-            trimmed.startsWith("kleinanzeigen.de") -> "https://www.$trimmed"
             else -> "https://$trimmed"
         }
     }
 
     fun getAsin(): String? {
         if (isKleinanzeigen()) return null
-        val url = getFormattedUrl()
+        val trimmed = dealUrl.trim()
         val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
-        val match = regex.find(url)
+        val match = regex.find(trimmed)
         if (match != null) {
             return match.groupValues[1].uppercase()
         }
         val fallbackRegex = Regex("""\b(B[0-9A-Z]{9})\b""")
-        return fallbackRegex.find(url)?.groupValues?.get(1)?.uppercase()
+        return fallbackRegex.find(trimmed)?.groupValues?.get(1)?.uppercase()
     }
 
     fun getSuggestedQuantity(): Int {
