@@ -39,7 +39,7 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun sendDealNotification(deal: Deal) {
-        val targetUrl = deal.getDirectCartUrl()
+        val targetUrl = deal.getFormattedUrl()
         val intent = if (targetUrl.isNotEmpty()) {
             Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
         } else {

@@ -291,7 +291,7 @@ fun Top3SavingsSection(
                 Card(
                     modifier = Modifier
                         .width(260.dp)
-                        .clickable { openUrlSafely(context, deal.getDirectCartUrl(), isCartUrl = true) },
+                        .clickable { openUrlSafely(context, deal.getFormattedUrl(), isCartUrl = false) },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     border = BorderStroke(1.5.dp, Brush.horizontalGradient(listOf(Color(0xFFFF9900), Color(0xFFEF4444))))
@@ -345,14 +345,14 @@ fun Top3SavingsSection(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Button(
-                            onClick = { openUrlSafely(context, deal.getDirectCartUrl(), isCartUrl = true) },
+                            onClick = { openUrlSafely(context, deal.getFormattedUrl(), isCartUrl = false) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(vertical = 6.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
                         ) {
                             Text(
-                                text = "🛒 1-Tap Warenkorb (${deal.getSuggestedQuantity()}x)",
+                                text = "👉 Zum Produkt / Angebot",
                                 color = Color.Black,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.sp
@@ -507,9 +507,10 @@ fun FilterChipsRow(
 ) {
     val filters = listOf(
         "Alle" to "⚡ Alle Deals",
+        "99% / Gratis" to "💥 99% / Gratis",
         "Amazon.de" to "🛒 Amazon.de",
         "Kleinanzeigen.de" to "🏷️ Kleinanzeigen.de",
-        "0.01€ / 1ct" to "💥 0.01€ / Gratis",
+        "0.01€ / 1ct" to "💥 0.01€ Glitches",
         "Glitch Deals" to "🔥 Glitches",
         "Drogerie Bot" to "🤖 Drogerie",
         "Elektronik Bot" to "⚡ Elektronik",
@@ -699,9 +700,7 @@ fun DealCard(
             Spacer(modifier = Modifier.height(14.dp))
 
             // Action Buttons
-            val directCartUrl = deal.getDirectCartUrl()
             val productUrl = deal.getFormattedUrl()
-            val qty = deal.getSuggestedQuantity()
 
             if (deal.isKleinanzeigen()) {
                 Button(
@@ -713,7 +712,7 @@ fun DealCard(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF86D000))
                 ) {
                     Text(
-                        text = "💬 Auf Kleinanzeigen.de ansehen / Anfragen",
+                        text = "💬 Auf Kleinanzeigen.de ansehen",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -722,14 +721,16 @@ fun DealCard(
             } else {
                 Button(
                     onClick = {
-                        openUrlSafely(context, directCartUrl, isCartUrl = true)
+                        openUrlSafely(context, productUrl, isCartUrl = false)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
                 ) {
+                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "🛒 Direkt in Warenkorb legen (${qty}x)",
+                        text = "👉 Zum Amazon Produkt / Angebot",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -745,34 +746,22 @@ fun DealCard(
             ) {
                 OutlinedButton(
                     onClick = {
-                        openUrlSafely(context, productUrl, isCartUrl = false)
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Produktseite", fontSize = 12.sp)
-                }
-
-                OutlinedButton(
-                    onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "🔥 Amazon Glitch Deal: ${deal.title} für ${deal.price}!\n$directCartUrl"
+                                "🔥 Amazon Glitch Deal (${deal.discountPercent}% Ersparnis): ${deal.title} für ${deal.price}!\n$productUrl"
                             )
                         }
                         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Teilen", fontSize = 12.sp)
+                    Text("Angebot teilen", fontSize = 12.sp)
                 }
             }
         }
