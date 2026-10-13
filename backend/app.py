@@ -2,7 +2,7 @@ import os
 import time
 import re
 import logging
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory, render_template_string
 import requests
 import feedparser
 from bs4 import BeautifulSoup
@@ -11,19 +11,145 @@ from apscheduler.schedulers.background import BackgroundScheduler
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
-# Global list of stored deals
+APP_VERSION = "v1.0.0"
 LATEST_DEALS = []
 
 KEYWORDS = ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "sparen erhalte", "50%", "gutschein", "preisfehler"]
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmazonDeals 24/7 Monitor - Cloud Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .card-custom {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+        .badge-status {
+            background: #10b981;
+            color: #ffffff;
+            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+            color: #ffffff;
+        }
+        .btn-api {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-api:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card card-custom p-4 p-md-5 text-center">
+                    <div class="mb-3">
+                        <span class="badge-status">
+                            <span class="pulse-dot"></span> 24/7 Cloud Scanner Aktiv
+                        </span>
+                    </div>
+
+                    <h1 class="fw-bold mb-2">🛒 AmazonDeals</h1>
+                    <p class="text-secondary small mb-4">Version {{ version }} &bull; Live Cloud Service</p>
+
+                    <p class="text-light leading-relaxed mb-4">
+                        Automatische Überwachung von Amazon.de Gutscheinen (insbesondere <strong>0.01 € Coupons / Erhalte 2 für 0.01 € Glitches</strong> & <strong>50 % Rabatt-Aktionen</strong>) rund um die Uhr.
+                    </p>
+
+                    <div class="p-3 mb-4 rounded-3 text-start" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-secondary small">Gefundene Live-Deals:</span>
+                            <span class="fw-bold text-warning">{{ deals_count }} Angebote</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small">Cloud Endpoint:</span>
+                            <code class="text-info small">https://amazondeals.onrender.com</code>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <a href="/download" class="btn-download">
+                            📱 Android App Herunterladen (.APK)
+                        </a>
+                        <a href="/deals" target="_blank" class="btn-api">
+                            🔍 Live JSON API Ansehen (/deals)
+                        </a>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-secondary text-secondary small">
+                        Verbinde die App nach der Installation einfach mit dieser URL in den Einstellungen.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
 
 def scrape_amazon_deals():
     global LATEST_DEALS
     logger.info("Starting scheduled deal scan...")
     scraped_deals = []
 
-    # Source 1: Mydealz RSS feed (filtered for Amazon Deals & Coupons)
     rss_urls = [
         "https://www.mydealz.de/rss/gruppe/amazon",
         "https://www.mydealz.de/rss/gutscheine"
@@ -37,13 +163,11 @@ def scrape_amazon_deals():
                 summary = getattr(entry, 'summary', '')
                 link = entry.link
 
-                # Clean HTML tags from summary
                 soup = BeautifulSoup(summary, 'html.parser')
                 clean_text = soup.get_text()
 
                 full_content = f"{title} {clean_text}".lower()
 
-                # Check if any target keyword matches
                 if any(kw in full_content for kw in KEYWORDS):
                     is_glitch = any(g in full_content for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "preisfehler"])
 
@@ -66,7 +190,6 @@ def scrape_amazon_deals():
         except Exception as e:
             logger.error(f"Error scraping {rss_url}: {e}")
 
-    # Fallback default glitch mock deals if no live RSS deals match at the moment
     if not scraped_deals:
         now_ms = int(time.time() * 1000)
         scraped_deals = [
@@ -97,20 +220,35 @@ def scrape_amazon_deals():
     LATEST_DEALS = scraped_deals
     logger.info(f"Scan complete. Found {len(LATEST_DEALS)} matching deals.")
 
+@app.route('/', methods=['GET'])
+def index():
+    return render_template_string(
+        HTML_TEMPLATE,
+        version=APP_VERSION,
+        deals_count=len(LATEST_DEALS)
+    )
+
 @app.route('/deals', methods=['GET'])
 def get_deals():
     return jsonify(LATEST_DEALS)
 
+@app.route('/download', methods=['GET'])
+def download_apk():
+    static_dir = os.path.join(app.root_path, 'static')
+    apk_file = 'AmazonDeals.apk'
+    if os.path.exists(os.path.join(static_dir, apk_file)):
+        return send_from_directory(static_dir, apk_file, as_attachment=True)
+    else:
+        return jsonify({"error": "APK not found"}), 404
+
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({"status": "ok", "dealsCount": len(LATEST_DEALS)})
+    return jsonify({"status": "ok", "version": APP_VERSION, "dealsCount": len(LATEST_DEALS)})
 
-# Start background scheduler (runs scan every 10 minutes)
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=scrape_amazon_deals, trigger="interval", minutes=10)
 scheduler.start()
 
-# Initial scan on server launch
 scrape_amazon_deals()
 
 if __name__ == '__main__':
