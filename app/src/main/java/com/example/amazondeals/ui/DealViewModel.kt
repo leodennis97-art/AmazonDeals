@@ -148,15 +148,19 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
             "50% Rabatt" -> allDeals.filter { it.couponText.contains("50%") || it.description.contains("50%") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }
-            "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") }
-            "Elektronik Bot" -> allDeals.filter { it.title.contains("Elektronik") || it.description.lowercase().contains("anker") || it.description.lowercase().contains("usb") || it.description.lowercase().contains("led") }
-            "Haushalt Bot" -> allDeals.filter { it.title.contains("Haushalt") || it.description.lowercase().contains("kaffee") || it.description.lowercase().contains("küche") || it.description.lowercase().contains("tabs") }
-            "Gaming Bot" -> allDeals.filter { it.title.contains("Gaming") || it.description.lowercase().contains("ps5") || it.description.lowercase().contains("xbox") || it.description.lowercase().contains("switch") }
-            "Fashion Bot" -> allDeals.filter { it.title.contains("Fashion") || it.description.lowercase().contains("nike") || it.description.lowercase().contains("adidas") || it.description.lowercase().contains("schuhe") }
-            "Tierwelt Bot" -> allDeals.filter { it.title.contains("Tierwelt") || it.description.lowercase().contains("katze") || it.description.lowercase().contains("hund") || it.description.lowercase().contains("felix") }
-            "Baumarkt Bot" -> allDeals.filter { it.title.contains("Baumarkt") || it.description.lowercase().contains("bosch") || it.description.lowercase().contains("makita") || it.description.lowercase().contains("werkzeug") }
+            "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") || it.title.lowercase().contains("rasier") }
+            "Elektronik Bot" -> allDeals.filter { it.title.contains("Elektronik") || it.description.lowercase().contains("anker") || it.description.lowercase().contains("usb") || it.description.lowercase().contains("led") || it.title.lowercase().contains("charger") }
+            "Haushalt Bot" -> allDeals.filter { it.title.contains("Haushalt") || it.description.lowercase().contains("kaffee") || it.description.lowercase().contains("küche") || it.description.lowercase().contains("tabs") || it.title.lowercase().contains("finish") }
+            "Gaming Bot" -> allDeals.filter { it.title.contains("Gaming") || it.description.lowercase().contains("ps5") || it.description.lowercase().contains("xbox") || it.description.lowercase().contains("switch") || it.title.lowercase().contains("controller") }
+            "Fashion Bot" -> allDeals.filter { it.title.contains("Fashion") || it.description.lowercase().contains("nike") || it.description.lowercase().contains("adidas") || it.description.lowercase().contains("schuhe") || it.title.lowercase().contains("t-shirt") }
+            "Tierwelt Bot" -> allDeals.filter { it.title.contains("Tierwelt") || it.description.lowercase().contains("katze") || it.description.lowercase().contains("hund") || it.description.lowercase().contains("felix") || it.title.lowercase().contains("futter") }
+            "Baumarkt Bot" -> allDeals.filter { it.title.contains("Baumarkt") || it.description.lowercase().contains("bosch") || it.description.lowercase().contains("makita") || it.description.lowercase().contains("werkzeug") || it.title.lowercase().contains("akku") }
             "Favoriten" -> allDeals.filter { repository.isFavorite(it.id) }
             else -> allDeals
+        }
+
+        if (result.isEmpty() && filter != "Favoriten" && query.isEmpty()) {
+            result = allDeals
         }
 
         if (query.trim().isNotEmpty()) {

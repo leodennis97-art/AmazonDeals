@@ -19,7 +19,8 @@ class DealRepository(private val context: Context) {
         private const val KEY_NOTIFIED_DEALS = "notified_deal_ids"
         private const val KEY_FAVORITE_DEALS = "favorite_deal_ids"
         private const val KEY_BACKEND_URL = "backend_url"
-        private const val DEFAULT_BACKEND_URL = "https://speller-importer-captivate.ngrok-free.dev"
+        private const val PRIMARY_NGROK_URL = "https://speller-importer-captivate.ngrok-free.dev"
+        private const val FALLBACK_CLOUD_URL = "https://amazondeals.onrender.com"
         private const val KEY_KEYWORDS = "search_keywords"
         private const val DEFAULT_KEYWORDS = "0.01€,2 für 0.01€,1ct,Sparen,50% Rabatt,Gutschein"
 
@@ -57,9 +58,9 @@ class DealRepository(private val context: Context) {
             return@withContext Pair(false, "Bitte gib deine E-Mail-Adresse ein.")
         }
 
-        // Lifetime VIP Free Access for Owner Account
+        // Lifetime Free VIP Access for Owner
         if (trimmedEmail == "leodennis97@gmail.com") {
-            val lifetimeMs = System.currentTimeMillis() + (36500L * 24 * 60 * 60 * 1000) // 100 Years
+            val lifetimeMs = System.currentTimeMillis() + (36500L * 24 * 60 * 60 * 1000)
             saveLicense(trimmedEmail, if (trimmedKey.isEmpty()) "VIP-LIFETIME" else trimmedKey, lifetimeMs)
             return@withContext Pair(true, "Willkommen Dennis! VIP-Zugang lebenslang aktiviert.")
         }
@@ -68,60 +69,60 @@ class DealRepository(private val context: Context) {
             return@withContext Pair(false, "Bitte gib deinen Lizenzcode ein.")
         }
 
-        // Master Keys for Instant VIP Activation
         if (trimmedKey == "PRO-2026-VIP" || trimmedKey.startsWith("PAYPAL") || trimmedKey == "PRO-1MONAT" || trimmedKey == "ADMIN") {
             val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
             saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
             return@withContext Pair(true, "Lizenz erfolgreich aktiviert (30 Tage PRO)!")
         }
 
-        try {
-            val url = URL("$backendUrl/verify_license")
-            val connection = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 8000
-                readTimeout = 8000
-                requestMethod = "POST"
-                setRequestProperty("Content-Type", "application/json")
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("ngrok-skip-browser-warning", "true")
-                doOutput = true
-            }
-
-            val jsonPayload = JSONObject().apply {
-                put("email", trimmedEmail)
-                put("licenseKey", trimmedKey)
-            }.toString()
-
-            connection.outputStream.use { it.write(jsonPayload.toByteArray(Charsets.UTF_8)) }
-
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(responseText)
-                val status = json.optString("status", "")
-                val expiry = json.optLong("expiryMs", System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000))
-                val message = json.optString("message", "Lizenz erfolgreich aktiviert!")
-
-                if (status == "ACTIVE" || status == "SUCCESS") {
-                    saveLicense(trimmedEmail, trimmedKey, expiry)
-                    return@withContext Pair(true, message)
-                } else {
-                    return@withContext Pair(false, json.optString("error", "Ungültiger Lizenzcode."))
+        val endpointsToTry = listOf(backendUrl, FALLBACK_CLOUD_URL)
+        for (endpoint in endpointsToTry) {
+            try {
+                val url = URL("$endpoint/verify_license")
+                val connection = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("ngrok-skip-browser-warning", "true")
+                    doOutput = true
                 }
-            } else {
-                return@withContext Pair(false, "Cloud-Verbindung fehlgeschlagen (${connection.responseCode}). Bitte Cloud-Status prüfen.")
+
+                val jsonPayload = JSONObject().apply {
+                    put("email", trimmedEmail)
+                    put("licenseKey", trimmedKey)
+                }.toString()
+
+                connection.outputStream.use { it.write(jsonPayload.toByteArray(Charsets.UTF_8)) }
+
+                if (connection.responseCode == 200) {
+                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = JSONObject(responseText)
+                    val status = json.optString("status", "")
+                    val expiry = json.optLong("expiryMs", System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000))
+                    val message = json.optString("message", "Lizenz erfolgreich aktiviert!")
+
+                    if (status == "ACTIVE" || status == "SUCCESS") {
+                        saveLicense(trimmedEmail, trimmedKey, expiry)
+                        return@withContext Pair(true, message)
+                    }
+                }
+            } catch (_: Exception) {
             }
-        } catch (e: Exception) {
-            if (trimmedKey.length >= 8) {
-                val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
-                saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
-                return@withContext Pair(true, "Lizenz aktiviert (PRO Modus)!")
-            }
-            return@withContext Pair(false, "Verbindung zur Cloud fehlgeschlagen. Bitte Internetverbindung prüfen.")
         }
+
+        if (trimmedKey.length >= 8) {
+            val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
+            saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
+            return@withContext Pair(true, "Lizenz aktiviert (PRO Modus)!")
+        }
+
+        return@withContext Pair(false, "Verbindung zur Cloud fehlgeschlagen. Bitte Internetverbindung prüfen.")
     }
 
     fun getBackendUrl(): String {
-        return prefs.getString(KEY_BACKEND_URL, DEFAULT_BACKEND_URL) ?: DEFAULT_BACKEND_URL
+        return prefs.getString(KEY_BACKEND_URL, PRIMARY_NGROK_URL) ?: PRIMARY_NGROK_URL
     }
 
     fun setBackendUrl(url: String) {
@@ -164,42 +165,48 @@ class DealRepository(private val context: Context) {
     }
 
     suspend fun fetchDeals(): List<Deal> = withContext(Dispatchers.IO) {
-        val backendUrl = getBackendUrl()
+        val primaryUrl = getBackendUrl()
+        val urlsToTry = listOf(primaryUrl, FALLBACK_CLOUD_URL).distinct()
         val deals = mutableListOf<Deal>()
 
-        try {
-            val url = URL("$backendUrl/deals")
-            val connection = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 8000
-                readTimeout = 8000
-                requestMethod = "GET"
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("ngrok-skip-browser-warning", "true")
-                setRequestProperty("User-Agent", "AmazonDealsApp/1.0")
-            }
-
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
-                val jsonArray = JSONArray(responseText)
-                for (i in 0 until jsonArray.length()) {
-                    val obj = jsonArray.getJSONObject(i)
-                    deals.add(
-                        Deal(
-                            id = obj.optString("id", System.currentTimeMillis().toString()),
-                            title = obj.optString("title", "Amazon Angebot"),
-                            description = obj.optString("description", ""),
-                            price = obj.optString("price", "0.01 €"),
-                            couponText = obj.optString("couponText", "Gutschein aktiv"),
-                            dealUrl = obj.optString("dealUrl", "https://www.amazon.de/coupons"),
-                            imageUrl = obj.optString("imageUrl", ""),
-                            timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
-                            isGlitch = obj.optBoolean("isGlitch", false)
-                        )
-                    )
+        for (endpoint in urlsToTry) {
+            try {
+                val url = URL("$endpoint/deals")
+                val connection = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                    requestMethod = "GET"
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("ngrok-skip-browser-warning", "true")
+                    setRequestProperty("User-Agent", "AmazonDealsApp/1.0")
                 }
+
+                if (connection.responseCode == 200) {
+                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonArray = JSONArray(responseText)
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        deals.add(
+                            Deal(
+                                id = obj.optString("id", System.currentTimeMillis().toString()),
+                                title = obj.optString("title", "Amazon Angebot"),
+                                description = obj.optString("description", ""),
+                                price = obj.optString("price", "0.01 €"),
+                                couponText = obj.optString("couponText", "Gutschein aktiv"),
+                                dealUrl = obj.optString("dealUrl", "https://www.amazon.de/coupons"),
+                                imageUrl = obj.optString("imageUrl", ""),
+                                timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
+                                isGlitch = obj.optBoolean("isGlitch", false)
+                            )
+                        )
+                    }
+                    if (deals.isNotEmpty()) {
+                        break
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
 
         if (deals.isEmpty()) {
@@ -214,7 +221,7 @@ class DealRepository(private val context: Context) {
         return listOf(
             Deal(
                 id = "mock_1",
-                title = "Gillette Mach3 Rasierklingen 8er Pack",
+                title = "[🤖 Drogerie Bot] Gillette Mach3 Rasierklingen 8er Pack",
                 description = "Aktiviere den Gutschein im Bezahlvorgang. Kombinierbar mit Spar-Abo.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
@@ -224,7 +231,7 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_2",
-                title = "Finish Powerball Dishwasher Tabs 100 Stk",
+                title = "[☕ Haushalt Bot] Finish Powerball Dishwasher Tabs 100 Stk",
                 description = "Coupons im Checkout aktivieren. 50% Ersparnis durch Rabattgutschein.",
                 price = "0.01 €",
                 couponText = "Kaufe 3 zahle 1ct (Auto-Gutschein)",
@@ -234,22 +241,42 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_3",
-                title = "Philips Hue White LED Lampe E27 Doppelpack",
-                description = "Aktionsgutschein auf der Produktseite anhaken.",
-                price = "12.49 €",
-                couponText = "50% Rabatt Gutschein",
-                dealUrl = "https://www.amazon.de/dp/B08K3C4CQC",
-                timestamp = now - 3600000,
-                isGlitch = false
-            ),
-            Deal(
-                id = "mock_4",
-                title = "Anker USB-C Schnellladegerät 30W",
+                title = "[⚡ Elektronik Bot] Anker USB-C Schnellladegerät 30W",
                 description = "Rabattcode beim Bezahlen eingeben.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
                 dealUrl = "https://www.amazon.de/dp/B08K3C4CQC",
+                timestamp = now - 3600000,
+                isGlitch = true
+            ),
+            Deal(
+                id = "mock_4",
+                title = "[🎮 Gaming Bot] PS5 DualSense Wireless Controller Midnight Black",
+                description = "Aktionsgutschein auf der Produktseite anhaken für maximale Ersparnis.",
+                price = "49.99 €",
+                couponText = "25% Aktionsgutschein im Checkout",
+                dealUrl = "https://www.amazon.de/dp/B092R82CGL",
+                timestamp = now - 5400000,
+                isGlitch = false
+            ),
+            Deal(
+                id = "mock_5",
+                title = "[👟 Fashion Bot] Nike Sportswear T-Shirt Herren 3er Pack",
+                description = "50% Direktabzug im Warenkorb durch Multibuy Coupon Aktion.",
+                price = "14.99 €",
+                couponText = "50% Rabatt Gutschein",
+                dealUrl = "https://www.amazon.de/dp/B07N123456",
                 timestamp = now - 7200000,
+                isGlitch = false
+            ),
+            Deal(
+                id = "mock_6",
+                title = "[🛠️ Baumarkt Bot] Bosch Professional 18V System Akkusauger",
+                description = "Preisfehler / Gutschein Glitch an der Kasse.",
+                price = "0.01 €",
+                couponText = "Kaufe 2 zahle 1ct (Glitch Code)",
+                dealUrl = "https://www.amazon.de/dp/B08XYZ7890",
+                timestamp = now - 9000000,
                 isGlitch = true
             )
         )
