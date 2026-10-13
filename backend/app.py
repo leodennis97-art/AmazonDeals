@@ -1,6 +1,5 @@
 import os
 import time
-import re
 import logging
 from flask import Flask, jsonify, request, send_from_directory, render_template_string
 import requests
@@ -239,17 +238,19 @@ def download_apk():
     if os.path.exists(os.path.join(static_dir, apk_file)):
         return send_from_directory(static_dir, apk_file, as_attachment=True)
     else:
-        return jsonify({"error": "APK not found"}), 404
+        return jsonify({"error": "APK not found", "version": APP_VERSION}), 404
 
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "ok", "version": APP_VERSION, "dealsCount": len(LATEST_DEALS)})
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=scrape_amazon_deals, trigger="interval", minutes=10)
-scheduler.start()
-
-scrape_amazon_deals()
+try:
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=scrape_amazon_deals, trigger="interval", minutes=10)
+    scheduler.start()
+    scrape_amazon_deals()
+except Exception as e:
+    logger.error(f"Error starting scheduler or initial scan: {e}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
