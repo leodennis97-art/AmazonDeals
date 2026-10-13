@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amazondeals.data.model.Deal
 
-fun openUrlSafely(context: Context, url: String) {
+fun openUrlSafely(context: Context, url: String, isCartUrl: Boolean = false) {
     if (url.isBlank()) return
     try {
         val trimmed = url.trim()
@@ -41,16 +41,28 @@ fun openUrlSafely(context: Context, url: String) {
             trimmed
         }
         val uri = Uri.parse(formattedUrl)
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (isCartUrl) {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            val chooser = Intent.createChooser(intent, "🛒 Warenkorb im Browser öffnen")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
         }
-        context.startActivity(intent)
     } catch (e: Exception) {
         e.printStackTrace()
         try {
-            val chooser = Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(url.trim())), "Öffnen mit")
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(chooser)
+            val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url.trim())).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(fallbackIntent)
         } catch (e2: Exception) {
             e2.printStackTrace()
         }
@@ -505,7 +517,7 @@ fun DealCard(
 
             Button(
                 onClick = {
-                    openUrlSafely(context, directCartUrl)
+                    openUrlSafely(context, directCartUrl, isCartUrl = true)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
@@ -527,7 +539,7 @@ fun DealCard(
             ) {
                 OutlinedButton(
                     onClick = {
-                        openUrlSafely(context, productUrl)
+                        openUrlSafely(context, productUrl, isCartUrl = false)
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp)
