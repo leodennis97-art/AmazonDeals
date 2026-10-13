@@ -143,6 +143,12 @@ fun HomeScreen(
                 onRequestPermission = onRequestNotificationPermission
             )
 
+            // TOP 3 Ersparnisse Banner
+            Top3SavingsSection(
+                deals = state.deals,
+                context = context
+            )
+
             // Search Bar
             SearchBarSection(
                 query = state.searchQuery,
@@ -218,6 +224,142 @@ fun HomeScreen(
                 showSettingsDialog = false
             }
         )
+    }
+}
+
+@Composable
+fun Top3SavingsSection(
+    deals: List<Deal>,
+    context: Context
+) {
+    val topDeals = remember(deals) {
+        deals.sortedWith(
+            compareByDescending<Deal> { it.isGlitch }
+                .thenBy { if (it.price.contains("0.01")) 0 else 1 }
+        ).take(3)
+    }
+
+    if (topDeals.isEmpty()) return
+
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🏆", fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "TOP 3 ERSPARNISSE",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 15.sp,
+                    color = Color(0xFFFF9900)
+                )
+            }
+
+            Surface(
+                color = Color(0xFFEF4444).copy(alpha = 0.15f),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Höchster Rabatt",
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFEF4444)
+                )
+            }
+        }
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(topDeals.size) { index ->
+                val deal = topDeals[index]
+                val rankLabel = when (index) {
+                    0 -> "🥇 #1 TOP ERSPARNIS"
+                    1 -> "🥈 #2 TOP ERSPARNIS"
+                    else -> "🥉 #3 TOP ERSPARNIS"
+                }
+
+                Card(
+                    modifier = Modifier
+                        .width(260.dp)
+                        .clickable { openUrlSafely(context, deal.getDirectCartUrl(), isCartUrl = true) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    border = BorderStroke(1.5.dp, Brush.horizontalGradient(listOf(Color(0xFFFF9900), Color(0xFFEF4444))))
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = rankLabel,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFFFF9900)
+                            )
+
+                            Text(
+                                text = deal.price,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Text(
+                            text = deal.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            maxLines = 2,
+                            lineHeight = 18.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "🏷️ ${deal.couponText}",
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Button(
+                            onClick = { openUrlSafely(context, deal.getDirectCartUrl(), isCartUrl = true) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+                        ) {
+                            Text(
+                                text = "🛒 1-Tap Warenkorb (${deal.getSuggestedQuantity()}x)",
+                                color = Color.Black,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
