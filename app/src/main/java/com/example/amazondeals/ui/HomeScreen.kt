@@ -197,7 +197,7 @@ fun HomeScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(state.filteredDeals, key = { it.id }) { deal ->
@@ -507,6 +507,7 @@ fun FilterChipsRow(
 ) {
     val filters = listOf(
         "Alle" to "⚡ Alle Deals",
+        "75%-199% Rabatt" to "🔥 75%-199% Rabatt",
         "99% / Gratis" to "💥 99% / Gratis",
         "Amazon.de" to "🛒 Amazon.de",
         "Kleinanzeigen.de" to "🏷️ Kleinanzeigen.de",

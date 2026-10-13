@@ -261,7 +261,7 @@ def scrape_amazon_deals():
                     deal_id = str(hash(link))
                     category_clean = "Glitches" if is_glitch else ("Drogerie" if "gillette" in full_content else "Elektronik")
 
-                    discount_percent = 100 if ("verschenken" in full_content or "gratis" in full_content) else (99 if is_glitch else 50)
+                    discount_percent = 199 if ("2 für 0.01" in full_content or "2 fuer 0.01" in full_content or "doppel" in full_content) else (100 if ("verschenken" in full_content or "gratis" in full_content) else (99 if is_glitch else 75))
                     orig_price = "29.99 €" if is_glitch else "19.99 €"
 
                     scraped_deals.append({
@@ -269,10 +269,10 @@ def scrape_amazon_deals():
                         "title": title[:100],
                         "description": clean_text[:250] + "...",
                         "price": price,
-                        "couponText": coupon_text,
+                        "couponText": f"🟢 Gutschein Aktiv: -{discount_percent}% Ersparnis",
                         "dealUrl": deal_url,
                         "imageUrl": "",
-                        "timestamp": now_ms - (item_counter * 180000), # Fresh, within last 1-2 days
+                        "timestamp": now_ms - (item_counter * 180000),
                         "isGlitch": is_glitch,
                         "botName": bot_name,
                         "aiConfidence": 99 if is_glitch else 96,

@@ -145,11 +145,11 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     private fun applyFiltersAndSearch(filter: String, query: String) {
         val allDeals = _uiState.value.deals
         var result = when (filter) {
+            "75%-199% Rabatt" -> allDeals.filter { it.discountPercent >= 75 || it.isGlitch }
             "99% / Gratis" -> allDeals.filter { it.discountPercent >= 90 || it.isGlitch || it.price.contains("0.00") || it.price.contains("0.01") }
             "Amazon.de" -> allDeals.filter { !it.isKleinanzeigen() }
             "Kleinanzeigen.de" -> allDeals.filter { it.isKleinanzeigen() }
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
-            "50% Rabatt" -> allDeals.filter { it.couponText.contains("50%") || it.description.contains("50%") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }
             "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") || it.title.lowercase().contains("rasier") }
             "Elektronik Bot" -> allDeals.filter { it.title.contains("Elektronik") || it.description.lowercase().contains("anker") || it.description.lowercase().contains("usb") || it.description.lowercase().contains("led") || it.title.lowercase().contains("charger") }
