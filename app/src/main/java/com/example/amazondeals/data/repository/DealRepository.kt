@@ -196,7 +196,10 @@ class DealRepository(private val context: Context) {
                                 dealUrl = obj.optString("dealUrl", "https://www.amazon.de/coupons"),
                                 imageUrl = obj.optString("imageUrl", ""),
                                 timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
-                                isGlitch = obj.optBoolean("isGlitch", false)
+                                isGlitch = obj.optBoolean("isGlitch", false),
+                                botName = obj.optString("botName", "🤖 AI Bot"),
+                                aiConfidence = obj.optInt("aiConfidence", 98),
+                                category = obj.optString("category", "Allgemein")
                             )
                         )
                     }

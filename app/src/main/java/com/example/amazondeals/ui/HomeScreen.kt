@@ -440,6 +440,21 @@ fun DealCard(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = "${deal.botName} (${deal.aiConfidence}% Score)",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {

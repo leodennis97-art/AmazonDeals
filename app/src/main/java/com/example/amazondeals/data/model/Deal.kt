@@ -9,7 +9,10 @@ data class Deal(
     val dealUrl: String,
     val imageUrl: String = "",
     val timestamp: Long = System.currentTimeMillis(),
-    val isGlitch: Boolean = false
+    val isGlitch: Boolean = false,
+    val botName: String = "🤖 AI Bot",
+    val aiConfidence: Int = 98,
+    val category: String = "Allgemein"
 ) {
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()

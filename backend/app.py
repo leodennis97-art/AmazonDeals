@@ -272,17 +272,21 @@ def scrape_amazon_deals():
                     bot_name = classify_bot(title, clean_text, coupon_text)
 
                     deal_id = str(hash(link))
+                    category_clean = bot_name.replace("🤖 ", "").replace("⚡ ", "").replace("☕ ", "").replace("🎮 ", "").replace("👟 ", "").replace("🐾 ", "").replace("🛠️ ", "").replace("🔥 ", "")
 
                     scraped_deals.append({
                         "id": deal_id,
-                        "title": f"[{bot_name}] {title[:90]}",
+                        "title": title[:100],
                         "description": clean_text[:250] + "...",
                         "price": price,
                         "couponText": coupon_text,
                         "dealUrl": deal_url,
                         "imageUrl": "",
                         "timestamp": int(time.time() * 1000),
-                        "isGlitch": is_glitch
+                        "isGlitch": is_glitch,
+                        "botName": bot_name,
+                        "aiConfidence": 99 if is_glitch else 95,
+                        "category": category_clean
                     })
         except Exception as e:
             logger.error(f"Error scraping feed {rss_url}: {e}")
