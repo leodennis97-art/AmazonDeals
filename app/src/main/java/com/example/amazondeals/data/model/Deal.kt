@@ -44,7 +44,7 @@ data class Deal(
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()
-            "https://www.amazon.de/gp/aws/cart/add.html?ASIN.1=$asin&Quantity.1=$qty"
+            "https://www.amazon.de/gp/item-dispatch?asin.1=$asin&action=addToCart&quantity.1=$qty"
         } else {
             getFormattedUrl()
         }

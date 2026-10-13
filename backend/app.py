@@ -307,7 +307,7 @@ def scrape_amazon_deals():
             "description": "Kaufe 3 Artikel, zahle nur 1 Cent. Kombinierbar mit Spar-Abo Rabatt.",
             "price": "0.01 €",
             "couponText": "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-            "dealUrl": "https://www.amazon.de/dp/B09XYZ1234",
+            "dealUrl": "https://www.amazon.de/dp/B08C1W55L6",
             "imageUrl": "",
             "timestamp": now_ms - 300000,
             "isGlitch": True
@@ -318,7 +318,7 @@ def scrape_amazon_deals():
             "description": "Automatisch 50% Rabatt-Gutschein im Bestellschritt aktivieren.",
             "price": "0.01 €",
             "couponText": "Sparen: Erhalte 2 für 0.01€",
-            "dealUrl": "https://www.amazon.de/dp/B08ABC9876",
+            "dealUrl": "https://www.amazon.de/dp/B08K3C4CQC",
             "imageUrl": "",
             "timestamp": now_ms - 600000,
             "isGlitch": True
