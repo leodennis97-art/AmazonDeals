@@ -6,15 +6,20 @@ Android App & Cloud/Local Scraper Backend zur automatischen Überwachung von Ama
 
 ## ⚡ Schnellstart mit ngrok (Lokaler Backend-Server)
 
-Wenn du das Scraper-Backend direkt auf deinem PC laufen lassen möchtest (ohne Cloud-Deployment):
+Wenn du das Scraper-Backend direkt auf deinem PC laufen lassen möchtest:
 
-### 1️⃣ Lokales Backend mit ngrok starten
+### 1️⃣ Kostenlosen ngrok Authtoken holen (einmalig)
+1. Registriere dich kostenlos auf [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup).
+2. Kopiere deinen Authtoken von [dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken).
+3. Speichere den Token in der Datei `backend/ngrok_authtoken.txt` (oder gib ihn beim ersten Start ein).
+
+### 2️⃣ Lokales Backend mit ngrok starten
 1. Navigiere in den Ordner `backend/`.
-2. Führe die Datei `start_local_ngrok.bat` aus (oder im Terminal `python start_ngrok.py`).
-3. Das Skript startet das Scraper-Backend und erstellt automatisch einen **ngrok Tunnel**.
+2. Führe die Datei `start_local_ngrok.bat` aus (oder im Terminal `python backend/start_ngrok.py`).
+3. Das Skript startet das Scraper-Backend und erstellt automatisch den **ngrok Tunnel**.
 4. Kopiere die angezeigte ngrok URL (z. B. `https://a1b2-34-56-78-90.ngrok-free.app`).
 
-### 2️⃣ URL in der App eintragen
+### 3️⃣ URL in der App eintragen
 1. Öffne die **AmazonDeals** App.
 2. Tippe oben rechts auf das ⚙️ **Einstellungen-Symbol**.
 3. Füge die **ngrok URL** ein und klicke auf **Speichern**.
