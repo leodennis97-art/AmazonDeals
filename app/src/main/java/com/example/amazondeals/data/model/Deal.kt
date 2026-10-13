@@ -13,10 +13,12 @@ data class Deal(
 ) {
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()
+        if (trimmed.isEmpty()) return "https://www.amazon.de/coupons"
         return when {
             trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
-            trimmed.isNotEmpty() -> "https://$trimmed"
-            else -> "https://www.amazon.de/coupons"
+            trimmed.startsWith("www.") -> "https://$trimmed"
+            trimmed.startsWith("amazon.de") -> "https://www.$trimmed"
+            else -> "https://$trimmed"
         }
     }
 

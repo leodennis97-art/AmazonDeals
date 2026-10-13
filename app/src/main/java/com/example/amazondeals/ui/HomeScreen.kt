@@ -31,17 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amazondeals.data.model.Deal
 
-fun openUrlSafely(context: Context, url: String, isCartUrl: Boolean = false) {
-    if (url.isBlank()) return
-    try {
-        val trimmed = url.trim()
-        val formattedUrl = if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
-            "https://$trimmed"
-        } else {
-            trimmed
-        }
-        val uri = Uri.parse(formattedUrl)
+fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) {
+    val trimmed = rawUrl.trim()
+    if (trimmed.isBlank()) return
 
+    val formattedUrl = when {
+        trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+        trimmed.startsWith("www.") -> "https://$trimmed"
+        trimmed.startsWith("amazon.de") -> "https://www.$trimmed"
+        else -> "https://$trimmed"
+    }
+
+    val uri = Uri.parse(formattedUrl)
+
+    try {
         if (isCartUrl) {
             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -59,10 +62,10 @@ fun openUrlSafely(context: Context, url: String, isCartUrl: Boolean = false) {
     } catch (e: Exception) {
         e.printStackTrace()
         try {
-            val fallbackIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url.trim())).apply {
+            val fallbackIntent = Intent(Intent.ACTION_VIEW, uri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            context.startActivity(fallbackIntent)
+            context.startActivity(Intent.createChooser(fallbackIntent, "Öffnen mit Browser"))
         } catch (e2: Exception) {
             e2.printStackTrace()
         }
