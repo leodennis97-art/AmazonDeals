@@ -225,7 +225,7 @@ class DealRepository(private val context: Context) {
                 description = "Aktiviere den Gutschein im Bezahlvorgang. Kombinierbar mit Spar-Abo.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/dp/B08N5WRWNW",
+                dealUrl = "https://www.amazon.de/dp/B0011883F6",
                 timestamp = now - 300000,
                 isGlitch = true
             ),
@@ -235,7 +235,7 @@ class DealRepository(private val context: Context) {
                 description = "Coupons im Checkout aktivieren. 50% Ersparnis durch Rabattgutschein.",
                 price = "0.01 €",
                 couponText = "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-                dealUrl = "https://www.amazon.de/dp/B08C1W55L6",
+                dealUrl = "https://www.amazon.de/dp/B073X2T4X2",
                 timestamp = now - 1800000,
                 isGlitch = true
             ),
@@ -245,7 +245,7 @@ class DealRepository(private val context: Context) {
                 description = "Rabattcode beim Bezahlen eingeben.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/dp/B08K3C4CQC",
+                dealUrl = "https://www.amazon.de/dp/B07GYRN82L",
                 timestamp = now - 3600000,
                 isGlitch = true
             ),
@@ -255,17 +255,17 @@ class DealRepository(private val context: Context) {
                 description = "Aktionsgutschein auf der Produktseite anhaken für maximale Ersparnis.",
                 price = "49.99 €",
                 couponText = "25% Aktionsgutschein im Checkout",
-                dealUrl = "https://www.amazon.de/dp/B092R82CGL",
+                dealUrl = "https://www.amazon.de/dp/B08H99BPJN",
                 timestamp = now - 5400000,
                 isGlitch = false
             ),
             Deal(
                 id = "mock_5",
-                title = "[👟 Fashion Bot] Nike Sportswear T-Shirt Herren 3er Pack",
-                description = "50% Direktabzug im Warenkorb durch Multibuy Coupon Aktion.",
-                price = "14.99 €",
-                couponText = "50% Rabatt Gutschein",
-                dealUrl = "https://www.amazon.de/dp/B07N123456",
+                title = "[👟 Fashion Bot] Amazon Coupon Übersichtsseite (Aktive Rabatte)",
+                description = "Alle aktuell aktiven 50% Rabattgutscheine direkt auf Amazon.de aktivieren.",
+                price = "Gutscheine",
+                couponText = "50% Rabatt Coupons",
+                dealUrl = "https://www.amazon.de/coupons",
                 timestamp = now - 7200000,
                 isGlitch = false
             ),
@@ -275,7 +275,7 @@ class DealRepository(private val context: Context) {
                 description = "Preisfehler / Gutschein Glitch an der Kasse.",
                 price = "0.01 €",
                 couponText = "Kaufe 2 zahle 1ct (Glitch Code)",
-                dealUrl = "https://www.amazon.de/dp/B08XYZ7890",
+                dealUrl = "https://www.amazon.de/coupons",
                 timestamp = now - 9000000,
                 isGlitch = true
             )

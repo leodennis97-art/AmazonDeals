@@ -296,7 +296,7 @@ def scrape_amazon_deals():
             "description": "2 Produkte für 0.01 € im Checkout. Automatische Gutscheinanwendung an der Kasse.",
             "price": "0.01 €",
             "couponText": "Sparen: Erhalte 2 für 0.01€",
-            "dealUrl": "https://www.amazon.de/dp/B08N5WRWNW",
+            "dealUrl": "https://www.amazon.de/dp/B0011883F6",
             "imageUrl": "",
             "timestamp": now_ms - 120000,
             "isGlitch": True
@@ -307,7 +307,7 @@ def scrape_amazon_deals():
             "description": "Kaufe 3 Artikel, zahle nur 1 Cent. Kombinierbar mit Spar-Abo Rabatt.",
             "price": "0.01 €",
             "couponText": "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-            "dealUrl": "https://www.amazon.de/dp/B08C1W55L6",
+            "dealUrl": "https://www.amazon.de/dp/B073X2T4X2",
             "imageUrl": "",
             "timestamp": now_ms - 300000,
             "isGlitch": True
@@ -318,7 +318,7 @@ def scrape_amazon_deals():
             "description": "Automatisch 50% Rabatt-Gutschein im Bestellschritt aktivieren.",
             "price": "0.01 €",
             "couponText": "Sparen: Erhalte 2 für 0.01€",
-            "dealUrl": "https://www.amazon.de/dp/B08K3C4CQC",
+            "dealUrl": "https://www.amazon.de/dp/B07GYRN82L",
             "imageUrl": "",
             "timestamp": now_ms - 600000,
             "isGlitch": True
@@ -329,18 +329,18 @@ def scrape_amazon_deals():
             "description": "Aktionsgutschein auf der Produktseite anhaken für maximale Ersparnis.",
             "price": "49.99 €",
             "couponText": "25% Aktionsgutschein im Checkout",
-            "dealUrl": "https://www.amazon.de/dp/B092R82CGL",
+            "dealUrl": "https://www.amazon.de/dp/B08H99BPJN",
             "imageUrl": "",
             "timestamp": now_ms - 900000,
             "isGlitch": False
         },
         {
             "id": "bot_fashion_1",
-            "title": "[👟 Fashion AI Bot] Nike Sportswear T-Shirt Herren 3er Pack",
-            "description": "50% Direktabzug im Warenkorb durch Multibuy Coupon Aktion.",
-            "price": "14.99 €",
-            "couponText": "50% Rabatt Gutschein",
-            "dealUrl": "https://www.amazon.de/dp/B07N123456",
+            "title": "[👟 Fashion AI Bot] Amazon Coupons (Alle aktiven 50% Rabatt-Gutscheine)",
+            "description": "50% Direktabzug im Warenkorb durch Multibuy Coupon Aktion auf Amazon.de.",
+            "price": "Coupons",
+            "couponText": "50% Rabatt Gutscheine",
+            "dealUrl": "https://www.amazon.de/coupons",
             "imageUrl": "",
             "timestamp": now_ms - 1200000,
             "isGlitch": False
