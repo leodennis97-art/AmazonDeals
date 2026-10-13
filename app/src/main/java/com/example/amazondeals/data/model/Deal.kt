@@ -11,14 +11,24 @@ data class Deal(
     val timestamp: Long = System.currentTimeMillis(),
     val isGlitch: Boolean = false
 ) {
+    fun getFormattedUrl(): String {
+        val trimmed = dealUrl.trim()
+        return when {
+            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+            trimmed.isNotEmpty() -> "https://$trimmed"
+            else -> "https://www.amazon.de/coupons"
+        }
+    }
+
     fun getAsin(): String? {
+        val url = getFormattedUrl()
         val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
-        val match = regex.find(dealUrl)
+        val match = regex.find(url)
         if (match != null) {
             return match.groupValues[1].uppercase()
         }
         val fallbackRegex = Regex("""\b(B[0-9A-Z]{9})\b""")
-        return fallbackRegex.find(dealUrl)?.groupValues?.get(1)?.uppercase()
+        return fallbackRegex.find(url)?.groupValues?.get(1)?.uppercase()
     }
 
     fun getSuggestedQuantity(): Int {
@@ -36,7 +46,7 @@ data class Deal(
             val qty = getSuggestedQuantity()
             "https://www.amazon.de/gp/aws/cart/add.html?ASIN.1=$asin&Quantity.1=$qty"
         } else {
-            dealUrl
+            getFormattedUrl()
         }
     }
 }

@@ -31,6 +31,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amazondeals.data.model.Deal
 
+fun openUrlSafely(context: Context, url: String) {
+    if (url.isBlank()) return
+    try {
+        val trimmed = url.trim()
+        val formattedUrl = if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
+            "https://$trimmed"
+        } else {
+            trimmed
+        }
+        val uri = Uri.parse(formattedUrl)
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        try {
+            val chooser = Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(url.trim())), "Öffnen mit")
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+        } catch (e2: Exception) {
+            e2.printStackTrace()
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -472,12 +498,12 @@ fun DealCard(
 
             // Action Buttons
             val directCartUrl = deal.getDirectCartUrl()
+            val productUrl = deal.getFormattedUrl()
             val qty = deal.getSuggestedQuantity()
 
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(directCartUrl))
-                    context.startActivity(intent)
+                    openUrlSafely(context, directCartUrl)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
@@ -499,8 +525,7 @@ fun DealCard(
             ) {
                 OutlinedButton(
                     onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deal.dealUrl))
-                        context.startActivity(intent)
+                        openUrlSafely(context, productUrl)
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp)
@@ -516,9 +541,10 @@ fun DealCard(
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "🔥 Amazon Glitch Deal: ${deal.title} für ${deal.price}!\n${deal.getDirectCartUrl()}"
+                                "🔥 Amazon Glitch Deal: ${deal.title} für ${deal.price}!\n$directCartUrl"
                             )
                         }
+                        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
                     },
                     modifier = Modifier.weight(1f),
