@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 data class DealUiState(
     val deals: List<Deal> = emptyList(),
     val filteredDeals: List<Deal> = emptyList(),
+    val searchQuery: String = "",
+    val favorites: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val selectedFilter: String = "Alle",
     val lastUpdated: Long = 0L,
@@ -53,7 +55,23 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     fun updateKeywords(keywords: List<String>) {
         repository.setKeywords(keywords)
         _uiState.value = _uiState.value.copy(keywords = keywords)
-        applyFilter(_uiState.value.selectedFilter)
+        applyFiltersAndSearch(_uiState.value.selectedFilter, _uiState.value.searchQuery)
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(searchQuery = query)
+        applyFiltersAndSearch(_uiState.value.selectedFilter, query)
+    }
+
+    fun toggleFavorite(dealId: String) {
+        repository.toggleFavorite(dealId)
+        val newFavs = _uiState.value.deals.map { it.id }.filter { repository.isFavorite(it) }.toSet()
+        _uiState.value = _uiState.value.copy(favorites = newFavs)
+        applyFiltersAndSearch(_uiState.value.selectedFilter, _uiState.value.searchQuery)
+    }
+
+    fun isFavorite(dealId: String): Boolean {
+        return repository.isFavorite(dealId)
     }
 
     fun refreshDeals() {
@@ -61,12 +79,14 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
                 val deals = repository.fetchDeals()
+                val favs = deals.map { it.id }.filter { repository.isFavorite(it) }.toSet()
                 _uiState.value = _uiState.value.copy(
                     deals = deals,
+                    favorites = favs,
                     isLoading = false,
                     lastUpdated = System.currentTimeMillis()
                 )
-                applyFilter(_uiState.value.selectedFilter)
+                applyFiltersAndSearch(_uiState.value.selectedFilter, _uiState.value.searchQuery)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -77,16 +97,33 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun applyFilter(filter: String) {
+        _uiState.value = _uiState.value.copy(selectedFilter = filter)
+        applyFiltersAndSearch(filter, _uiState.value.searchQuery)
+    }
+
+    private fun applyFiltersAndSearch(filter: String, query: String) {
         val allDeals = _uiState.value.deals
-        val filtered = when (filter) {
+        var result = when (filter) {
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
             "50% Rabatt" -> allDeals.filter { it.couponText.contains("50%") || it.description.contains("50%") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }
+            "Favoriten" -> allDeals.filter { repository.isFavorite(it.id) }
             else -> allDeals
         }
+
+        if (query.trim().isNotEmpty()) {
+            val q = query.trim().lowercase()
+            result = result.filter {
+                it.title.lowercase().contains(q) ||
+                it.description.lowercase().contains(q) ||
+                it.couponText.lowercase().contains(q) ||
+                it.price.lowercase().contains(q)
+            }
+        }
+
         _uiState.value = _uiState.value.copy(
             selectedFilter = filter,
-            filteredDeals = filtered
+            filteredDeals = result
         )
     }
 
@@ -97,7 +134,7 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             description = "Test-Alarm für 0.01€ Amazon Gutschein-Glitches.",
             price = "0.01 €",
             couponText = "Sparen: Erhalte 2 für 0.01€",
-            dealUrl = "https://www.amazon.de/coupons",
+            dealUrl = "https://www.amazon.de/dp/B08N5WRWNW",
             isGlitch = true
         )
         notificationHelper.sendDealNotification(testDeal)

@@ -6,7 +6,6 @@ import com.example.amazondeals.data.model.Deal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -17,6 +16,7 @@ class DealRepository(private val context: Context) {
 
     companion object {
         private const val KEY_NOTIFIED_DEALS = "notified_deal_ids"
+        private const val KEY_FAVORITE_DEALS = "favorite_deal_ids"
         private const val KEY_BACKEND_URL = "backend_url"
         private const val DEFAULT_BACKEND_URL = "https://speller-importer-captivate.ngrok-free.dev"
         private const val KEY_KEYWORDS = "search_keywords"
@@ -49,6 +49,21 @@ class DealRepository(private val context: Context) {
         val set = (prefs.getStringSet(KEY_NOTIFIED_DEALS, emptySet()) ?: emptySet()).toMutableSet()
         set.add(dealId)
         prefs.edit().putStringSet(KEY_NOTIFIED_DEALS, set).apply()
+    }
+
+    fun isFavorite(dealId: String): Boolean {
+        val set = prefs.getStringSet(KEY_FAVORITE_DEALS, emptySet()) ?: emptySet()
+        return set.contains(dealId)
+    }
+
+    fun toggleFavorite(dealId: String) {
+        val set = (prefs.getStringSet(KEY_FAVORITE_DEALS, emptySet()) ?: emptySet()).toMutableSet()
+        if (set.contains(dealId)) {
+            set.remove(dealId)
+        } else {
+            set.add(dealId)
+        }
+        prefs.edit().putStringSet(KEY_FAVORITE_DEALS, set).apply()
     }
 
     suspend fun fetchDeals(): List<Deal> = withContext(Dispatchers.IO) {

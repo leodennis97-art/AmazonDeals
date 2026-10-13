@@ -9,46 +9,60 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val HighEndDarkColorScheme = darkColorScheme(
+    primary = AmazonAmberPrimary,
+    onPrimary = Color.Black,
+    primaryContainer = AmazonAmberContainer,
+    onPrimaryContainer = OnAmazonAmberContainer,
+    secondary = CouponEmerald,
+    onSecondary = Color.Black,
+    secondaryContainer = CouponEmeraldContainer,
+    onSecondaryContainer = Color(0xFFA7F3D0),
+    tertiary = GlitchCrimson,
+    onTertiary = Color.White,
+    tertiaryContainer = GlitchCrimsonContainer,
+    onTertiaryContainer = Color(0xFFFECACA),
+    background = DarkBackground,
+    onBackground = TextPrimaryDark,
+    surface = DarkSurface,
+    onSurface = TextPrimaryDark,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = TextSecondaryDark,
+    outline = Color(0xFF475569)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
+private val HighEndLightColorScheme = lightColorScheme(
+    primary = Color(0xFFFF9900),
+    onPrimary = Color.Black,
+    primaryContainer = Color(0xFFFFF7ED),
+    onPrimaryContainer = Color(0xFF9A3412),
+    secondary = Color(0xFF059669),
     onSecondary = Color.White,
+    secondaryContainer = Color(0xFFECFDF5),
+    onSecondaryContainer = Color(0xFF065F46),
+    tertiary = Color(0xFFDC2626),
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    tertiaryContainer = Color(0xFFFEF2F2),
+    onTertiaryContainer = Color(0xFF991B1B),
+    background = Color(0xFFF8FAFC),
+    onBackground = Color(0xFF0F172A),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF0F172A),
+    surfaceVariant = Color(0xFFF1F5F9),
+    onSurfaceVariant = Color(0xFF64748B),
+    outline = Color(0xFFCBD5E1)
 )
 
 @Composable
 fun AmazonDealsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Set false for consistent branded Amazon High-End look
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) HighEndDarkColorScheme else HighEndLightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

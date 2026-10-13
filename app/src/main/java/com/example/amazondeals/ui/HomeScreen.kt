@@ -4,22 +4,26 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.format.DateUtils
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.OpenInNew
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -41,13 +45,33 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text("Amazon Deals 24/7", fontWeight = FontWeight.Bold)
-                        Text(
-                            "0.01€ Coupons & 50% Rabatte",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(Color(0xFFFF9900), Color(0xFFFF5500))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🛒", fontSize = 20.sp)
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "AmazonDeals PRO",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "24/7 Glitch & Coupon Scanner",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -59,7 +83,7 @@ fun HomeScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -69,37 +93,71 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Cloud Status & Test Alarm Card
-            StatusCard(
+            // Status Header Banner
+            StatusHeaderCard(
                 lastUpdated = state.lastUpdated,
+                dealsCount = state.filteredDeals.size,
                 backendUrl = state.backendUrl,
                 onTestNotification = { viewModel.sendTestNotification() },
                 onRequestPermission = onRequestNotificationPermission
             )
 
+            // Search Bar
+            SearchBarSection(
+                query = state.searchQuery,
+                onQueryChange = { viewModel.updateSearchQuery(it) }
+            )
+
             // Filter Chips
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
+                favoritesCount = state.favorites.size,
                 onSelectFilter = { viewModel.applyFilter(it) }
             )
 
             // Deals List
             if (state.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Scanne Amazon.de nach Glitches...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else if (state.filteredDeals.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Keine passenden Angebote gefunden.")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("🔍", fontSize = 48.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Keine passenden Angebote gefunden.",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            "Versuche einen anderen Filter oder Suchbegriff.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(state.filteredDeals) { deal ->
-                        DealCard(deal = deal, context = context)
+                    items(state.filteredDeals, key = { it.id }) { deal ->
+                        DealCard(
+                            deal = deal,
+                            isFavorite = viewModel.isFavorite(deal.id),
+                            onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
+                            context = context
+                        )
                     }
                 }
             }
@@ -123,36 +181,72 @@ fun HomeScreen(
 }
 
 @Composable
-fun StatusCard(
+fun StatusHeaderCard(
     lastUpdated: Long,
+    dealsCount: Int,
     backendUrl: String,
     onTestNotification: () -> Unit,
     onRequestPermission: () -> Unit
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Cloud,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Cloud 24/7 Scanner aktiv",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF10B981).copy(alpha = alpha))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "24/7 Scanner Aktiv",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        text = "$dealsCount Deals live",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             Text(
                 text = if (lastUpdated > 0) {
-                    "Zuletzt geprüft: ${
+                    "Zuletzt gescannt: ${
                         DateUtils.getRelativeTimeSpanString(
                             lastUpdated,
                             System.currentTimeMillis(),
@@ -160,12 +254,8 @@ fun StatusCard(
                         )
                     }"
                 } else "Warte auf ersten Scan...",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = "Backend: $backendUrl",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -174,17 +264,23 @@ fun StatusCard(
                 Button(
                     onClick = onTestNotification,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Test-Alarm", fontSize = 12.sp)
+                    Icon(
+                        Icons.Default.Notifications,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Test-Alarm", fontSize = 12.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
 
                 OutlinedButton(
                     onClick = onRequestPermission,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Rechte prüfen", fontSize = 12.sp)
                 }
@@ -194,107 +290,187 @@ fun StatusCard(
 }
 
 @Composable
+fun SearchBarSection(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        placeholder = { Text("Angebote durchsuchen (z. B. Gillette, Tabs, 50%)...", fontSize = 14.sp) },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(Icons.Default.Close, contentDescription = "Löschen")
+                }
+            }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+@Composable
 fun FilterChipsRow(
     selectedFilter: String,
+    favoritesCount: Int,
     onSelectFilter: (String) -> Unit
 ) {
-    val filters = listOf("Alle", "0.01€ / 1ct", "50% Rabatt", "Glitch Deals")
+    val filters = listOf(
+        "Alle" to "⚡ Alle",
+        "0.01€ / 1ct" to "💥 0.01€ / 1ct",
+        "50% Rabatt" to "🏷️ 50% Rabatt",
+        "Glitch Deals" to "🔥 Glitches",
+        "Favoriten" to "❤️ Favoriten ($favoritesCount)"
+    )
+
     LazyRow(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(filters) { filter ->
+        items(filters) { (key, label) ->
             FilterChip(
-                selected = selectedFilter == filter,
-                onClick = { onSelectFilter(filter) },
-                label = { Text(filter) }
+                selected = selectedFilter == key,
+                onClick = { onSelectFilter(key) },
+                label = { Text(label, fontWeight = if (selectedFilter == key) FontWeight.Bold else FontWeight.Normal) },
+                shape = RoundedCornerShape(20.dp)
             )
         }
     }
 }
 
 @Composable
-fun DealCard(deal: Deal, context: Context) {
+fun DealCard(
+    deal: Deal,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    context: Context
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Header Row: Badge & Price & Favorite
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (deal.isGlitch) {
-                    Surface(
-                        color = Color(0xFFD32F2F),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Text(
-                            "⚡ PREISFEHLER / 1CT",
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                } else {
-                    Surface(
-                        color = Color(0xFF388E3C),
-                        shape = RoundedCornerShape(4.dp)
-                    ) {
-                        Text(
-                            "GUTSCHEIN",
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deal.isGlitch) {
+                        Surface(
+                            color = Color(0xFFEF4444),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                "⚡ PREISFEHLER / 1CT",
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    } else {
+                        Surface(
+                            color = Color(0xFF10B981),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                "GUTSCHEIN",
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
-                Text(
-                    text = deal.price,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = deal.price,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        onClick = onToggleFavorite,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Favorit",
+                            tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
+            // Title
             Text(
                 text = deal.title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                lineHeight = 22.sp
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
+            // Coupon Badge
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(6.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = "🏷️ ${deal.couponText}",
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
+            // Description (Expandable)
             if (deal.description.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = deal.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(modifier = Modifier.height(8.dp))
+                AnimatedVisibility(visible = expanded || deal.description.length < 80) {
+                    Text(
+                        text = deal.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (deal.description.length >= 80) {
+                    Text(
+                        text = if (expanded) "Weniger anzeigen" else "Details anzeigen...",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .clickable { expanded = !expanded }
+                            .padding(vertical = 4.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
+            // Action Buttons
             val directCartUrl = deal.getDirectCartUrl()
             val qty = deal.getSuggestedQuantity()
 
@@ -304,29 +480,54 @@ fun DealCard(deal: Deal, context: Context) {
                     context.startActivity(intent)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
             ) {
                 Text(
                     text = "🛒 Direkt in Warenkorb legen (${qty}x)",
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
                 )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            OutlinedButton(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deal.dealUrl))
-                    context.startActivity(intent)
-                },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Produktseite öffnen", fontSize = 13.sp)
+                OutlinedButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deal.dealUrl))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Produktseite", fontSize = 12.sp)
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "🔥 Amazon Glitch Deal: ${deal.title} für ${deal.price}!\n${deal.getDirectCartUrl()}"
+                            )
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Teilen", fontSize = 12.sp)
+                }
             }
         }
     }
@@ -344,26 +545,31 @@ fun SettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cloud Backend & Filter") },
+        title = { Text("Cloud Backend & Alarm-Filter", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Render Cloud URL") },
+                    label = { Text("Cloud Backend URL") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(8.dp)
                 )
                 OutlinedTextField(
                     value = keywords,
                     onValueChange = { keywords = it },
                     label = { Text("Alarm-Schlüsselwörter (kommagetrennt)") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onSave(url, keywords) }) {
+            Button(
+                onClick = { onSave(url, keywords) },
+                shape = RoundedCornerShape(8.dp)
+            ) {
                 Text("Speichern")
             }
         },
