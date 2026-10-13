@@ -506,8 +506,8 @@ fun FilterChipsRow(
     val filters = listOf(
         "Alle" to "⚡ Alle Deals",
         "Amazon.de" to "🛒 Amazon.de",
-        "eBay.de" to "🛍️ eBay.de",
-        "0.01€ / 1ct" to "💥 0.01€ / 1ct",
+        "Kleinanzeigen.de" to "🏷️ Kleinanzeigen.de",
+        "0.01€ / 1ct" to "💥 0.01€ / Gratis",
         "Glitch Deals" to "🔥 Glitches",
         "Drogerie Bot" to "🤖 Drogerie",
         "Elektronik Bot" to "⚡ Elektronik",
@@ -678,20 +678,38 @@ fun DealCard(
             val productUrl = deal.getFormattedUrl()
             val qty = deal.getSuggestedQuantity()
 
-            Button(
-                onClick = {
-                    openUrlSafely(context, directCartUrl, isCartUrl = true)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
-            ) {
-                Text(
-                    text = "🛒 Direkt in Warenkorb legen (${qty}x)",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
+            if (deal.isKleinanzeigen()) {
+                Button(
+                    onClick = {
+                        openUrlSafely(context, productUrl, isCartUrl = false)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF86D000))
+                ) {
+                    Text(
+                        text = "💬 Auf Kleinanzeigen.de ansehen / Anfragen",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+            } else {
+                Button(
+                    onClick = {
+                        openUrlSafely(context, directCartUrl, isCartUrl = true)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+                ) {
+                    Text(
+                        text = "🛒 Direkt in Warenkorb legen (${qty}x)",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(6.dp))

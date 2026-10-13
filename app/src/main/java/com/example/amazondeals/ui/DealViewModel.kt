@@ -145,8 +145,8 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     private fun applyFiltersAndSearch(filter: String, query: String) {
         val allDeals = _uiState.value.deals
         var result = when (filter) {
-            "Amazon.de" -> allDeals.filter { !it.isEbay() }
-            "eBay.de" -> allDeals.filter { it.isEbay() }
+            "Amazon.de" -> allDeals.filter { !it.isKleinanzeigen() }
+            "Kleinanzeigen.de" -> allDeals.filter { it.isKleinanzeigen() }
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
             "50% Rabatt" -> allDeals.filter { it.couponText.contains("50%") || it.description.contains("50%") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }

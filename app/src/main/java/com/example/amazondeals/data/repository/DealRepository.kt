@@ -186,7 +186,7 @@ class DealRepository(private val context: Context) {
                     for (i in 0 until jsonArray.length()) {
                         val obj = jsonArray.getJSONObject(i)
                         val dealLink = obj.optString("dealUrl", "https://www.amazon.de/coupons")
-                        val defaultPlatform = if (dealLink.lowercase().contains("ebay")) "eBay.de" else "Amazon.de"
+                        val defaultPlatform = if (dealLink.lowercase().contains("kleinanzeigen")) "Kleinanzeigen.de" else "Amazon.de"
                         deals.add(
                             Deal(
                                 id = obj.optString("id", System.currentTimeMillis().toString()),
@@ -237,14 +237,14 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_2",
-                title = "[🛍️ eBay Bot] Anker USB-C Schnellladegerät 30W PowerPort",
-                description = "eBay Gutscheincode direkt an der Kasse einlösen für 0.01 € Endpreis.",
-                price = "0.01 €",
-                couponText = "100% Rabatt Gutscheincode auf eBay.de",
-                dealUrl = "https://www.ebay.de",
+                title = "[🏷️ Kleinanzeigen Bot] PS5 DualSense Controller Midnight Black",
+                description = "Zu verschenken / Starker Preisnachlass VB auf Kleinanzeigen.de in deiner Nähe.",
+                price = "0.00 € (Zu verschenken)",
+                couponText = "100% Preisnachlass / Verschenken",
+                dealUrl = "https://www.kleinanzeigen.de/s-ps5-controller/k0",
                 timestamp = now - 900000,
                 isGlitch = true,
-                platform = "eBay.de"
+                platform = "Kleinanzeigen.de"
             ),
             Deal(
                 id = "mock_3",
@@ -259,14 +259,14 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_4",
-                title = "[🛍️ eBay Bot] PS5 DualSense Wireless Controller Midnight Black",
-                description = "eBay Refurbished & B-Ware Top Deal mit 10% Extra-Rabatt.",
-                price = "44.99 €",
-                couponText = "10% Rabattcode auf eBay.de",
-                dealUrl = "https://www.ebay.de",
+                title = "[🏷️ Kleinanzeigen Bot] Anker Powerbank 20.000mAh Schnelllade-Station",
+                description = "Schnäppchen & Starker Preisnachlass wegen Haushaltsauflösung auf Kleinanzeigen.de.",
+                price = "5.00 €",
+                couponText = "85% Preisnachlass VB",
+                dealUrl = "https://www.kleinanzeigen.de/s-anker-powerbank/k0",
                 timestamp = now - 3600000,
-                isGlitch = false,
-                platform = "eBay.de"
+                isGlitch = true,
+                platform = "Kleinanzeigen.de"
             )
         )
     }

@@ -253,15 +253,15 @@ def scrape_amazon_deals():
 
                 full_content = f"{title} {clean_text}".lower()
 
-                # STRICT FILTER: ONLY Amazon.de and eBay.de allowed
+                # STRICT FILTER: ONLY Amazon.de and Kleinanzeigen.de allowed
                 is_amazon = "amazon" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
-                is_ebay = "ebay" in full_content or "ebay" in link.lower()
+                is_kleinanzeigen = "kleinanzeigen" in full_content or "kleinanzeigen" in link.lower()
 
-                if is_amazon or is_ebay:
+                if is_amazon or is_kleinanzeigen:
                     seen_urls.add(link)
-                    is_glitch = any(g in full_content for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "preisfehler", "gratis"])
+                    is_glitch = any(g in full_content for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "2 fuer 0.01", "preisfehler", "gratis", "verschenken"])
 
-                    platform = "eBay.de" if is_ebay else "Amazon.de"
+                    platform = "Kleinanzeigen.de" if is_kleinanzeigen else "Amazon.de"
 
                     asin = extract_asin(link) or extract_asin(full_content)
                     if is_amazon and asin:
@@ -269,8 +269,8 @@ def scrape_amazon_deals():
                     else:
                         deal_url = link
 
-                    price = "0.01 €" if is_glitch else "Sonderpreis / Gutschein"
-                    coupon_text = "Sparen: Erhalte 2 für 0.01€" if is_glitch else "50% Rabatt-Gutschein"
+                    price = "0.00 € (Gratis)" if ("verschenken" in full_content or "gratis" in full_content) else ("0.01 €" if is_glitch else "Sonderpreis / Rabatt")
+                    coupon_text = "Starker Preisnachlass / Verschenken" if is_kleinanzeigen else ("Sparen: Erhalte 2 für 0.01€" if is_glitch else "50% Rabatt-Gutschein")
                     bot_name = classify_bot(title, clean_text, coupon_text)
 
                     deal_id = str(hash(link))
