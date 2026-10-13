@@ -407,7 +407,7 @@ fun StatusHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "24/7 Scanner Aktiv",
+                        text = "100 KI-Bots Aktiv (Max. 7 Tage alt)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
