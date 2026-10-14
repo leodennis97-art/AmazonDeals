@@ -22,9 +22,11 @@ data class Deal(
     }
 
     fun getFormattedUrl(): String {
+        val trimmed = dealUrl.trim()
         if (isKleinanzeigen()) {
-            val trimmed = dealUrl.trim()
-            if (trimmed.isEmpty()) return "https://www.kleinanzeigen.de"
+            if (trimmed.isEmpty() || !trimmed.contains("kleinanzeigen.de")) {
+                return "https://www.kleinanzeigen.de/s-zu-verschenken/k0"
+            }
             return when {
                 trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
                 trimmed.startsWith("www.") -> "https://$trimmed"
@@ -37,8 +39,10 @@ data class Deal(
             return "https://www.amazon.de/dp/$asin"
         }
 
-        val trimmed = dealUrl.trim()
-        if (trimmed.isEmpty()) return "https://www.amazon.de/coupons"
+        if (trimmed.isEmpty() || !trimmed.contains("amazon.de")) {
+            return "https://www.amazon.de/coupons"
+        }
+
         return when {
             trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
             trimmed.startsWith("www.") -> "https://$trimmed"

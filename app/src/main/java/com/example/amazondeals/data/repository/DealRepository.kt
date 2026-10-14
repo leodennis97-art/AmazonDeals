@@ -245,7 +245,7 @@ class DealRepository(private val context: Context) {
                 description = "Zu verschenken / Starker Preisnachlass VB auf Kleinanzeigen.de in deiner Nähe.",
                 price = "0.00 € (Gratis)",
                 couponText = "100% Preisnachlass / Verschenken",
-                dealUrl = "https://www.kleinanzeigen.de",
+                dealUrl = "https://www.kleinanzeigen.de/s-zu-verschenken/k0",
                 timestamp = now - 900000,
                 isGlitch = true,
                 platform = "Kleinanzeigen.de",
