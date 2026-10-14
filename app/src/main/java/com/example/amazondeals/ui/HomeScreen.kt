@@ -394,6 +394,7 @@ fun DealCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val categoryTag = if (selectedFilterName == "Alle") "AN DER SPITZE" else "IN $selectedFilterName".uppercase()
+    val productUrl = deal.getFormattedUrl()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -541,12 +542,15 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Title
+            // Title (Tapping title directly opens the Amazon product page!)
             Text(
                 text = deal.title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
-                lineHeight = 20.sp
+                lineHeight = 20.sp,
+                modifier = Modifier.clickable {
+                    openUrlSafely(context, productUrl, isCartUrl = false)
+                }
             )
 
             Spacer(modifier = Modifier.height(4.dp))
