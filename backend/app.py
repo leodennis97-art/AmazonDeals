@@ -286,24 +286,31 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
             clean_text = soup.get_text()
             full_content = f"{title} {clean_text}".lower()
 
+            # Check platforms
+            is_amazon = "amazon" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
+            is_kleinanzeigen = "kleinanzeigen" in full_content or "kleinanzeigen" in link.lower()
+            is_ebay = "ebay" in full_content or "ebay" in link.lower()
+
             # Extreme Deep ASIN Mining
             asin = extract_asin(full_content) or extract_asin(link)
 
-            is_multibuy_glitch = any(g in full_content for g in ["kaufe 3", "kaufe 2", "3 für 1", "2 für 1", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch", "99%"])
+            is_multibuy_glitch = any(g in full_content for g in ["kaufe 3", "kaufe 2", "3 für 1", "2 für 1", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch", "99%", "gratis", "verschenken"])
             is_fifty_percent = "50%" in full_content or "halber preis" in full_content
 
-            if asin and (is_multibuy_glitch or is_fifty_percent):
-                seen_urls.add(link)
-                deal_url = f"https://www.amazon.de/dp/{asin}"
+            if (is_amazon and asin) or is_kleinanzeigen or is_ebay:
+                if is_multibuy_glitch or is_fifty_percent:
+                    seen_urls.add(link)
+                    platform = "Kleinanzeigen.de" if is_kleinanzeigen else ("eBay.de" if is_ebay else "Amazon.de")
+                    deal_url = f"https://www.amazon.de/dp/{asin}" if (is_amazon and asin) else link
 
-                # STRICT LIVE URL VALIDATION - Ignore 404 Dog pages!
-                if not is_link_verified_reachable(deal_url):
-                    continue
+                    # STRICT LIVE URL VALIDATION - Ignore 404 pages!
+                    if not is_link_verified_reachable(deal_url):
+                        continue
 
                 if is_multibuy_glitch:
-                    price = "0.01 €"
-                    discount_percent = 199
-                    coupon_text = "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
+                    price = "0.00 € (Gratis)" if ("verschenken" in full_content or "gratis" in full_content) else "0.01 €"
+                    discount_percent = 100 if ("verschenken" in full_content or "gratis" in full_content) else 199
+                    coupon_text = "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct" if not is_kleinanzeigen else "🟢 100% Gratis / Verschenken"
                 else:
                     price = "50% Rabatt"
                     discount_percent = 50
@@ -314,7 +321,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 import random
                 bot_name = bot_name.replace(" AI Bot", f" Bot #{random.randint(1, 1000)}")
 
-                deal_id = str(hash(asin + str(now_ms)))
+                deal_id = str(hash(link + str(now_ms)))
 
                 local_deals.append({
                     "id": deal_id,
@@ -329,7 +336,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "botName": bot_name,
                     "aiConfidence": 99,
                     "category": category_clean,
-                    "platform": "Amazon.de",
+                    "platform": platform,
                     "originalPrice": "UVP",
                     "discountPercent": discount_percent,
                     "couponActive": True

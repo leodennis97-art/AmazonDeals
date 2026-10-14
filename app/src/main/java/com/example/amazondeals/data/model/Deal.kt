@@ -23,17 +23,25 @@ data class Deal(
         return platform.lowercase().contains("kleinanzeigen") || dealUrl.lowercase().contains("kleinanzeigen.de")
     }
 
+    fun isEbay(): Boolean {
+        return platform.lowercase().contains("ebay") || dealUrl.lowercase().contains("ebay.de")
+    }
+
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()
+        
         if (isKleinanzeigen()) {
             if (trimmed.isEmpty() || !trimmed.contains("kleinanzeigen.de")) {
                 return "https://www.kleinanzeigen.de/s-zu-verschenken/k0"
             }
-            return when {
-                trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
-                trimmed.startsWith("www.") -> "https://$trimmed"
-                else -> "https://www.$trimmed"
+            return ensureHttps(trimmed)
+        }
+
+        if (isEbay()) {
+            if (trimmed.isEmpty() || !trimmed.contains("ebay.de")) {
+                return "https://www.ebay.de/b/Restposten/bn_7115312781"
             }
+            return ensureHttps(trimmed)
         }
 
         val asin = getAsin()
@@ -45,16 +53,19 @@ data class Deal(
             return "https://www.amazon.de/coupons"
         }
 
+        return ensureHttps(trimmed)
+    }
+
+    private fun ensureHttps(url: String): String {
         return when {
-            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
-            trimmed.startsWith("www.") -> "https://$trimmed"
-            trimmed.startsWith("amazon.de") -> "https://www.$trimmed"
-            else -> "https://$trimmed"
+            url.startsWith("http://") || url.startsWith("https://") -> url
+            url.startsWith("www.") -> "https://$url"
+            else -> "https://www.$url"
         }
     }
 
     fun getAsin(): String? {
-        if (isKleinanzeigen()) return null
+        if (isKleinanzeigen() || isEbay()) return null
         val trimmed = dealUrl.trim()
         val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
         val match = regex.find(trimmed)
@@ -75,7 +86,7 @@ data class Deal(
     }
 
     fun getDirectCartUrl(): String {
-        if (isKleinanzeigen()) return getFormattedUrl()
+        if (isKleinanzeigen() || isEbay()) return getFormattedUrl()
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()
