@@ -2,6 +2,7 @@ package com.example.amazondeals.ui
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.animation.*
@@ -49,11 +50,26 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
         val uri = Uri.parse(formattedUrl)
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            // Fix for Android 11+ to force apps to resolve the link if possible
-            addCategory(Intent.CATEGORY_BROWSABLE)
         }
         
-        // Force browser chooser to bypass broken Amazon App deep links
+        if (formattedUrl.contains("amazon.de") && !isCartUrl) {
+            // Try explicit browser launch for Amazon.de product pages to prevent CS11
+            val packageManager = context.packageManager
+            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            
+            val resolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            if (resolveInfo != null) {
+                // We found a browser, force launch
+                browserIntent.setPackage(resolveInfo.activityInfo.packageName)
+                context.startActivity(browserIntent)
+                return
+            }
+        }
+        
+        // Fallback or Cart URL
         val chooser = Intent.createChooser(intent, "Angebot öffnen mit...")
         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(chooser)
