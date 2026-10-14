@@ -52,25 +52,34 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         
-        if (formattedUrl.contains("amazon.de") && !isCartUrl) {
-            // Try explicit browser launch for Amazon.de product pages to prevent CS11
-            val packageManager = context.packageManager
-            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addCategory(Intent.CATEGORY_BROWSABLE)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            
-            val resolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-            if (resolveInfo != null) {
-                // We found a browser, force launch
-                browserIntent.setPackage(resolveInfo.activityInfo.packageName)
+        if (formattedUrl.contains("amazon.de")) {
+            // Force it to open in a web browser (like Chrome), completely bypassing the Amazon App
+            // because the Amazon App handles deep links poorly and throws 404/CS11 errors.
+            try {
+                val browserIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
+                    data = uri
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
                 context.startActivity(browserIntent)
                 return
+            } catch (e: Exception) {
+                // If API < 15 or no browser found, fallback to Chrome package directly
+                try {
+                    val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                        addCategory(Intent.CATEGORY_BROWSABLE)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        setPackage("com.android.chrome")
+                    }
+                    context.startActivity(chromeIntent)
+                    return
+                } catch (e2: Exception) {
+                    // Ignore, fallback to chooser below
+                }
             }
         }
         
-        // Fallback or Cart URL
-        val chooser = Intent.createChooser(intent, "Angebot öffnen mit...")
+        // Fallback Chooser
+        val chooser = Intent.createChooser(intent, "Angebot im Browser öffnen...")
         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(chooser)
 
