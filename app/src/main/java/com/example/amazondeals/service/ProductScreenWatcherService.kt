@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
+import java.util.Locale
 
 class ProductScreenWatcherService : AccessibilityService() {
 
@@ -87,10 +88,14 @@ class ProductScreenWatcherService : AccessibilityService() {
                 }
 
                 if (matchedDeal != null) {
+                    val resaleFormatted = String.format(Locale.GERMANY, "%.2f €", matchedDeal.getMyResalePriceEuros())
+                    val marginFormatted = String.format(Locale.GERMANY, "+%.2f €", matchedDeal.getTradingProfitMarginEuros())
                     FloatingBubbleService.showBubble(
                         applicationContext,
                         matchedDeal.getFormattedUrl(),
-                        "💰 ${matchedDeal.price} (Günstiger auf Amazon!)"
+                        matchedDeal.price,
+                        resaleFormatted,
+                        marginFormatted
                     )
                 } else {
                     val encodedTitle = URLEncoder.encode(productTitle, "UTF-8")
@@ -98,7 +103,9 @@ class ProductScreenWatcherService : AccessibilityService() {
                     FloatingBubbleService.showBubble(
                         applicationContext,
                         searchUrl,
-                        "🤖 KI-Netzpreisvergleich für $productTitle"
+                        "Vergleich im Netz",
+                        "Marktpreis",
+                        "Aktiv"
                     )
                 }
             } catch (e: Exception) {

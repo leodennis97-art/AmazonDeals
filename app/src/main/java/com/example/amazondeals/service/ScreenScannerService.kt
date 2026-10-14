@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class ScreenScannerService : Service() {
 
@@ -107,10 +108,14 @@ class ScreenScannerService : Service() {
                         val deals = repository?.fetchDeals() ?: emptyList()
                         val glitchDeal = deals.firstOrNull { it.isGlitch || it.discountPercent >= 90 }
                         if (glitchDeal != null) {
+                            val resaleFormatted = String.format(Locale.GERMANY, "%.2f €", glitchDeal.getMyResalePriceEuros())
+                            val marginFormatted = String.format(Locale.GERMANY, "+%.2f €", glitchDeal.getTradingProfitMarginEuros())
                             FloatingBubbleService.showBubble(
                                 applicationContext,
                                 glitchDeal.getFormattedUrl(),
-                                glitchDeal.price
+                                glitchDeal.price,
+                                resaleFormatted,
+                                marginFormatted
                             )
                         }
                     } catch (e: Exception) {

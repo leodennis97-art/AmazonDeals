@@ -8,31 +8,40 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.example.amazondeals.R
 
 class FloatingBubbleService : Service() {
 
     private var windowManager: WindowManager? = null
     private var bubbleView: View? = null
     private var dealUrl: String = "https://www.amazon.de/coupons"
-    private var dealPrice: String = "0.01 €"
+    private var buyPrice: String = "18.60 €"
+    private var resalePrice: String = "25.99 €"
+    private var profitMargin: String = "+7.39 €"
 
     companion object {
         const val EXTRA_DEAL_URL = "extra_deal_url"
-        const val EXTRA_DEAL_PRICE = "extra_deal_price"
+        const val EXTRA_BUY_PRICE = "extra_buy_price"
+        const val EXTRA_RESALE_PRICE = "extra_resale_price"
+        const val EXTRA_PROFIT_MARGIN = "extra_profit_margin"
 
-        fun showBubble(context: Context, url: String, price: String) {
+        fun showBubble(
+            context: Context,
+            url: String,
+            buyPrice: String,
+            resalePrice: String,
+            profitMargin: String
+        ) {
             val intent = Intent(context, FloatingBubbleService::class.java).apply {
                 putExtra(EXTRA_DEAL_URL, url)
-                putExtra(EXTRA_DEAL_PRICE, price)
+                putExtra(EXTRA_BUY_PRICE, buyPrice)
+                putExtra(EXTRA_RESALE_PRICE, resalePrice)
+                putExtra(EXTRA_PROFIT_MARGIN, profitMargin)
             }
             context.startService(intent)
         }
@@ -43,7 +52,9 @@ class FloatingBubbleService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             dealUrl = it.getStringExtra(EXTRA_DEAL_URL) ?: "https://www.amazon.de/coupons"
-            dealPrice = it.getStringExtra(EXTRA_DEAL_PRICE) ?: "0.01 €"
+            buyPrice = it.getStringExtra(EXTRA_BUY_PRICE) ?: "18.60 €"
+            resalePrice = it.getStringExtra(EXTRA_RESALE_PRICE) ?: "25.99 €"
+            profitMargin = it.getStringExtra(EXTRA_PROFIT_MARGIN) ?: "+7.39 €"
         }
 
         if (bubbleView == null) {
@@ -79,10 +90,10 @@ class FloatingBubbleService : Service() {
 
         val container = FrameLayout(this)
         val textView = TextView(this).apply {
-            text = "💰 $dealPrice (Günstiger!)"
-            textSize = 12f
-            setBackgroundColor(0xFF10B981.toInt())
-            setTextColor(0xFF000000.toInt())
+            text = "🛒 Kauf: $buyPrice | 🏷️ Kleinanzeigen: $resalePrice | 💰 Marge: $profitMargin"
+            textSize = 11f
+            setBackgroundColor(0xFF1E293B.toInt())
+            setTextColor(0xFF10B981.toInt())
             setPadding(24, 16, 24, 16)
         }
         container.addView(textView)
@@ -139,7 +150,7 @@ class FloatingBubbleService : Service() {
         bubbleView?.let { container ->
             if (container is FrameLayout && container.childCount > 0) {
                 val tv = container.getChildAt(0) as? TextView
-                tv?.text = "💰 $dealPrice (Günstiger!)"
+                tv?.text = "🛒 Kauf: $buyPrice | 🏷️ Kleinanzeigen: $resalePrice | 💰 Marge: $profitMargin"
             }
         }
     }
