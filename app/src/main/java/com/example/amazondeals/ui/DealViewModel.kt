@@ -183,6 +183,13 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        // Dynamically re-sort the filtered category deals so top 3 items of THIS category are always at the top!
+        result = result.sortedWith(
+            compareByDescending<Deal> { it.discountPercent }
+                .thenByDescending { it.isGlitch }
+                .thenByDescending { it.timestamp }
+        )
+
         val totalSavings = result.sumOf { deal ->
             val orig = deal.originalPrice.replace("€", "").trim().toDoubleOrNull() ?: 29.99
             val cur = deal.price.replace("€", "").replace("(Gratis)", "").replace("(Zu verschenken)", "").trim().toDoubleOrNull() ?: 0.01

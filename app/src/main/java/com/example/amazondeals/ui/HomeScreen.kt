@@ -226,6 +226,7 @@ fun HomeScreen(
                         DealCard(
                             deal = deal,
                             rankIndex = if (index < 3) index else -1,
+                            selectedFilterName = state.selectedFilter,
                             isFavorite = viewModel.isFavorite(deal.id),
                             onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
                             onOpenTradingDialog = { selectedTradingDeal = it },
@@ -397,12 +398,14 @@ fun FilterChipsRow(
 fun DealCard(
     deal: Deal,
     rankIndex: Int = -1,
+    selectedFilterName: String = "Alle",
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onOpenTradingDialog: (Deal) -> Unit,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val categoryTag = if (selectedFilterName == "Alle") "AN DER SPITZE" else "IN $selectedFilterName".uppercase()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -414,7 +417,7 @@ fun DealCard(
         )
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
-            // Rank Badge at top of card
+            // Dynamic Category Rank Badge at top of card
             if (rankIndex == 0) {
                 Surface(
                     color = Color(0xFFFF9900).copy(alpha = 0.15f),
@@ -423,7 +426,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🏆 #1 TOP ERSPARNIS AN DER SPITZE",
+                        text = "🏆 #1 TOP ERSPARNIS $categoryTag",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -438,7 +441,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥈 #2 TOP ERSPARNIS",
+                        text = "🥈 #2 TOP ERSPARNIS $categoryTag",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -453,7 +456,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥉 #3 TOP ERSPARNIS",
+                        text = "🥉 #3 TOP ERSPARNIS $categoryTag",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
