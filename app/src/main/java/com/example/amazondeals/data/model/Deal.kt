@@ -27,6 +27,45 @@ data class Deal(
         return platform.lowercase().contains("ebay") || dealUrl.lowercase().contains("ebay.de")
     }
 
+    fun getClaimInstructions(): List<String> {
+        val qty = getSuggestedQuantity()
+        val textLower = "$title $description $couponText".lowercase()
+
+        if (isKleinanzeigen()) {
+            return listOf(
+                "1. Öffne das Angebot über den Button unten.",
+                "2. Kontaktiere den Verkäufer direkt per Nachricht.",
+                "3. Vereinbare die kostenlose Abholung oder Versand."
+            )
+        }
+
+        if (isEbay()) {
+            return listOf(
+                "1. Produktseite auf eBay.de öffnen.",
+                "2. Gutscheincode an der Kasse (im Checkout) eingeben.",
+                "3. Rabattierten Kauf abschließen."
+            )
+        }
+
+        return when {
+            qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
+                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "2. Lege exakt $qty Stück in deinen Warenkorb.",
+                "3. Der Preisfehler (0,01 € / Gratis) wird an der Kasse automatisch abgezogen."
+            )
+            couponText.contains("50%") || textLower.contains("50%") || textLower.contains("gutschein") -> listOf(
+                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "2. Aktiviere das Häkchen bei 'Gutschein einlösen' unter dem Preis.",
+                "3. Der 50% Rabatt wird im letzten Bestellschritt abgezogen."
+            )
+            else -> listOf(
+                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "2. Aktiviere etwaige Coupons auf der Produktseite.",
+                "3. Schließe die Bestellung ab."
+            )
+        }
+    }
+
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()
         
@@ -88,7 +127,6 @@ data class Deal(
     fun getDirectCartUrl(): String {
         if (isKleinanzeigen() || isEbay()) return getFormattedUrl()
         
-        // If we don't have a valid ASIN but we have a safe search URL, use it as fallback
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()
