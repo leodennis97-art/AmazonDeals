@@ -184,10 +184,10 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Dynamically re-sort the filtered category deals so top 3 items of THIS category are always at the top!
+        // Dynamically re-sort category deals strictly by highest trading profit margin!
         result = result.sortedWith(
-            compareByDescending<Deal> { it.discountPercent }
-                .thenByDescending { it.isGlitch }
+            compareByDescending<Deal> { it.getTradingProfitMarginEuros() }
+                .thenByDescending { it.discountPercent }
                 .thenByDescending { it.timestamp }
         )
 

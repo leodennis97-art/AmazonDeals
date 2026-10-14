@@ -431,7 +431,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🏆 #1 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
+                        text = "🏆 #1 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -446,7 +446,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥈 #2 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
+                        text = "🥈 #2 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -461,7 +461,7 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥉 #3 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
+                        text = "🥉 #3 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
