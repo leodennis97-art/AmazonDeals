@@ -298,16 +298,16 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_2",
-                title = "[🏷️ Kleinanzeigen Bot] PS5 DualSense Controller Midnight Black",
-                description = "Zu verschenken / Starker Preisnachlass VB auf Kleinanzeigen.de in deiner Nähe.",
-                price = "0.00 € (Gratis)",
-                couponText = "100% Preisnachlass / Verschenken",
-                dealUrl = "https://www.kleinanzeigen.de/s-zu-verschenken/k0",
+                title = "[⚡ Gaming Bot] Sony DualSense Wireless Controller PS5",
+                description = "Gutschein direkt im Bezahlvorgang auf Amazon.de aktivieren.",
+                price = "0.01 €",
+                couponText = "Sparen: Erhalte 2 für 0.01€",
+                dealUrl = "https://www.amazon.de/dp/B08H99BPJN",
                 timestamp = now - 900000,
                 isGlitch = true,
-                platform = "Kleinanzeigen.de",
+                platform = "Amazon.de",
                 originalPrice = "69.99 €",
-                discountPercent = 100
+                discountPercent = 99
             ),
             Deal(
                 id = "mock_3",
