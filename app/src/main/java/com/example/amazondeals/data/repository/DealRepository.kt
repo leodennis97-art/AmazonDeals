@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.amazondeals.data.model.Deal
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -220,7 +223,45 @@ class DealRepository(private val context: Context) {
             deals.addAll(getMockDeals())
         }
 
-        return@withContext deals
+        // CLIENT-SIDE LIVE 404 FILTER: Verify deals directly on the user's phone to filter out all 404 Dog pages!
+        val verifiedDeals = coroutineScope {
+            deals.map { deal ->
+                async(Dispatchers.IO) {
+                    if (isUrlAliveOnDevice(deal.getFormattedUrl())) deal else null
+                }
+            }.awaitAll().filterNotNull()
+        }
+
+        return@withContext if (verifiedDeals.isNotEmpty()) verifiedDeals else getMockDeals()
+    }
+
+    private fun isUrlAliveOnDevice(rawUrl: String): Boolean {
+        if (!rawUrl.contains("amazon.de/dp/")) return true
+        try {
+            val url = URL(rawUrl)
+            val connection = (url.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 3000
+                readTimeout = 3000
+                requestMethod = "GET"
+                setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
+                setRequestProperty("Accept-Language", "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7")
+                instanceFollowRedirects = true
+            }
+
+            val responseCode = connection.responseCode
+            if (responseCode == 404) return false
+
+            val stream = if (responseCode in 200..299) connection.inputStream else connection.errorStream
+            val pageText = stream?.bufferedReader()?.use { it.readText() } ?: ""
+
+            if (pageText.contains("Tut uns leid. Die eingegebene Webadresse") || pageText.contains("Seite wurde nicht gefunden") || pageText.contains("dogsofamazon")) {
+                return false
+            }
+
+            return responseCode in 200..302
+        } catch (e: Exception) {
+            return true
+        }
     }
 
     fun getMockDeals(): List<Deal> {
