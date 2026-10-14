@@ -84,7 +84,7 @@ data class Deal(
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
                 "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
                 "2. Lege exakt $qty Stück in deinen Warenkorb.",
-                "3. Der Preisfehler (0,01 € / Gratis) wird an der Kasse automatisch abgezogen."
+                "3. Der Preisfehler (0,01 €) wird an der Kasse automatisch abgezogen."
             )
             couponText.contains("50%") || textLower.contains("50%") || textLower.contains("gutschein") -> listOf(
                 "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",

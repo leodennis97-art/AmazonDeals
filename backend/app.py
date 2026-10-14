@@ -255,11 +255,7 @@ def classify_category_bot(title, description):
 def parse_price_and_discount(title, description):
     text = f"{title} {description}".lower()
 
-    is_gratis = "gratis" in text or "verschenken" in text or "zu verschenken" in text
     is_one_cent = any(g in text for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch"])
-
-    if is_gratis:
-        return "0.00 € (Gratis)", 100, True, "🟢 100% Gratis / Verschenken"
 
     if is_one_cent:
         return "0.01 €", 199, True, "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
