@@ -27,7 +27,8 @@ data class DealUiState(
     val isVerifyingLicense: Boolean = false,
     val savedEmail: String = "",
     val savedLicenseKey: String = "",
-    val licenseErrorMessage: String? = null
+    val licenseErrorMessage: String? = null,
+    val totalSavingsEuros: Double = 0.0
 )
 
 class DealViewModel(application: Application) : AndroidViewModel(application) {
@@ -182,9 +183,16 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        val totalSavings = result.sumOf { deal ->
+            val orig = deal.originalPrice.replace("€", "").trim().toDoubleOrNull() ?: 29.99
+            val cur = deal.price.replace("€", "").replace("(Gratis)", "").replace("(Zu verschenken)", "").trim().toDoubleOrNull() ?: 0.01
+            (orig - cur).coerceAtLeast(0.0)
+        }
+
         _uiState.value = _uiState.value.copy(
             selectedFilter = filter,
-            filteredDeals = result
+            filteredDeals = result,
+            totalSavingsEuros = totalSavings
         )
     }
 

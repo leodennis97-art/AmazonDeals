@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.amazondeals.data.model.Deal
+import java.util.Locale
 
 fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) {
     val trimmed = rawUrl.trim()
@@ -140,6 +141,7 @@ fun HomeScreen(
             StatusHeaderCard(
                 lastUpdated = state.lastUpdated,
                 dealsCount = state.filteredDeals.size,
+                totalSavings = state.totalSavingsEuros,
                 backendUrl = state.backendUrl,
                 onTestNotification = { viewModel.sendTestNotification() },
                 onRequestPermission = onRequestNotificationPermission
@@ -218,6 +220,7 @@ fun HomeScreen(
 fun StatusHeaderCard(
     lastUpdated: Long,
     dealsCount: Int,
+    totalSavings: Double,
     backendUrl: String,
     onTestNotification: () -> Unit,
     onRequestPermission: () -> Unit
@@ -278,20 +281,35 @@ fun StatusHeaderCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = if (lastUpdated > 0) {
-                    "Zuletzt gescannt: ${
-                        DateUtils.getRelativeTimeSpanString(
-                            lastUpdated,
-                            System.currentTimeMillis(),
-                            DateUtils.MINUTE_IN_MILLIS
-                        )
-                    }"
-                } else "Warte auf ersten Scan...",
-                style = MaterialTheme.typography.bodySmall,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (lastUpdated > 0) {
+                        "Zuletzt gescannt: ${
+                            DateUtils.getRelativeTimeSpanString(
+                                lastUpdated,
+                                System.currentTimeMillis(),
+                                DateUtils.MINUTE_IN_MILLIS
+                            )
+                        }"
+                    } else "Warte auf ersten Scan...",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                if (totalSavings > 0) {
+                    Text(
+                        text = "💰 Ersparnis: ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF10B981)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
