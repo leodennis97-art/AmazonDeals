@@ -62,9 +62,9 @@ data class Deal(
             Hallo! Ich verkaufe hier das fabriksneue, originale $title.
             
             Details:
-            - Zustand: 100% Neu, unbenutzt & OVP
-            - Nichtraucherhaushalt & Tierfrei
-            - Schneller Versand mit Sendungsverfolgung oder Abholung möglich
+            - Zustand: 100% Neu, unbenutzt & in OVP
+            - Aus tierfreiem Nichtraucherhaushalt
+            - Abholung vor Ort oder schneller Versand möglich
             
             Bei Interesse gerne direkt melden!
         """.trimIndent()
@@ -102,7 +102,7 @@ data class Deal(
     fun getFormattedUrl(): String {
         val asin = getAsin()
         if (asin != null) {
-            return "https://www.amazon.de/dp/$asin"
+            return "https://www.amazon.de/dp/$asin/?_encoding=UTF8&pd_rd_i=$asin&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
         }
 
         val trimmed = dealUrl.trim()
@@ -110,7 +110,7 @@ data class Deal(
             return trimmed
         }
 
-        return "https://www.amazon.de/dp/$trimmed"
+        return "https://www.amazon.de/dp/$trimmed/?_encoding=UTF8&pd_rd_i=$trimmed&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
     }
 
     private fun ensureHttps(url: String): String {

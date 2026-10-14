@@ -329,7 +329,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 if not asin:
                     continue
 
-                deal_url = f"https://www.amazon.de/dp/{asin}"
+                deal_url = f"https://www.amazon.de/dp/{asin}/?_encoding=UTF8&pd_rd_i={asin}&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
 
                 price_str, discount_percent, is_glitch, coupon_text = parse_price_and_discount(title, clean_text)
 
