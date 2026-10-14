@@ -17,7 +17,7 @@ APP_VERSION = "v2.1.0"
 LATEST_DEALS = []
 ONE_WEEK_MS = 7 * 24 * 3600 * 1000
 
-COMPARISON_SITES = ["idealo", "geizhals", "billiger", "guenstiger", "check24", "mydealz.de/gutscheine/vergleich"]
+COMPARISON_SITES = ["mydealz", "idealo", "geizhals", "billiger", "guenstiger", "check24"]
 
 BOT_NAMES = []
 for i in range(1, 16): BOT_NAMES.append(f"🤖 Drogerie Bot #{i}")
@@ -223,9 +223,6 @@ def scrape_amazon_deals():
     now_ms = int(time.time() * 1000)
 
     rss_urls = [
-        "https://www.mydealz.de/rss/gruppe/amazon",
-        "https://www.mydealz.de/rss/gutscheine",
-        "https://www.mydealz.de/rss/alle",
         "https://www.dealdoktor.de/feed/",
         "https://www.monsterdealz.de/feed"
     ]
