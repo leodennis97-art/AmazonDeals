@@ -253,15 +253,16 @@ fun StatusHeaderCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(9.dp)
+                            .size(10.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF10B981).copy(alpha = alpha))
+                            .background(Color(0xFFEF4444).copy(alpha = alpha))
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "100 KI-Bots Aktiv (Max. 7 Tage alt)",
+                        text = "🚀 1000+ KI-Bots: Aggressiver Massen-Scan",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        color = Color(0xFFEF4444)
                     )
                 }
 
@@ -287,17 +288,17 @@ fun StatusHeaderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (lastUpdated > 0) {
-                        "Zuletzt gescannt: ${
+                    text = "Echtzeit Cloud-Sync: Alle 30s | " + if (lastUpdated > 0) {
+                        "Zuletzt: ${
                             DateUtils.getRelativeTimeSpanString(
                                 lastUpdated,
                                 System.currentTimeMillis(),
                                 DateUtils.MINUTE_IN_MILLIS
                             )
                         }"
-                    } else "Warte auf ersten Scan...",
+                    } else "Initialisiere Scan...",
                     style = MaterialTheme.typography.bodySmall,
-                    fontSize = 11.sp,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 

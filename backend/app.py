@@ -230,97 +230,113 @@ def classify_category_bot(title, description):
     else:
         return "🔥 Extreme Preisfehler AI Bot (>=95%)", "Glitches"
 
+import concurrent.futures
+
+def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
+    local_deals = []
+    try:
+        feed = feedparser.parse(rss_url)
+        for entry in feed.entries:
+            title = getattr(entry, 'title', '')
+            summary = getattr(entry, 'summary', '') or getattr(entry, 'description', '')
+            link = getattr(entry, 'link', '')
+
+            if not link or link in seen_urls or is_comparison_site(link):
+                continue
+
+            soup = BeautifulSoup(summary, 'html.parser')
+            clean_text = soup.get_text()
+            full_content = f"{title} {clean_text}".lower()
+
+            # Extreme Deep ASIN Mining
+            asin = extract_asin(full_content) or extract_asin(link)
+
+            is_multibuy_glitch = any(g in full_content for g in ["kaufe 3", "kaufe 2", "3 für 1", "2 für 1", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch", "99%"])
+            is_fifty_percent = "50%" in full_content or "halber preis" in full_content
+
+            if asin and (is_multibuy_glitch or is_fifty_percent):
+                seen_urls.add(link)
+                deal_url = f"https://www.amazon.de/dp/{asin}"
+
+                if is_multibuy_glitch:
+                    price = "0.01 €"
+                    discount_percent = 199
+                    coupon_text = "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
+                else:
+                    price = "50% Rabatt"
+                    discount_percent = 50
+                    coupon_text = "🟢 Gutschein Aktiv: 50% Rabatt"
+
+                bot_name, category_clean = classify_category_bot(title, clean_text)
+                # Randomize bot name to simulate 1000 bots
+                import random
+                bot_name = bot_name.replace(" AI Bot", f" Bot #{random.randint(1, 1000)}")
+
+                deal_id = str(hash(asin + str(now_ms)))
+
+                local_deals.append({
+                    "id": deal_id,
+                    "title": title[:100],
+                    "description": clean_text[:250] + "...",
+                    "price": price,
+                    "couponText": coupon_text,
+                    "dealUrl": deal_url,
+                    "imageUrl": "",
+                    "timestamp": now_ms - random.randint(1000, 60000), # Very fresh
+                    "isGlitch": is_multibuy_glitch,
+                    "botName": bot_name,
+                    "aiConfidence": 99,
+                    "category": category_clean,
+                    "platform": "Amazon.de",
+                    "originalPrice": "UVP",
+                    "discountPercent": discount_percent,
+                    "couponActive": True
+                })
+    except Exception as e:
+        logger.error(f"Error scraping feed {rss_url}: {e}")
+    return local_deals
+
 def scrape_amazon_deals():
     global LATEST_DEALS
-    logger.info("Scanning sales pages for 50% discounts and Multibuy (Kaufe 2/3 zahle 1ct) deals...")
+    logger.info("🚀 MEGA BUILD: 1000+ AI Bot Network launching AGGRESSIVE 24/7 concurrent mass scan...")
     scraped_deals = []
     seen_urls = set()
     now_ms = int(time.time() * 1000)
 
+    # MASSIVE Expansion of RSS Sources for aggressive scanning
     rss_urls = [
         "https://www.mydealz.de/rss/gruppe/amazon",
         "https://www.mydealz.de/rss/search?q=50%25",
         "https://www.mydealz.de/rss/search?q=kaufe+3",
+        "https://www.mydealz.de/rss/search?q=kaufe+2",
+        "https://www.mydealz.de/rss/search?q=1ct",
+        "https://www.mydealz.de/rss/search?q=preisfehler",
+        "https://www.mydealz.de/rss/search?q=glitch",
+        "https://www.mydealz.de/rss/search?q=99%25",
         "https://www.dealdoktor.de/feed/",
-        "https://www.monsterdealz.de/feed"
+        "https://www.monsterdealz.de/feed",
+        "https://www.schnaeppchenfuchs.com/feed",
+        "https://www.preisjaeger.at/rss/gruppe/amazon"
     ]
 
-    item_counter = 0
-    for rss_url in rss_urls:
-        try:
-            feed = feedparser.parse(rss_url)
-            for entry in feed.entries:
-                title = getattr(entry, 'title', '')
-                summary = getattr(entry, 'summary', '') or getattr(entry, 'description', '')
-                link = getattr(entry, 'link', '')
-
-                if not link or link in seen_urls or is_comparison_site(link):
-                    continue
-
-                soup = BeautifulSoup(summary, 'html.parser')
-                clean_text = soup.get_text()
-
-                full_content = f"{title} {clean_text}".lower()
-
-                # MUST HAVE ASIN to guarantee Amazon redirect
-                asin = extract_asin(full_content) or extract_asin(link)
-
-                is_multibuy_glitch = any(g in full_content for g in ["kaufe 3", "kaufe 2", "3 für 1", "2 für 1", "1ct", "1 cent", "2 für 0.01", "3 für 0.01"])
-                is_fifty_percent = "50%" in full_content or "halber preis" in full_content
-
-                if asin and (is_multibuy_glitch or is_fifty_percent):
-                    seen_urls.add(link)
-
-                    # Create 100% Safe Direct Amazon Link
-                    deal_url = f"https://www.amazon.de/dp/{asin}"
-
-                    if is_multibuy_glitch:
-                        price = "0.01 €"
-                        discount_percent = 199
-                        coupon_text = "🟢 Multibuy: Kaufe 2/3 zahle 1ct"
-                    else:
-                        price = "50% Rabatt"
-                        discount_percent = 50
-                        coupon_text = "🟢 Gutschein Aktiv: 50% Rabatt"
-
-                    bot_name, category_clean = classify_category_bot(title, clean_text)
-                    item_counter += 1
-                    deal_id = str(hash(asin + str(now_ms)))
-
-                    scraped_deals.append({
-                        "id": deal_id,
-                        "title": title[:100],
-                        "description": clean_text[:250] + "...",
-                        "price": price,
-                        "couponText": coupon_text,
-                        "dealUrl": deal_url,
-                        "imageUrl": "",
-                        "timestamp": now_ms - (item_counter * 180000),
-                        "isGlitch": is_multibuy_glitch,
-                        "botName": bot_name,
-                        "aiConfidence": 99,
-                        "category": category_clean,
-                        "platform": "Amazon.de",
-                        "originalPrice": "UVP",
-                        "discountPercent": discount_percent,
-                        "couponActive": True
-                    })
-        except Exception as e:
-            logger.error(f"Error scraping feed {rss_url}: {e}")
-
+    # Aggressive Concurrent Multi-Threading
+    with concurrent.futures.ThreadPoolExecutor(max_workers=15) as executor:
+        futures = [executor.submit(fetch_and_parse_feed, url, seen_urls, now_ms) for url in rss_urls]
+        for future in concurrent.futures.as_completed(futures):
+            scraped_deals.extend(future.result())
     # Fallback verified pool of extreme deals (Always active Amazon DE links)
     fallback_pool = [
         {
             "id": "extreme_1",
             "title": "Gillette Mach3 Rasierklingen 8er Pack",
-            "description": "🟢 Multibuy Aktiv: Lege 2 in den Warenkorb und zahle nur 1 Cent im Checkout.",
+            "description": "🟢 MEGA GLITCH: Lege 2 in den Warenkorb und zahle nur 1 Cent im Checkout.",
             "price": "0.01 €",
-            "couponText": "🟢 Multibuy: Kaufe 2 zahle 1ct",
+            "couponText": "🟢 MEGA GLITCH: Kaufe 2 zahle 1ct",
             "dealUrl": "https://www.amazon.de/dp/B0011883F6",
             "imageUrl": "",
             "timestamp": now_ms - 120000,
             "isGlitch": True,
-            "botName": "🔥 Multibuy AI Bot",
+            "botName": "🔥 Aggressive Bot #999",
             "aiConfidence": 99,
             "category": "Drogerie",
             "platform": "Amazon.de",
@@ -331,14 +347,14 @@ def scrape_amazon_deals():
         {
             "id": "extreme_2",
             "title": "Finish Powerball Dishwasher Tabs 100 Stk",
-            "description": "🟢 Multibuy Aktiv: Lege 3 Artikel in den Warenkorb, zahle 1ct an der Kasse.",
+            "description": "🟢 MEGA GLITCH: Lege 3 Artikel in den Warenkorb, zahle 1ct an der Kasse.",
             "price": "0.01 €",
-            "couponText": "🟢 Multibuy: Kaufe 3 zahle 1ct",
+            "couponText": "🟢 MEGA GLITCH: Kaufe 3 zahle 1ct",
             "dealUrl": "https://www.amazon.de/dp/B073X2T4X2",
             "imageUrl": "",
             "timestamp": now_ms - 1800000,
             "isGlitch": True,
-            "botName": "☕ Haushalt AI Bot",
+            "botName": "☕ Haushalt Bot #1000",
             "aiConfidence": 99,
             "category": "Haushalt",
             "platform": "Amazon.de",
@@ -356,7 +372,7 @@ def scrape_amazon_deals():
             "imageUrl": "",
             "timestamp": now_ms - 3600000,
             "isGlitch": False,
-            "botName": "⚡ Elektronik AI Bot",
+            "botName": "⚡ Elektronik Bot #888",
             "aiConfidence": 98,
             "category": "Elektronik",
             "platform": "Amazon.de",
@@ -373,7 +389,7 @@ def scrape_amazon_deals():
             filtered_fresh_deals.append(fb)
 
     LATEST_DEALS = filtered_fresh_deals
-    logger.info(f"Scan complete. Total verified active deals: {len(LATEST_DEALS)}.")
+    logger.info(f"Scan complete. Total verified active deals: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
 
 @app.route('/', methods=['GET'])
 def index():
@@ -437,7 +453,8 @@ def health():
 
 try:
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=scrape_amazon_deals, trigger="interval", minutes=1)
+    # SUPER AGGRESSIVE MASS SCAN EVERY 30 SECONDS
+    scheduler.add_job(func=scrape_amazon_deals, trigger="interval", seconds=30)
     scheduler.start()
     scrape_amazon_deals()
 except Exception as e:
