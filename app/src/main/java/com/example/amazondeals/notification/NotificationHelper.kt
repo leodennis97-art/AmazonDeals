@@ -53,13 +53,14 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val title = if (deal.isGlitch) {
-            "🔥 EXTREM DEAL: ${deal.price} - ${deal.title}"
+        val title = if (deal.isGlitch || deal.discountPercent >= 95) {
+            "💥 PREISFEHLER (-${deal.discountPercent}%): ${deal.price}!"
         } else {
             "🏷️ NEUER GUTSCHEIN: ${deal.title}"
         }
 
-        val body = "${deal.couponText}\n${deal.description}"
+        val origText = if (deal.originalPrice.isNotEmpty()) " (Statt ${deal.originalPrice})" else ""
+        val body = "${deal.title}$origText\n${deal.couponText}\n${deal.botName}"
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)

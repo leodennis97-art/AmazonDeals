@@ -145,6 +145,7 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     private fun applyFiltersAndSearch(filter: String, query: String) {
         val allDeals = _uiState.value.deals
         var result = when (filter) {
+            "95%-100% Preisfehler" -> allDeals.filter { it.discountPercent >= 95 || it.isGlitch }
             "75%-199% Rabatt" -> allDeals.filter { it.discountPercent >= 75 || it.isGlitch }
             "99% / Gratis" -> allDeals.filter { it.discountPercent >= 90 || it.isGlitch || it.price.contains("0.00") || it.price.contains("0.01") }
             "Amazon.de" -> allDeals.filter { !it.isKleinanzeigen() }
