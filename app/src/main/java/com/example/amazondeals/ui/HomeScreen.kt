@@ -908,6 +908,13 @@ fun VipTradingDialog(
     )
 }
 
+data class AdminManagedUser(
+    val email: String,
+    var role: String,
+    var isBanned: Boolean = false,
+    var assignedKey: String = ""
+)
+
 @Composable
 fun VipManagementDialog(
     state: DealUiState,
@@ -917,6 +924,15 @@ fun VipManagementDialog(
     var generatedKey by remember { mutableStateOf("") }
     var activeTab by remember { mutableStateOf(0) }
 
+    val usersList = remember {
+        mutableStateListOf(
+            AdminManagedUser("leodennis97@gmail.com", "Master VIP Owner"),
+            AdminManagedUser("kunde_paypal@gmx.de", "PRO (PayPal)", assignedKey = "PRO-2026-PAYPAL"),
+            AdminManagedUser("user_test2026@web.de", "Standard (Gratis)"),
+            AdminManagedUser("kauf_interessent@gmail.com", "Standard (Gratis)")
+        )
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -925,11 +941,11 @@ fun VipManagementDialog(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("👑 VIP Benutzer- & Panel-Verwaltung", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text("👑 VIP Admin Panel & Kundenverwaltung", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 // Tab Selector
                 TabRow(
                     selectedTabIndex = activeTab,
@@ -944,7 +960,7 @@ fun VipManagementDialog(
                     Tab(
                         selected = activeTab == 1,
                         onClick = { activeTab = 1 },
-                        text = { Text("Benutzer & Lizenzen", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                        text = { Text("Kunden-Verwaltung", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
                     )
                 }
 
@@ -985,84 +1001,163 @@ fun VipManagementDialog(
                         }
                     }
                 } else {
-                    // Admin User & License Generator Panel
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(10.dp)
+                    // Admin Customer Management Panel
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(modifier = Modifier.padding(10.dp)) {
-                            Text("👥 Alle Registrierten Benutzer:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            Spacer(modifier = Modifier.height(6.dp))
+                        Text("👥 Alle Kunden & Benutzer ({${usersList.size}}):", fontWeight = FontWeight.Bold, fontSize = 12.sp)
 
-                            // Master VIP Owner
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("👑 leodennis97@gmail.com", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
-                                Text("Master VIP Owner", fontSize = 10.sp, color = Color(0xFFFF9900), fontWeight = FontWeight.ExtraBold)
-                            }
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        usersList.forEachIndexed { index, user ->
+                            Surface(
+                                color = if (user.isBanned) Color(0xFFEF4444).copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant,
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (user.isBanned) Color(0xFFEF4444) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = user.email,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (user.isBanned) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = if (user.isBanned) "🚫 GEBANNT" else user.role,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = if (user.isBanned) Color(0xFFEF4444) else Color(0xFFFF9900)
+                                        )
+                                    }
 
-                            // PayPal PRO Users
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("💳 kunde_paypal@gmx.de", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
-                                Text("PRO (PayPal)", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
-                            }
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    if (user.assignedKey.isNotEmpty()) {
+                                        Text(
+                                            text = "Schlüssel: ${user.assignedKey}",
+                                            fontSize = 10.sp,
+                                            color = Color(0xFF10B981)
+                                        )
+                                    }
 
-                            // Normal Registered Users (Standard / Gratis)
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("📱 user_test2026@web.de", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Standard (Gratis)", fontSize = 10.sp, color = Color(0xFF94A3B8))
-                            }
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    Spacer(modifier = Modifier.height(4.dp))
 
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Text("📱 kauf_interessent@gmail.com", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Standard (Gratis)", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                                    // Action Buttons Row: Ban / Lizenz / Admin
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        // Ban Button
+                                        OutlinedButton(
+                                            onClick = {
+                                                usersList[index] = user.copy(isBanned = !user.isBanned)
+                                                val statusMsg = if (!user.isBanned) "Benutzer gebannt!" else "Benutzer entbannt!"
+                                                Toast.makeText(context, statusMsg, Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            contentPadding = PaddingValues(vertical = 2.dp),
+                                            shape = RoundedCornerShape(6.dp),
+                                            border = BorderStroke(1.dp, if (user.isBanned) Color(0xFF10B981) else Color(0xFFEF4444))
+                                        ) {
+                                            Text(
+                                                text = if (user.isBanned) "🔓 Entbannen" else "🚫 Bannen",
+                                                fontSize = 9.sp,
+                                                color = if (user.isBanned) Color(0xFF10B981) else Color(0xFFEF4444),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+
+                                        // Give License Button
+                                        OutlinedButton(
+                                            onClick = {
+                                                val generated = "PRO-VIP-" + (100000..999999).random()
+                                                usersList[index] = user.copy(role = "PRO (VIP)", assignedKey = generated, isBanned = false)
+                                                Toast.makeText(context, "VIP Lizenz erteilt: $generated", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            contentPadding = PaddingValues(vertical = 2.dp),
+                                            shape = RoundedCornerShape(6.dp),
+                                            border = BorderStroke(1.dp, Color(0xFF10B981))
+                                        ) {
+                                            Text(
+                                                text = "🔑 Lizenz",
+                                                fontSize = 9.sp,
+                                                color = Color(0xFF10B981),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+
+                                        // Make Admin Button
+                                        OutlinedButton(
+                                            onClick = {
+                                                usersList[index] = user.copy(role = "Admin / Owner", isBanned = false)
+                                                Toast.makeText(context, "${user.email} ist jetzt Admin!", Toast.LENGTH_SHORT).show()
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            contentPadding = PaddingValues(vertical = 2.dp),
+                                            shape = RoundedCornerShape(6.dp),
+                                            border = BorderStroke(1.dp, Color(0xFFFF9900))
+                                        ) {
+                                            Text(
+                                                text = "👑 Admin",
+                                                fontSize = 9.sp,
+                                                color = Color(0xFFFF9900),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Text("🔑 Neuer VIP-Lizenzcode Generieren:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Text("🔑 Lizenz Generator:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
 
-                    Button(
-                        onClick = {
-                            val newKey = "PRO-VIP-" + (100000..999999).random()
-                            generatedKey = newKey
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
-                    ) {
-                        Text("Neuen 30-Tage Lizenzschlüssel erzeugen", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                    }
-
-                    if (generatedKey.isNotEmpty()) {
-                        Surface(
-                            color = Color(0xFF10B981).copy(alpha = 0.15f),
+                        Button(
+                            onClick = {
+                                val newKey = "PRO-VIP-" + (100000..999999).random()
+                                generatedKey = newKey
+                            },
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, Color(0xFF10B981))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Text("Neuen 30-Tage Lizenzschlüssel erzeugen", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        }
+
+                        if (generatedKey.isNotEmpty()) {
+                            Surface(
+                                color = Color(0xFF10B981).copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = BorderStroke(1.dp, Color(0xFF10B981))
                             ) {
-                                Text(generatedKey, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Color(0xFF10B981))
-                                Button(
-                                    onClick = {
-                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        val clip = ClipData.newPlainText("Lizenzcode", generatedKey)
-                                        clipboard.setPrimaryClip(clip)
-                                        Toast.makeText(context, "Lizenzcode kopiert!", Toast.LENGTH_SHORT).show()
-                                    },
-                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Kopieren", fontSize = 10.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                                    Text(generatedKey, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Color(0xFF10B981))
+                                    Button(
+                                        onClick = {
+                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                            val clip = ClipData.newPlainText("Lizenzcode", generatedKey)
+                                            clipboard.setPrimaryClip(clip)
+                                            Toast.makeText(context, "Lizenzcode kopiert!", Toast.LENGTH_SHORT).show()
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                                    ) {
+                                        Text("Kopieren", fontSize = 10.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
