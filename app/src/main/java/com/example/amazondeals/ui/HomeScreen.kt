@@ -254,56 +254,26 @@ fun StatusHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "🚀 1000+ KI-Bots aktiv",
+                        text = "🚀 $dealsCount Deals (1000+ KI-Bots)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = Color(0xFFEF4444)
                     )
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = "$dealsCount Deals",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Sync 30s | " + if (lastUpdated > 0) {
-                        "${
-                            DateUtils.getRelativeTimeSpanString(
-                                lastUpdated,
-                                System.currentTimeMillis(),
-                                DateUtils.MINUTE_IN_MILLIS
-                            )
-                        }"
-                    } else "Warte...",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
                 if (totalSavings > 0) {
-                    Text(
-                        text = "💰 Gespart: ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF10B981)
-                    )
+                    Surface(
+                        color = Color(0xFF10B981).copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "💰 ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF10B981)
+                        )
+                    }
                 }
             }
         }
