@@ -56,37 +56,24 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
 
     try {
         val uri = Uri.parse(formattedUrl)
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
 
-        if (formattedUrl.contains("amazon.de")) {
-            // Force it to open in a web browser (like Chrome), completely bypassing the Amazon App
-            try {
-                val browserIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
-                    data = uri
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(browserIntent)
-                return
-            } catch (_: Exception) {
-                try {
-                    val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                        addCategory(Intent.CATEGORY_BROWSABLE)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        setPackage("com.android.chrome")
-                    }
-                    context.startActivity(chromeIntent)
-                    return
-                } catch (_: Exception) {
-                }
+        // DIRECT LAUNCH: Open product page link immediately in Chrome
+        try {
+            val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                setPackage("com.android.chrome")
             }
+            context.startActivity(chromeIntent)
+            return
+        } catch (_: Exception) {
+            // Fallback to default browser
+            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(browserIntent)
         }
-
-        val chooser = Intent.createChooser(intent, "Angebot im Browser öffnen...")
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        context.startActivity(chooser)
-
     } catch (e: Exception) {
         e.printStackTrace()
     }
