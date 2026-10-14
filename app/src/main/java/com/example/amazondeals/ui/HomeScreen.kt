@@ -422,6 +422,7 @@ fun DealCard(
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             // Dynamic Category Rank Badge at top of card
+            val marginFormatted = String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())
             if (rankIndex == 0) {
                 Surface(
                     color = Color(0xFFFF9900).copy(alpha = 0.15f),
@@ -430,9 +431,9 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🏆 #1 TOP ERSPARNIS $categoryTag",
+                        text = "🏆 #1 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
                     )
@@ -445,9 +446,9 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥈 #2 TOP ERSPARNIS $categoryTag",
+                        text = "🥈 #2 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
                     )
@@ -460,9 +461,9 @@ fun DealCard(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
-                        text = "🥉 #3 TOP ERSPARNIS $categoryTag",
+                        text = "🥉 #3 HÖCHSTE MARGE: +$marginFormatted (AMAZON ➔ KLEINANZEIGEN)",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
                     )
