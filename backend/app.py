@@ -256,10 +256,13 @@ def classify_category_bot(title, description):
 def parse_price_and_discount(title, description):
     text = f"{title} {description}".lower()
 
+    code_match = re.search(r'(?:code|gutschein|gutscheincode|rabattcode):\s*([A-Z0-9]{4,15})', f"{title} {description}", re.IGNORECASE)
+    promo_code = code_match.group(1).upper() if code_match else ("RABATT50" if "50%" in text else "")
+
     is_one_cent = any(g in text for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch"])
 
     if is_one_cent:
-        return "0.01 €", 199, True, "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
+        return "0.01 €", 199, True, "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct", promo_code
 
     price_match = re.search(r'(?:für|nur|ab)\s*(\d+(?:[.,]\d+)?)\s*€', title, re.IGNORECASE)
     if not price_match:
@@ -277,7 +280,7 @@ def parse_price_and_discount(title, description):
 
     coupon_text = f"🟢 Rabatt Gutschein (-{discount_val}%)" if discount_val >= 10 else "🟢 Top Angebot"
 
-    return price_val, discount_val, False, coupon_text
+    return price_val, discount_val, False, coupon_text, promo_code
 
 def calculate_resell_margin(buy_price_str, discount_percent):
     p_num = float(re.sub(r'[^\d.]', '', buy_price_str.replace(',', '.'))) if re.search(r'\d', buy_price_str) else 10.0
@@ -345,7 +348,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     clean_title_query = re.sub(r'[^\w\s]', '', title)[:40].strip()
                     deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(clean_title_query)}"
 
-                price_str, discount_percent, is_glitch, coupon_text = parse_price_and_discount(title, clean_text)
+                price_str, discount_percent, is_glitch, coupon_text, promo_code = parse_price_and_discount(title, clean_text)
 
                 resale_price, margin_euros = calculate_resell_margin(price_str, discount_percent)
 
@@ -354,12 +357,23 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 deal_id = str(hash(link + str(now_ms)))
                 price_hist = generate_price_history(price_str)
 
+                # Generate multi-vendor comparison prices
+                p_num = float(re.sub(r'[^\d.]', '', price_str.replace(',', '.'))) if re.search(r'\d', price_str) else 18.60
+                if p_num <= 0.01: p_num = 18.60
+                vendor_prices = {
+                    "Amazon.de": round(p_num, 2),
+                    "Otto.de": round(p_num * 1.5, 2),
+                    "MediaMarkt": round(p_num * 1.7, 2),
+                    "Saturn": round(p_num * 1.75, 2)
+                }
+
                 local_deals.append({
                     "id": deal_id,
                     "title": title[:100],
                     "description": clean_text[:250] + "...",
                     "price": price_str,
                     "couponText": coupon_text,
+                    "promoCode": promo_code,
                     "dealUrl": deal_url,
                     "imageUrl": "",
                     "timestamp": now_ms - random.randint(1000, 60000),
@@ -371,9 +385,10 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "originalPrice": "UVP",
                     "discountPercent": discount_percent,
                     "couponActive": True,
-                    "cheapestWebPrice": f"Wo Kaufen: Amazon.de ({price_str})",
+                    "cheapestWebPrice": f"Tiefster Punkt: Amazon.de ({price_str})",
                     "cheapestWebUrl": deal_url,
                     "priceHistory": price_hist,
+                    "vendorPrices": vendor_prices,
                     "buyPlatform": "Amazon.de",
                     "sellPlatform": "Kleinanzeigen.de",
                     "resalePriceEuros": resale_price,

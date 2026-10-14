@@ -201,6 +201,23 @@ class DealRepository(private val context: Context) {
                             historyList.addAll(listOf(39.99f, 35.00f, 32.00f, 29.99f, 26.00f, 22.00f, 18.60f))
                         }
 
+                        val vendorMap = mutableMapOf<String, Float>()
+                        val vendorObj = obj.optJSONObject("vendorPrices")
+                        if (vendorObj != null) {
+                            val keys = vendorObj.keys()
+                            while (keys.hasNext()) {
+                                val key = keys.next()
+                                vendorMap[key] = vendorObj.getDouble(key).toFloat()
+                            }
+                        }
+                        if (vendorMap.isEmpty()) {
+                            val buyP = obj.optString("price", "18.60").replace("€", "").replace(",", ".").trim().toFloatOrNull() ?: 18.60f
+                            vendorMap["Amazon.de"] = buyP
+                            vendorMap["Otto.de"] = buyP * 1.5f
+                            vendorMap["MediaMarkt"] = buyP * 1.7f
+                            vendorMap["Saturn"] = buyP * 1.75f
+                        }
+
                         deals.add(
                             Deal(
                                 id = obj.optString("id", System.currentTimeMillis().toString()),
@@ -222,7 +239,9 @@ class DealRepository(private val context: Context) {
                                 cheapestWebUrl = obj.optString("cheapestWebUrl", ""),
                                 priceHistory = historyList,
                                 buyPlatform = obj.optString("buyPlatform", "Amazon.de"),
-                                sellPlatform = obj.optString("sellPlatform", "Kleinanzeigen.de")
+                                sellPlatform = obj.optString("sellPlatform", "Kleinanzeigen.de"),
+                                promoCode = obj.optString("promoCode", ""),
+                                vendorPrices = vendorMap
                             )
                         )
                     }

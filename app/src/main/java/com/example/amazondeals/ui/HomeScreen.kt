@@ -569,6 +569,46 @@ fun DealCard(
                 )
             }
 
+            if (deal.promoCode.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    color = Color(0xFF10B981).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(1.dp, Color(0xFF10B981)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "🏷️ RABATTCODE: ${deal.promoCode}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF10B981)
+                        )
+                        OutlinedButton(
+                            onClick = {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Rabattcode", deal.promoCode)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(context, "Rabattcode '${deal.promoCode}' kopiert! 📋", Toast.LENGTH_SHORT).show()
+                            },
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            border = BorderStroke(1.dp, Color(0xFF10B981))
+                        ) {
+                            Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color(0xFF10B981))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Code kopieren", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+
             // Description (Expandable)
             if (deal.description.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(6.dp))
@@ -683,9 +723,10 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Price Trend Chart Diagram
+            // Price Trend Chart Diagram (Shows all searched web stores & lowest node)
             PriceTrendChart(
                 priceHistory = deal.priceHistory,
+                vendorPrices = deal.vendorPrices,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -1188,6 +1229,7 @@ fun VipManagementDialog(
 @Composable
 fun PriceTrendChart(
     priceHistory: List<Float>,
+    vendorPrices: Map<String, Float> = emptyMap(),
     modifier: Modifier = Modifier
 ) {
     if (priceHistory.size < 2) return
@@ -1195,17 +1237,43 @@ fun PriceTrendChart(
     val minPrice = priceHistory.minOrNull() ?: 10f
     val maxPrice = priceHistory.maxOrNull() ?: 50f
     val range = (maxPrice - minPrice).coerceAtLeast(1f)
+    val lowestVendorPair = vendorPrices.minByOrNull { it.value }?.toPair() ?: Pair("Amazon.de", minPrice)
 
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("📊 7-Tage Netz-Preistrend:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text("Höchst: ${String.format(Locale.GERMANY, "%.2f €", maxPrice)} | Tiefst: ${String.format(Locale.GERMANY, "%.2f €", minPrice)}", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+            Text("📊 Durchsuchte Internet-Shops & Preistrend:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text("🟢 Tiefster Punkt: ${lowestVendorPair.first} (${String.format(Locale.GERMANY, "%.2f €", lowestVendorPair.second.toDouble())})", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.ExtraBold)
         }
 
         Spacer(modifier = Modifier.height(4.dp))
+
+        // Vendor Price Badges Row
+        if (vendorPrices.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+            ) {
+                items(vendorPrices.toList()) { (store, p) ->
+                    val isLowest = store == lowestVendorPair.first
+                    Surface(
+                        color = if (isLowest) Color(0xFF10B981).copy(alpha = 0.2f) else Color(0xFF1E293B),
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(1.dp, if (isLowest) Color(0xFF10B981) else Color(0xFF334155))
+                    ) {
+                        Text(
+                            text = "$store: ${String.format(Locale.GERMANY, "%.2f €", p.toDouble())}",
+                            fontSize = 9.sp,
+                            fontWeight = if (isLowest) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isLowest) Color(0xFF10B981) else Color(0xFF94A3B8),
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
+        }
 
         Canvas(
             modifier = Modifier

@@ -23,9 +23,17 @@ data class Deal(
     val cheapestWebUrl: String = "",
     val priceHistory: List<Float> = listOf(39.99f, 35.00f, 32.00f, 29.99f, 26.00f, 22.00f, 18.60f),
     val buyPlatform: String = "Amazon.de",
-    val sellPlatform: String = "Kleinanzeigen.de"
+    val sellPlatform: String = "Kleinanzeigen.de",
+    val promoCode: String = "",
+    val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f)
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
+
+    fun getLowestVendorPoint(): Pair<String, Float> {
+        if (vendorPrices.isEmpty()) return Pair("Amazon.de", 18.60f)
+        val minEntry = vendorPrices.minByOrNull { it.value } ?: return Pair("Amazon.de", 18.60f)
+        return Pair(minEntry.key, minEntry.value)
+    }
 
     fun getLowestKleinanzeigenMarketPriceEuros(): Double {
         val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 1.0
@@ -35,7 +43,6 @@ data class Deal(
     }
 
     fun getMyResalePriceEuros(): Double {
-        // EXACTLY 1 Cent below the lowest current Kleinanzeigen market price!
         val lowestMarket = getLowestKleinanzeigenMarketPriceEuros()
         return (lowestMarket - 0.01).coerceAtLeast(0.01)
     }
@@ -111,14 +118,6 @@ data class Deal(
         }
 
         return "https://www.amazon.de/dp/$trimmed/?_encoding=UTF8&pd_rd_i=$trimmed&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
-    }
-
-    private fun ensureHttps(url: String): String {
-        return when {
-            url.startsWith("http://") || url.startsWith("https://") -> url
-            url.startsWith("www.") -> "https://$url"
-            else -> "https://www.$url"
-        }
     }
 
     fun getAsin(): String? {
