@@ -145,12 +145,15 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun applyFiltersAndSearch(filter: String, query: String) {
         val allDeals = _uiState.value.deals.sortedWith(
-            compareByDescending<Deal> { it.isMegaGlitch() }
-                .thenByDescending { it.discountPercent }
+            compareByDescending<Deal> { it.discountPercent >= 199 } // Kaufe 2/3 zahle 1ct (Multibuy Glitch)
+                .thenByDescending { it.discountPercent } // Dann 50%
                 .thenBy { if (it.price.contains("0.01") || it.price.contains("0.00")) 0 else 1 }
         )
         var result = when (filter) {
             "Mega-Filter (>=95%)" -> allDeals.filter { it.isMegaGlitch() }
+            "💥 Kaufe 2/3 zahle 1ct" -> allDeals.filter { it.discountPercent >= 199 }
+            "🏷️ 50% Rabatt" -> allDeals.filter { it.discountPercent == 50 || it.couponText.contains("50%") }
+            "🛒 Amazon.de Original-Deals" -> allDeals.filter { it.platform == "Amazon.de" }
             "95%-100% Preisfehler" -> allDeals.filter { it.discountPercent >= 95 || it.isGlitch }
             "75%-199% Rabatt" -> allDeals.filter { it.discountPercent >= 75 || it.isGlitch }
             "99% / Gratis" -> allDeals.filter { it.discountPercent >= 90 || it.isGlitch || it.price.contains("0.00") || it.price.contains("0.01") }
