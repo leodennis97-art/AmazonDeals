@@ -184,13 +184,24 @@ fun LockScreen(
                 OutlinedTextField(
                     value = if (isOwner && licenseKey.isEmpty()) "VIP-LIFETIME-OWNER" else licenseKey,
                     onValueChange = { licenseKey = it },
-                    label = { Text(if (isOwner) "Lizenzcode (Nicht erforderlich)" else "Lizenzcode (z. B. PRO-2026-VIP)") },
+                    label = { Text(if (isOwner) "Lizenzcode (Nicht erforderlich)" else "Lizenzcode") },
+                    placeholder = { Text("Erhältst du nach PayPal Zahlung", color = Color(0xFF64748B), fontSize = 12.sp) },
                     leadingIcon = { Icon(Icons.Default.Key, contentDescription = null) },
                     singleLine = true,
                     enabled = !isOwner,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp)
                 )
+
+                if (!isOwner) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "ℹ️ Ein Lizenzcode wird ausschließlich nach erfolgreicher PayPal-Zahlung per E-Mail ausgestellt.",
+                        color = Color(0xFF94A3B8),
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
                 if (errorMessage != null && !isOwner) {
                     Spacer(modifier = Modifier.height(8.dp))

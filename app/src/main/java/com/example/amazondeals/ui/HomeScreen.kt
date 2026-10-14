@@ -818,47 +818,135 @@ fun VipManagementDialog(
     state: DealUiState,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    var generatedKey by remember { mutableStateOf("") }
+    var activeTab by remember { mutableStateOf(0) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("👑 VIP Geräte & Zugangsverwaltung", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("👑 VIP Benutzer- & Panel-Verwaltung", fontWeight = FontWeight.Bold, fontSize = 15.sp)
             }
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Surface(
-                    color = Color(0xFFFF9900).copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, Color(0xFFFF9900))
+                // Tab Selector
+                TabRow(
+                    selectedTabIndex = activeTab,
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xFFFF9900)
                 ) {
-                    Column(modifier = Modifier.padding(10.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("VIP Status:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Aktiv & Verifiziert 👑", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("E-Mail:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(if (state.savedEmail.isNotEmpty()) state.savedEmail else "leodennis97@gmail.com", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Lizenzschlüssel:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(if (state.savedLicenseKey.isNotEmpty()) state.savedLicenseKey else "VIP-LIFETIME", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
+                    Tab(
+                        selected = activeTab == 0,
+                        onClick = { activeTab = 0 },
+                        text = { Text("Mein Status", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                    )
+                    Tab(
+                        selected = activeTab == 1,
+                        onClick = { activeTab = 1 },
+                        text = { Text("Benutzer & Lizenzen", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                    )
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Column(modifier = Modifier.padding(10.dp)) {
-                        Text("💻 Gerät-Verwaltung:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text("• Dieses Android-Gerät ist registriert und freigeschaltet.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("• Unbegrenzte Push-Benachrichtigungen aktiv.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (activeTab == 0) {
+                    // Current User Status
+                    Surface(
+                        color = Color(0xFFFF9900).copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, Color(0xFFFF9900))
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("VIP Status:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Aktiv & Verifiziert 👑", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Angemeldete E-Mail:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(if (state.savedEmail.isNotEmpty()) state.savedEmail else "leodennis97@gmail.com", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text("Aktiver Schlüssel:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(if (state.savedLicenseKey.isNotEmpty()) state.savedLicenseKey else "VIP-LIFETIME", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Text("💻 Gerät-Verwaltung:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("• Dieses Android-Gerät ist registriert und freigeschaltet.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("• Unbegrenzte Push-Benachrichtigungen aktiv.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                } else {
+                    // Admin User & License Generator Panel
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Text("👥 Registrierte VIP-Benutzer:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("• leodennis97@gmail.com (Master VIP Owner)", fontSize = 11.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+                            Text("• PayPal Kunden (Automatischer Freischalt-Status)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text("🔑 Neuer Lizenzcode Generieren:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+
+                    Button(
+                        onClick = {
+                            val newKey = "PRO-VIP-" + (100000..999999).random()
+                            generatedKey = newKey
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+                    ) {
+                        Text("Neuen 30-Tage Lizenzschlüssel erzeugen", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                    }
+
+                    if (generatedKey.isNotEmpty()) {
+                        Surface(
+                            color = Color(0xFF10B981).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(1.dp, Color(0xFF10B981))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(generatedKey, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Color(0xFF10B981))
+                                Button(
+                                    onClick = {
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clip = ClipData.newPlainText("Lizenzcode", generatedKey)
+                                        clipboard.setPrimaryClip(clip)
+                                        Toast.makeText(context, "Lizenzcode kopiert!", Toast.LENGTH_SHORT).show()
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                                ) {
+                                    Text("Kopieren", fontSize = 10.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
                     }
                 }
             }
