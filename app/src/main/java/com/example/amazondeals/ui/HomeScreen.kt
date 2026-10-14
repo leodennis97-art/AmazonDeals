@@ -6,8 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import android.text.format.DateUtils
 import android.widget.Toast
+import com.example.amazondeals.service.ScreenScannerService
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -171,7 +173,8 @@ fun HomeScreen(
                 lastUpdated = state.lastUpdated,
                 dealsCount = state.filteredDeals.size,
                 totalSavings = state.totalSavingsEuros,
-                backendUrl = state.backendUrl
+                backendUrl = state.backendUrl,
+                context = context
             )
 
             // Filter Chips
@@ -264,7 +267,8 @@ fun StatusHeaderCard(
     lastUpdated: Long,
     dealsCount: Int,
     totalSavings: Double,
-    backendUrl: String
+    backendUrl: String,
+    context: Context
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
@@ -321,6 +325,37 @@ fun StatusHeaderCard(
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // 24/7 Screen-Watcher & Floating Bubble Activation Button
+            Button(
+                onClick = {
+                    if (Settings.canDrawOverlays(context)) {
+                        ScreenScannerService.startService(context)
+                        Toast.makeText(context, "🚀 24/7 KI Preis-Watcher & Floating Bubble Aktiviert!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${context.packageName}")
+                        ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                        context.startActivity(intent)
+                        Toast.makeText(context, "Bitte erteile die 'Über anderen Apps einblenden' Berechtigung.", Toast.LENGTH_LONG).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+            ) {
+                Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.Black)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "💬 24/7 KI Screen-Watcher & Floating Bubble starten",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp
+                )
             }
         }
     }
