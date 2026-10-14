@@ -78,8 +78,7 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    viewModel: DealViewModel,
-    onRequestNotificationPermission: () -> Unit
+    viewModel: DealViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -142,9 +141,7 @@ fun HomeScreen(
                 lastUpdated = state.lastUpdated,
                 dealsCount = state.filteredDeals.size,
                 totalSavings = state.totalSavingsEuros,
-                backendUrl = state.backendUrl,
-                onTestNotification = { viewModel.sendTestNotification() },
-                onRequestPermission = onRequestNotificationPermission
+                backendUrl = state.backendUrl
             )
 
             // Filter Chips
@@ -221,9 +218,7 @@ fun StatusHeaderCard(
     lastUpdated: Long,
     dealsCount: Int,
     totalSavings: Double,
-    backendUrl: String,
-    onTestNotification: () -> Unit,
-    onRequestPermission: () -> Unit
+    backendUrl: String
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
@@ -239,12 +234,12 @@ fun StatusHeaderCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(14.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -253,27 +248,27 @@ fun StatusHeaderCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(10.dp)
+                            .size(8.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFEF4444).copy(alpha = alpha))
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "🚀 1000+ KI-Bots: Aggressiver Massen-Scan",
+                        text = "🚀 1000+ KI-Bots aktiv",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         color = Color(0xFFEF4444)
                     )
                 }
 
                 Surface(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = "$dealsCount Deals live",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        fontSize = 11.sp,
+                        text = "$dealsCount Deals",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -288,15 +283,15 @@ fun StatusHeaderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Echtzeit Cloud-Sync: Alle 30s | " + if (lastUpdated > 0) {
-                        "Zuletzt: ${
+                    text = "Sync 30s | " + if (lastUpdated > 0) {
+                        "${
                             DateUtils.getRelativeTimeSpanString(
                                 lastUpdated,
                                 System.currentTimeMillis(),
                                 DateUtils.MINUTE_IN_MILLIS
                             )
                         }"
-                    } else "Initialisiere Scan...",
+                    } else "Warte...",
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -304,41 +299,11 @@ fun StatusHeaderCard(
 
                 if (totalSavings > 0) {
                     Text(
-                        text = "💰 Ersparnis: ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
+                        text = "💰 Gespart: ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF10B981)
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = onTestNotification,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 6.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = null,
-                        modifier = Modifier.size(15.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Test-Alarm", fontSize = 11.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                }
-
-                OutlinedButton(
-                    onClick = onRequestPermission,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 6.dp)
-                ) {
-                    Text("Rechte prüfen", fontSize = 11.sp)
                 }
             }
         }

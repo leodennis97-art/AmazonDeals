@@ -54,8 +54,7 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     HomeScreen(
-                        viewModel = viewModel,
-                        onRequestNotificationPermission = { checkAndRequestNotificationPermission() }
+                        viewModel = viewModel
                     )
                 }
             }
