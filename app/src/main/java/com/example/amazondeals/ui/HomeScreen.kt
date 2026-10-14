@@ -643,7 +643,7 @@ fun DealCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("🛒 WO KAUFEN:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("🛒 KAUFPREIS (NEU & OVP):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text("${deal.buyPlatform} (${deal.price})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
                     }
                     Spacer(modifier = Modifier.height(2.dp))
@@ -651,8 +651,16 @@ fun DealCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("🏷️ WO VERKAUFEN:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${deal.sellPlatform} (${String.format(Locale.GERMANY, "%.2f €", deal.getEstimatedResalePriceEuros())})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                        Text("🏷️ KLEINANZEIGEN TIEFSTPREIS:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(String.format(Locale.GERMANY, "%.2f €", deal.getLowestKleinanzeigenMarketPriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("⚡ DEIN VERKAUFSPREIS (1ct BILLIGER):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(String.format(Locale.GERMANY, "%.2f €", deal.getMyResalePriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
                     }
                 }
             }
@@ -827,15 +835,22 @@ fun VipTradingDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("🛒 Günstigster Kaufpreis:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("🛒 Kaufpreis (Neu & OVP):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(deal.price, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("🏷️ Kleinanzeigen Verkaufpreis:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(String.format(Locale.GERMANY, "%.2f €", deal.getEstimatedResalePriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("🏷️ Niedrigster Kleinanzeigen Marktpreis:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(String.format(Locale.GERMANY, "%.2f €", deal.getLowestKleinanzeigenMarketPriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("⚡ Dein Verkaufspreis (1 Cent günstiger):", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                            Text(String.format(Locale.GERMANY, "%.2f €", deal.getMyResalePriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFF10B981).copy(alpha = 0.3f))
                         Row(

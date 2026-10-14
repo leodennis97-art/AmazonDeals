@@ -27,16 +27,22 @@ data class Deal(
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
 
-    fun getEstimatedResalePriceEuros(): Double {
+    fun getLowestKleinanzeigenMarketPriceEuros(): Double {
         val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 1.0
         val orig = originalPrice.replace("€", "").replace(",", ".").trim().toDoubleOrNull() ?: (purchase * 2.0)
         val resale = if (orig > purchase) orig * 0.85 else purchase * 1.8
         return (resale).coerceAtLeast(purchase + 5.0)
     }
 
+    fun getMyResalePriceEuros(): Double {
+        // EXACTLY 1 Cent below the lowest current Kleinanzeigen market price!
+        val lowestMarket = getLowestKleinanzeigenMarketPriceEuros()
+        return (lowestMarket - 0.01).coerceAtLeast(0.01)
+    }
+
     fun getTradingProfitMarginEuros(): Double {
         val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 0.01
-        return (getEstimatedResalePriceEuros() - purchase).coerceAtLeast(0.0)
+        return (getMyResalePriceEuros() - purchase).coerceAtLeast(0.0)
     }
 
     fun getTradingProfitMarginPercent(): Int {
@@ -46,21 +52,21 @@ data class Deal(
     }
 
     fun getKleinanzeigenTemplateText(): String {
-        val resalePriceFormatted = String.format(Locale.GERMANY, "%.2f €", getEstimatedResalePriceEuros())
+        val resalePriceFormatted = String.format(Locale.GERMANY, "%.2f €", getMyResalePriceEuros())
         return """
-            Neu & OVP: $title
+            Fabrikneu & OVP: $title
             
-            Preis: $resalePriceFormatted (Festpreis)
-            Zustand: Fabrikneu & Ungeöffnet in Originalverpackung
+            Preis: $resalePriceFormatted (Günstigster Preis auf Kleinanzeigen - Festpreis)
+            Zustand: Neu & Ungeöffnet in Originalverpackung
             
-            Hallo! Ich verkaufe hier ein nagelneues, unbenutztes $title.
+            Hallo! Ich verkaufe hier das fabriksneue, originale $title.
             
             Details:
-            - Zustand: 100% Neu, unbenutzt & in OVP
-            - Aus tierfreiem Nichtraucherhaushalt
-            - Abholung vor Ort oder schneller Versand möglich
+            - Zustand: 100% Neu, unbenutzt & OVP
+            - Nichtraucherhaushalt & Tierfrei
+            - Schneller Versand mit Sendungsverfolgung oder Abholung möglich
             
-            Bei Interesse oder Fragen einfach kurz eine Nachricht schreiben!
+            Bei Interesse gerne direkt melden!
         """.trimIndent()
     }
 
@@ -76,17 +82,17 @@ data class Deal(
 
         return when {
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
                 "2. Lege exakt $qty Stück in deinen Warenkorb.",
                 "3. Der Preisfehler (0,01 € / Gratis) wird an der Kasse automatisch abgezogen."
             )
             couponText.contains("50%") || textLower.contains("50%") || textLower.contains("gutschein") -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
                 "2. Aktiviere das Häkchen bei 'Gutschein einlösen' unter dem Preis.",
                 "3. Der 50% Rabatt wird im letzten Bestellschritt abgezogen."
             )
             else -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt'.",
+                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
                 "2. Aktiviere etwaige Coupons auf der Produktseite.",
                 "3. Schließe die Bestellung ab."
             )
