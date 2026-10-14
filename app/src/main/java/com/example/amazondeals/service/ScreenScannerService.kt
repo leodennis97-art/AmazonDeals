@@ -31,17 +31,25 @@ class ScreenScannerService : Service() {
         private const val NOTIFICATION_ID = 888
 
         fun startService(context: Context) {
-            val intent = Intent(context, ScreenScannerService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            try {
+                val intent = Intent(context, ScreenScannerService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
         fun stopService(context: Context) {
-            val intent = Intent(context, ScreenScannerService::class.java)
-            context.stopService(intent)
+            try {
+                val intent = Intent(context, ScreenScannerService::class.java)
+                context.stopService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -51,7 +59,11 @@ class ScreenScannerService : Service() {
         super.onCreate()
         repository = DealRepository(applicationContext)
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, createNotification())
+        try {
+            startForeground(NOTIFICATION_ID, createNotification())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         start247BackgroundScanning()
     }
 
@@ -95,7 +107,6 @@ class ScreenScannerService : Service() {
                         val deals = repository?.fetchDeals() ?: emptyList()
                         val glitchDeal = deals.firstOrNull { it.isGlitch || it.discountPercent >= 90 }
                         if (glitchDeal != null) {
-                            // Automatically trigger floating bubble over screen if cheaper price found!
                             FloatingBubbleService.showBubble(
                                 applicationContext,
                                 glitchDeal.getFormattedUrl(),
@@ -106,7 +117,7 @@ class ScreenScannerService : Service() {
                         e.printStackTrace()
                     }
                 }
-                handler.postDelayed(this, 30000) // Check every 30s
+                handler.postDelayed(this, 30000)
             }
         }, 5000)
     }
