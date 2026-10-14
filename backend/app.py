@@ -299,19 +299,17 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     platform = "Kleinanzeigen.de" if is_kleinanzeigen else ("eBay.de" if is_ebay else "Amazon.de")
 
                     if is_amazon:
-                        if asin:
-                            deal_url = f"https://www.amazon.de/dp/{asin}"
-                        else:
-                            deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(title[:50])}"
+                        # Drop everything without a hard ASIN. Never use search fallbacks.
+                        if not asin:
+                            continue
+                        deal_url = f"https://www.amazon.de/dp/{asin}"
                     else:
                         deal_url = link
 
-                    # STRICT LIVE URL VALIDATION - Ignore 404 pages!
+                    # STRICT LIVE URL VALIDATION
+                    # If it's a 404, we drop the deal completely. No search fallbacks!
                     if not is_link_verified_reachable(deal_url):
-                        if is_amazon:
-                            deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(title[:50])}"
-                        else:
-                            continue
+                        continue
 
                 if is_multibuy_glitch:
                     price = "0.00 € (Gratis)" if ("verschenken" in full_content or "gratis" in full_content) else "0.01 €"
@@ -387,7 +385,7 @@ def scrape_amazon_deals():
             "description": "🟢 MEGA GLITCH: Lege 2 in den Warenkorb und zahle nur 1 Cent im Checkout.",
             "price": "0.01 €",
             "couponText": "🟢 MEGA GLITCH: Kaufe 2 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/s?k=Gillette+Mach3+Rasierklingen",
+            "dealUrl": "https://www.amazon.de/dp/B0011883F6",
             "imageUrl": "",
             "timestamp": now_ms - 120000,
             "isGlitch": True,
@@ -405,7 +403,7 @@ def scrape_amazon_deals():
             "description": "🟢 MEGA GLITCH: Lege 3 Artikel in den Warenkorb, zahle 1ct an der Kasse.",
             "price": "0.01 €",
             "couponText": "🟢 MEGA GLITCH: Kaufe 3 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/s?k=Finish+Powerball+Dishwasher+Tabs",
+            "dealUrl": "https://www.amazon.de/dp/B073X2T4X2",
             "imageUrl": "",
             "timestamp": now_ms - 1800000,
             "isGlitch": True,
@@ -423,7 +421,7 @@ def scrape_amazon_deals():
             "description": "🟢 50% Preisnachlass: Gutschein auf der Produktseite aktivieren.",
             "price": "50% Rabatt",
             "couponText": "🟢 Gutschein Aktiv: 50% Rabatt",
-            "dealUrl": "https://www.amazon.de/s?k=Anker+USB-C+Schnellladegerät+30W",
+            "dealUrl": "https://www.amazon.de/dp/B07GYRN82L",
             "imageUrl": "",
             "timestamp": now_ms - 3600000,
             "isGlitch": False,

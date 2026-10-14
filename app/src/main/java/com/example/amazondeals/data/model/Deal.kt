@@ -44,11 +44,6 @@ data class Deal(
             return ensureHttps(trimmed)
         }
 
-        // Check if it's already a safe Amazon Search link
-        if (trimmed.contains("amazon.de/s?k=")) {
-            return ensureHttps(trimmed)
-        }
-
         val asin = getAsin()
         if (asin != null) {
             return "https://www.amazon.de/dp/$asin"
