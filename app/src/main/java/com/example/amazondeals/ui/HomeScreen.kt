@@ -91,7 +91,7 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(34.dp)
                                 .clip(CircleShape)
                                 .background(
                                     Brush.linearGradient(
@@ -100,14 +100,14 @@ fun HomeScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("🛒", fontSize = 20.sp)
+                            Text("🛒", fontSize = 18.sp)
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
                                 text = "AmazonDeals PRO",
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 18.sp
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp
                             )
                             Text(
                                 text = "24/7 Glitch & Coupon Scanner",
@@ -145,12 +145,6 @@ fun HomeScreen(
                 onRequestPermission = onRequestNotificationPermission
             )
 
-            // Search Bar
-            SearchBarSection(
-                query = state.searchQuery,
-                onQueryChange = { viewModel.updateSearchQuery(it) }
-            )
-
             // Filter Chips
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
@@ -182,7 +176,7 @@ fun HomeScreen(
                             fontSize = 16.sp
                         )
                         Text(
-                            "Versuche einen anderen Filter oder Suchbegriff.",
+                            "Versuche einen anderen Filter.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -191,8 +185,8 @@ fun HomeScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 14.dp, end = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     itemsIndexed(state.filteredDeals, key = { _, deal -> deal.id }) { index, deal ->
                         DealCard(
@@ -242,12 +236,12 @@ fun StatusHeaderCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -256,15 +250,15 @@ fun StatusHeaderCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(10.dp)
+                            .size(9.dp)
                             .clip(CircleShape)
                             .background(Color(0xFF10B981).copy(alpha = alpha))
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "100 KI-Bots Aktiv (Max. 7 Tage alt)",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontSize = 13.sp
                     )
                 }
 
@@ -274,15 +268,15 @@ fun StatusHeaderCard(
                 ) {
                     Text(
                         text = "$dealsCount Deals live",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        fontSize = 12.sp,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = if (lastUpdated > 0) {
@@ -295,63 +289,41 @@ fun StatusHeaderCard(
                     }"
                 } else "Warte auf ersten Scan...",
                 style = MaterialTheme.typography.bodySmall,
+                fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
                     onClick = onTestNotification,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Icon(
                         Icons.Default.Notifications,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(15.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Test-Alarm", fontSize = 12.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Test-Alarm", fontSize = 11.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
 
                 OutlinedButton(
                     onClick = onRequestPermission,
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(vertical = 6.dp)
                 ) {
-                    Text("Rechte prüfen", fontSize = 12.sp)
+                    Text("Rechte prüfen", fontSize = 11.sp)
                 }
             }
         }
     }
-}
-
-@Composable
-fun SearchBarSection(
-    query: String,
-    onQueryChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        placeholder = { Text("Angebote durchsuchen (z. B. Gillette, Tabs, 50%)...", fontSize = 14.sp) },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Default.Close, contentDescription = "Löschen")
-                }
-            }
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(12.dp)
-    )
 }
 
 @Composable
@@ -376,15 +348,15 @@ fun FilterChipsRow(
     )
 
     LazyRow(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.padding(horizontal = 14.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         items(filters) { (key, label) ->
             FilterChip(
                 selected = selectedFilter == key,
                 onClick = { onSelectFilter(key) },
-                label = { Text(label, fontWeight = if (selectedFilter == key) FontWeight.Bold else FontWeight.Normal) },
-                shape = RoundedCornerShape(20.dp)
+                label = { Text(label, fontSize = 12.sp, fontWeight = if (selectedFilter == key) FontWeight.Bold else FontWeight.Normal) },
+                shape = RoundedCornerShape(16.dp)
             )
         }
     }
@@ -402,25 +374,25 @@ fun DealCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = BorderStroke(
             width = if (rankIndex >= 0) 1.5.dp else 1.dp,
             color = if (rankIndex >= 0) Color(0xFFFF9900) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             // Rank Badge at top of card
             if (rankIndex == 0) {
                 Surface(
                     color = Color(0xFFFF9900).copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
                         text = "🏆 #1 TOP ERSPARNIS AN DER SPITZE",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -429,13 +401,13 @@ fun DealCard(
             } else if (rankIndex == 1) {
                 Surface(
                     color = Color(0xFFFF9900).copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.7f)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
                         text = "🥈 #2 TOP ERSPARNIS",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -444,13 +416,13 @@ fun DealCard(
             } else if (rankIndex == 2) {
                 Surface(
                     color = Color(0xFFFF9900).copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.5f)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
                 ) {
                     Text(
                         text = "🥉 #3 TOP ERSPARNIS",
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -473,8 +445,8 @@ fun DealCard(
                             Text(
                                 "🏷️ Kleinanzeigen.de",
                                 color = Color.Black,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.ExtraBold
                             )
                         }
@@ -486,8 +458,8 @@ fun DealCard(
                             Text(
                                 "⚡ PREISFEHLER / 1CT",
                                 color = Color.White,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.ExtraBold
                             )
                         }
@@ -499,8 +471,8 @@ fun DealCard(
                             Text(
                                 "GUTSCHEIN",
                                 color = Color.White,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                fontSize = 11.sp,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -514,8 +486,8 @@ fun DealCard(
                     ) {
                         Text(
                             text = "-${deal.discountPercent}%",
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                            fontSize = 11.sp,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFFEF4444)
                         )
@@ -526,56 +498,57 @@ fun DealCard(
                     if (deal.originalPrice.isNotEmpty()) {
                         Text(
                             text = deal.originalPrice,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = TextStyle(textDecoration = TextDecoration.LineThrough)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                     }
 
                     Text(
                         text = deal.price,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     IconButton(
                         onClick = onToggleFavorite,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorit",
-                            tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Title
             Text(
                 text = deal.title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                lineHeight = 22.sp
+                fontSize = 15.sp,
+                lineHeight = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Coupon Badge
             Surface(
                 color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(6.dp)
             ) {
                 Text(
                     text = "🏷️ ${deal.couponText}",
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
@@ -583,11 +556,12 @@ fun DealCard(
 
             // Description (Expandable)
             if (deal.description.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 AnimatedVisibility(visible = expanded || deal.description.length < 80) {
                     Text(
                         text = deal.description,
                         style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -595,17 +569,17 @@ fun DealCard(
                 if (deal.description.length >= 80) {
                     Text(
                         text = if (expanded) "Weniger anzeigen" else "Details anzeigen...",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .clickable { expanded = !expanded }
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 2.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Action Buttons
             val productUrl = deal.getFormattedUrl()
@@ -616,14 +590,15 @@ fun DealCard(
                         openUrlSafely(context, productUrl, isCartUrl = false)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF86D000))
                 ) {
                     Text(
                         text = "💬 Auf Kleinanzeigen.de ansehen",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontSize = 13.sp
                     )
                 }
             } else {
@@ -632,25 +607,26 @@ fun DealCard(
                         openUrlSafely(context, productUrl, isCartUrl = false)
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
                 ) {
-                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Black)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "👉 Zum Amazon Produkt / Angebot",
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp
+                        fontSize = 13.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 OutlinedButton(
                     onClick = {
@@ -665,11 +641,12 @@ fun DealCard(
                         context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Angebot teilen", fontSize = 12.sp)
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Angebot teilen", fontSize = 11.sp)
                 }
             }
         }
