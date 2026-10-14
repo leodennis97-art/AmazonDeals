@@ -214,15 +214,14 @@ HTML_TEMPLATE = """
 </html>
 """
 
+import urllib.parse
+
 def extract_asin(text_or_url):
-    # Search for standard Amazon ASIN patterns (10 chars, uppercase letters and digits, starting with B usually but not strictly required if following /dp/)
+    # STRICT ASIN MATCHING ONLY.
+    # Prevents grabbing random hashes or image IDs that start with 'B' causing 404 pages.
     match = re.search(r'(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b', text_or_url)
     if match:
         return match.group(1).upper()
-    # Fallback to find any 10 char string starting with B that looks like an ASIN
-    fallback = re.search(r'\b(B[0-9A-Z]{9})\b', text_or_url)
-    if fallback:
-        return fallback.group(1).upper()
     return None
 
 def is_comparison_site(url):
@@ -298,11 +297,21 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 if is_multibuy_glitch or is_fifty_percent:
                     seen_urls.add(link)
                     platform = "Kleinanzeigen.de" if is_kleinanzeigen else ("eBay.de" if is_ebay else "Amazon.de")
-                    deal_url = f"https://www.amazon.de/dp/{asin}" if (is_amazon and asin) else link
+
+                    if is_amazon:
+                        if asin:
+                            deal_url = f"https://www.amazon.de/dp/{asin}"
+                        else:
+                            deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(title[:50])}"
+                    else:
+                        deal_url = link
 
                     # STRICT LIVE URL VALIDATION - Ignore 404 pages!
                     if not is_link_verified_reachable(deal_url):
-                        continue
+                        if is_amazon:
+                            deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(title[:50])}"
+                        else:
+                            continue
 
                 if is_multibuy_glitch:
                     price = "0.00 € (Gratis)" if ("verschenken" in full_content or "gratis" in full_content) else "0.01 €"
@@ -378,7 +387,7 @@ def scrape_amazon_deals():
             "description": "🟢 MEGA GLITCH: Lege 2 in den Warenkorb und zahle nur 1 Cent im Checkout.",
             "price": "0.01 €",
             "couponText": "🟢 MEGA GLITCH: Kaufe 2 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/dp/B0011883F6",
+            "dealUrl": "https://www.amazon.de/s?k=Gillette+Mach3+Rasierklingen",
             "imageUrl": "",
             "timestamp": now_ms - 120000,
             "isGlitch": True,
@@ -396,7 +405,7 @@ def scrape_amazon_deals():
             "description": "🟢 MEGA GLITCH: Lege 3 Artikel in den Warenkorb, zahle 1ct an der Kasse.",
             "price": "0.01 €",
             "couponText": "🟢 MEGA GLITCH: Kaufe 3 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/dp/B073X2T4X2",
+            "dealUrl": "https://www.amazon.de/s?k=Finish+Powerball+Dishwasher+Tabs",
             "imageUrl": "",
             "timestamp": now_ms - 1800000,
             "isGlitch": True,
@@ -414,7 +423,7 @@ def scrape_amazon_deals():
             "description": "🟢 50% Preisnachlass: Gutschein auf der Produktseite aktivieren.",
             "price": "50% Rabatt",
             "couponText": "🟢 Gutschein Aktiv: 50% Rabatt",
-            "dealUrl": "https://www.amazon.de/dp/B07GYRN82L",
+            "dealUrl": "https://www.amazon.de/s?k=Anker+USB-C+Schnellladegerät+30W",
             "imageUrl": "",
             "timestamp": now_ms - 3600000,
             "isGlitch": False,

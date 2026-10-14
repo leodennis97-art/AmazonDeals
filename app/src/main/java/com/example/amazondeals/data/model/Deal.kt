@@ -44,6 +44,11 @@ data class Deal(
             return ensureHttps(trimmed)
         }
 
+        // Check if it's already a safe Amazon Search link
+        if (trimmed.contains("amazon.de/s?k=")) {
+            return ensureHttps(trimmed)
+        }
+
         val asin = getAsin()
         if (asin != null) {
             return "https://www.amazon.de/dp/$asin"
@@ -87,6 +92,8 @@ data class Deal(
 
     fun getDirectCartUrl(): String {
         if (isKleinanzeigen() || isEbay()) return getFormattedUrl()
+        
+        // If we don't have a valid ASIN but we have a safe search URL, use it as fallback
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()
