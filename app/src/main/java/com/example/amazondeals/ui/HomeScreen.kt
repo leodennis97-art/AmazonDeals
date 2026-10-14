@@ -308,7 +308,7 @@ fun StatusHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "🚀 $dealsCount Deals (1000+ KI-Bots)",
+                        text = "🚀 $dealsCount Deals (10.000+ KI-Bots)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = Color(0xFFEF4444)

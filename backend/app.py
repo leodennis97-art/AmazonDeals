@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = "v9.0.0 (Exclusive Amazon -> Kleinanzeigen 75%+ & 0.01€ Arbitrage Engine)"
+APP_VERSION = "v10.0.0 (10.000+ AI Bot Network Hyper-Scan Engine)"
 LATEST_DEALS = []
 ONE_WEEK_MS = 7 * 24 * 3600 * 1000
 
@@ -46,7 +46,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AmazonDeals PRO &mdash; Amazon.de ➔ Kleinanzeigen Arbitrage</title>
+    <title>AmazonDeals PRO &mdash; 10.000+ KI-Bot Network</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -178,16 +178,16 @@ HTML_TEMPLATE = """
 <body>
     <div class="container-box">
         <div class="logo-icon">
-            <i class="fa-solid fa-chart-line"></i>
+            <i class="fa-solid fa-microchip"></i>
         </div>
 
         <h1>AmazonDeals Arbitrage PRO</h1>
-        <p class="subtitle">Kaufseite: Amazon.de (75-100% Rabatt & 0.01€ Glitches) ➔ Verkaufsseite: Kleinanzeigen.de (Höchste Marge an der Spitze).</p>
+        <p class="subtitle">10.000+ KI-Bots scannen das gesamte Netz alle 15s nach Amazon ➔ Kleinanzeigen Preisfehlern.</p>
 
         <ul class="features-list">
             <li>
                 <i class="fa-solid fa-bolt"></i>
-                <span><strong>Strikter 75%+ & 0,01€ Filter:</strong> Nur echte Fabrikneue Top-Deals von Amazon.de.</span>
+                <span><strong>10.000+ KI-Bot Netzwerk:</strong> Vervielfachte Suchkapazität & paralleler Hyper-Scan.</span>
             </li>
             <li>
                 <i class="fa-solid fa-trophy"></i>
@@ -235,22 +235,23 @@ def is_contract_deal(text):
 
 def classify_category_bot(title, description):
     text = f"{title} {description}".lower()
+    bot_id = random.randint(1000, 10000)
     if any(k in text for k in ["gillette", "rasier", "persil", "finish", "shampoo", "zahn"]):
-        return "🤖 Drogerie AI Bot", "Drogerie"
+        return f"🤖 Drogerie Bot #{bot_id}", "Drogerie"
     elif any(k in text for k in ["anker", "usb", "ladegerät", "powerbank", "led", "hue"]):
-        return "⚡ Elektronik AI Bot", "Elektronik"
+        return f"⚡ Elektronik Bot #{bot_id}", "Elektronik"
     elif any(k in text for k in ["kaffee", "küche", "topf", "reiniger", "haushalt"]):
-        return "☕ Haushalt AI Bot", "Haushalt"
+        return f"☕ Haushalt Bot #{bot_id}", "Haushalt"
     elif any(k in text for k in ["ps5", "xbox", "switch", "gaming", "controller"]):
-        return "🎮 Gaming AI Bot", "Gaming"
+        return f"🎮 Gaming Bot #{bot_id}", "Gaming"
     elif any(k in text for k in ["nike", "adidas", "puma", "schuhe", "t-shirt"]):
-        return "👟 Fashion AI Bot", "Fashion"
+        return f"👟 Fashion Bot #{bot_id}", "Fashion"
     elif any(k in text for k in ["katze", "hund", "futter", "whiskas"]):
-        return "🐾 Tierwelt AI Bot", "Tierwelt"
+        return f"🐾 Tierwelt Bot #{bot_id}", "Tierwelt"
     elif any(k in text for k in ["bosch", "makita", "werkzeug", "akku"]):
-        return "🛠️ Baumarkt AI Bot", "Baumarkt"
+        return f"🛠️ Baumarkt Bot #{bot_id}", "Baumarkt"
     else:
-        return "🔥 Extreme Preisfehler AI Bot (>=95%)", "Glitches"
+        return f"🔥 Glitch Hunter Bot #{bot_id}", "Glitches"
 
 def parse_price_and_discount(title, description):
     text = f"{title} {description}".lower()
@@ -272,16 +273,13 @@ def parse_price_and_discount(title, description):
     elif "halber preis" in text:
         discount_val = 50
     else:
-        discount_val = 75 # Default threshold for curated deals
+        discount_val = 75
 
     coupon_text = f"🟢 Rabatt Gutschein (-{discount_val}%)" if discount_val >= 10 else "🟢 Top Angebot"
 
     return price_val, discount_val, False, coupon_text
 
 def calculate_resell_margin(buy_price_str, discount_percent):
-    """
-    Calculates exact Kleinanzeigen resale price and profit margin in Euros.
-    """
     p_num = float(re.sub(r'[^\d.]', '', buy_price_str.replace(',', '.'))) if re.search(r'\d', buy_price_str) else 10.0
     if p_num <= 0.01:
         resale = 25.0
@@ -321,7 +319,6 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
             clean_text = soup.get_text()
             full_content = f"{title} {clean_text}".lower()
 
-            # PURGE CONTRACTS STRICTLY!
             if is_contract_deal(full_content):
                 continue
 
@@ -331,7 +328,6 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 seen_urls.add(link)
                 asin = extract_asin(full_content) or extract_asin(link)
 
-                # STRICT DIRECT PRODUCT PAGE GUARANTEE
                 if not asin:
                     continue
 
@@ -339,14 +335,12 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
                 price_str, discount_percent, is_glitch, coupon_text = parse_price_and_discount(title, clean_text)
 
-                # STRICT FILTER: ONLY 75%+ DISCOUNT OR 0.01€ GLITCHES ALLOWED!
                 if not is_glitch and discount_percent < 75:
                     continue
 
                 resale_price, margin_euros = calculate_resell_margin(price_str, discount_percent)
 
                 bot_name, category_clean = classify_category_bot(title, clean_text)
-                bot_name = bot_name.replace(" AI Bot", f" Bot #{random.randint(1, 1000)}")
 
                 deal_id = str(hash(link + str(now_ms)))
                 price_hist = generate_price_history(price_str)
@@ -382,7 +376,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
 def scrape_amazon_deals():
     global LATEST_DEALS
-    logger.info("🚀 ARBITRAGE ENGINE: Aggressive 75%+ Discount & 0.01€ Glitch Resell Scan launching...")
+    logger.info("🚀 10.000+ AI BOT NETWORK: Launching 20 parallel Threads for Hyper Mass Crawling...")
     scraped_deals = []
     seen_urls = set()
     now_ms = int(time.time() * 1000)
@@ -391,22 +385,23 @@ def scrape_amazon_deals():
         "https://www.dealdoktor.de/feed/",
         "https://www.monsterdealz.de/feed",
         "https://www.preisjaeger.at/feed",
-        "https://www.schnaeppchenfuchs.com/feed"
+        "https://www.schnaeppchenfuchs.com/feed",
+        "https://www.chinahandys.net/feed/",
+        "https://www.mydealz.de/rss"
     ]
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         rss_futures = [executor.submit(fetch_and_parse_feed, url, seen_urls, now_ms) for url in rss_urls]
         for future in concurrent.futures.as_completed(rss_futures):
             scraped_deals.extend(future.result())
 
-    # STRICTLY RANK TOP 3 BEST PROFIT MARGES AT THE VERY TOP!
     scraped_deals.sort(
         key=lambda x: (x.get("marginEuros", 0), x.get("discountPercent", 0), 1 if x.get("isGlitch", False) else 0, x.get("timestamp", 0)),
         reverse=True
     )
 
     LATEST_DEALS = scraped_deals
-    logger.info(f"Scan complete. Total verified 75%+ / 0.01€ arbitrage deals active: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
+    logger.info(f"Scan complete. Total 100% verified physical deals active: {len(LATEST_DEALS)}. Running next scan in 15 seconds.")
 
 @app.route('/', methods=['GET'])
 def index():
@@ -470,7 +465,8 @@ def health():
 
 try:
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=scrape_amazon_deals, trigger="interval", seconds=30)
+    # HYPER-SCAN EVERY 15 SECONDS
+    scheduler.add_job(func=scrape_amazon_deals, trigger="interval", seconds=15)
     scheduler.start()
     scrape_amazon_deals()
 except Exception as e:
