@@ -153,12 +153,9 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             "Mega-Filter (>=95%)" -> allDeals.filter { it.isMegaGlitch() }
             "💥 Kaufe 2/3 zahle 1ct" -> allDeals.filter { it.discountPercent >= 199 }
             "🏷️ 50% Rabatt" -> allDeals.filter { it.discountPercent == 50 || it.couponText.contains("50%") }
-            "🛒 Amazon.de Original-Deals" -> allDeals.filter { it.platform == "Amazon.de" }
             "95%-100% Preisfehler" -> allDeals.filter { it.discountPercent >= 95 || it.isGlitch }
             "75%-199% Rabatt" -> allDeals.filter { it.discountPercent >= 75 || it.isGlitch }
             "99% / Gratis" -> allDeals.filter { it.discountPercent >= 90 || it.isGlitch || it.price.contains("0.00") || it.price.contains("0.01") }
-            "Amazon.de" -> allDeals.filter { !it.isKleinanzeigen() }
-            "Kleinanzeigen.de" -> allDeals.filter { it.isKleinanzeigen() }
             "0.01€ / 1ct" -> allDeals.filter { it.isGlitch || it.price.contains("0.01") || it.couponText.contains("0.01") || it.couponText.contains("1ct") }
             "Glitch Deals" -> allDeals.filter { it.isGlitch }
             "Drogerie Bot" -> allDeals.filter { it.title.contains("Drogerie") || it.description.lowercase().contains("gillette") || it.description.lowercase().contains("persil") || it.description.lowercase().contains("finish") || it.title.lowercase().contains("rasier") }

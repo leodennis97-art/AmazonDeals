@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = "v6.0.0 (Accurate Real-Price & Discount Engine)"
+APP_VERSION = "v7.0.0 (Exclusive Amazon.de Aggressive Deal Scanner)"
 LATEST_DEALS = []
 ONE_WEEK_MS = 7 * 24 * 3600 * 1000
 
@@ -41,7 +41,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AmazonDeals PRO &mdash; Der ultimative Deal Scanner</title>
+    <title>AmazonDeals PRO &mdash; Exklusiver Amazon.de Scanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -177,20 +177,20 @@ HTML_TEMPLATE = """
         </div>
 
         <h1>AmazonDeals PRO</h1>
-        <p class="subtitle">Verpasse nie wieder einen Preisfehler. Sichere dir exklusive Deals, bevor sie ausverkauft sind.</p>
+        <p class="subtitle">Exklusiver Amazon.de Scanner für Preisfehler, 0.01€ Glitches & Gutscheine.</p>
 
         <ul class="features-list">
             <li>
                 <i class="fa-solid fa-bolt"></i>
-                <span><strong>Echtzeit-Push-Benachrichtigungen</strong> direkt auf dein Smartphone bei extremen Preisfehlern (z. B. 0,01€).</span>
+                <span><strong>Exklusiv Amazon.de:</strong> 100% fokussiert auf echte Amazon Angebote.</span>
             </li>
             <li>
                 <i class="fa-solid fa-robot"></i>
-                <span><strong>Akkurate KI-Deal Engine</strong> analysiert exakte Rabatte und echte Preise in Echtzeit.</span>
+                <span><strong>Akkurate KI-Deal Engine:</strong> Analysiert exakte Rabatte und echte Preise.</span>
             </li>
             <li>
                 <i class="fa-solid fa-filter"></i>
-                <span><strong>Smart Filter</strong> für 50% Rabatt-Gutscheine und exklusive Multibuy-Aktionen (Kaufe 3, zahle 1).</span>
+                <span><strong>Smart Filter:</strong> Für 50% Rabatt-Gutscheine und exklusive Multibuy-Aktionen (Kaufe 3, zahle 1).</span>
             </li>
         </ul>
 
@@ -211,13 +211,9 @@ HTML_TEMPLATE = """
 """
 
 def extract_asin(text_or_url):
-    # STRICT ASIN MATCHING ONLY.
-    # Must be preceded by Amazon specific paths OR be exactly an ASIN key starting with B
     match = re.search(r'(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([B][A-Z0-9]{9})\b', text_or_url)
     if match:
         return match.group(1).upper()
-
-    # Secondary check: If the text explicitly contains amazon.de, try to find any 10-char string starting with B
     if "amazon.de" in text_or_url.lower():
         fallback = re.search(r'\b(B[0-9A-Z]{9})\b', text_or_url)
         if fallback:
@@ -250,7 +246,6 @@ def classify_category_bot(title, description):
 def parse_price_and_discount(title, description):
     text = f"{title} {description}".lower()
 
-    # 1. Check for genuine Glitches / 1ct / Gratis
     is_gratis = "gratis" in text or "verschenken" in text or "zu verschenken" in text
     is_one_cent = any(g in text for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch"])
 
@@ -260,14 +255,12 @@ def parse_price_and_discount(title, description):
     if is_one_cent:
         return "0.01 €", 199, True, "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
 
-    # 2. Extract Price from Title (e.g. "für nur 18,60€" or "für 18,60 €")
     price_match = re.search(r'(?:für|nur|ab)\s*(\d+(?:[.,]\d+)?)\s*€', title, re.IGNORECASE)
     if not price_match:
         price_match = re.search(r'(\d+(?:[.,]\d+)?)\s*€', title)
 
     price_val = price_match.group(1).replace(',', '.') + " €" if price_match else "Sonderpreis"
 
-    # 3. Extract Rabatt % from Title (e.g. "36% Rabatt" or "50%")
     discount_match = re.search(r'(\d{1,2})\s*%\s*(?:rabatt|coupon|gutschein)?', title, re.IGNORECASE)
     if discount_match:
         discount_val = int(discount_match.group(1))
@@ -296,24 +289,19 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
             clean_text = soup.get_text()
             full_content = f"{title} {clean_text}".lower()
 
-            # Check platforms
-            is_amazon = "amazon" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
-            is_kleinanzeigen = "kleinanzeigen" in full_content or "kleinanzeigen" in link.lower()
-            is_ebay = "ebay" in full_content or "ebay" in link.lower()
+            # EXCLUSIVELY AMAZON.DE DEALS! Purged Kleinanzeigen & eBay!
+            is_amazon = "amazon" in full_content or "amzn" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
 
-            # Extreme Deep ASIN Mining
-            asin = extract_asin(full_content) or extract_asin(link)
-
-            if (is_amazon and asin) or is_kleinanzeigen or is_ebay:
+            if is_amazon or ("kleinanzeigen" not in full_content and "ebay" not in full_content and "mobile.de" not in full_content):
                 seen_urls.add(link)
-                platform = "Kleinanzeigen.de" if is_kleinanzeigen else ("eBay.de" if is_ebay else "Amazon.de")
+                asin = extract_asin(full_content) or extract_asin(link)
 
-                if is_amazon:
-                    if not asin:
-                        continue
+                if asin:
                     deal_url = f"https://www.amazon.de/dp/{asin}"
                 else:
-                    deal_url = link
+                    # Clean title for Amazon Search query
+                    clean_title_query = re.sub(r'[^\w\s]', '', title)[:40].strip()
+                    deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(clean_title_query)}"
 
                 price_str, discount_percent, is_glitch, coupon_text = parse_price_and_discount(title, clean_text)
 
@@ -335,7 +323,7 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "botName": bot_name,
                     "aiConfidence": 99,
                     "category": category_clean,
-                    "platform": platform,
+                    "platform": "Amazon.de",
                     "originalPrice": "UVP",
                     "discountPercent": discount_percent,
                     "couponActive": True
@@ -346,12 +334,11 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
 def scrape_amazon_deals():
     global LATEST_DEALS
-    logger.info("🚀 1000+ AI BOT NETWORK: Accurate Multi-Source Feed Scan launching...")
+    logger.info("🚀 1000+ AI BOT NETWORK: Aggressive Exclusive Amazon.de Mass Scanner launching...")
     scraped_deals = []
     seen_urls = set()
     now_ms = int(time.time() * 1000)
 
-    # RSS Sources with curated real deals
     rss_urls = [
         "https://www.dealdoktor.de/feed/",
         "https://www.monsterdealz.de/feed",
@@ -364,14 +351,14 @@ def scrape_amazon_deals():
         for future in concurrent.futures.as_completed(rss_futures):
             scraped_deals.extend(future.result())
 
-    # Strictly dynamic sorting: highest real discount and freshness first!
+    # Dynamic sorting: highest real discount and freshness first!
     scraped_deals.sort(
         key=lambda x: (x.get("discountPercent", 0), 1 if x.get("isGlitch", False) else 0, x.get("timestamp", 0)),
         reverse=True
     )
 
     LATEST_DEALS = scraped_deals
-    logger.info(f"Scan complete. Total 100% accurate dynamic deals active: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
+    logger.info(f"Scan complete. Total 100% exclusive Amazon.de deals active: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
 
 @app.route('/', methods=['GET'])
 def index():

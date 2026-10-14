@@ -19,33 +19,9 @@ data class Deal(
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
 
-    fun isKleinanzeigen(): Boolean {
-        return platform.lowercase().contains("kleinanzeigen") || dealUrl.lowercase().contains("kleinanzeigen.de")
-    }
-
-    fun isEbay(): Boolean {
-        return platform.lowercase().contains("ebay") || dealUrl.lowercase().contains("ebay.de")
-    }
-
     fun getClaimInstructions(): List<String> {
         val qty = getSuggestedQuantity()
         val textLower = "$title $description $couponText".lowercase()
-
-        if (isKleinanzeigen()) {
-            return listOf(
-                "1. Öffne das Angebot über den Button unten.",
-                "2. Kontaktiere den Verkäufer direkt per Nachricht.",
-                "3. Vereinbare die kostenlose Abholung oder Versand."
-            )
-        }
-
-        if (isEbay()) {
-            return listOf(
-                "1. Produktseite auf eBay.de öffnen.",
-                "2. Gutscheincode an der Kasse (im Checkout) eingeben.",
-                "3. Rabattierten Kauf abschließen."
-            )
-        }
 
         return when {
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
@@ -68,20 +44,6 @@ data class Deal(
 
     fun getFormattedUrl(): String {
         val trimmed = dealUrl.trim()
-        
-        if (isKleinanzeigen()) {
-            if (trimmed.isEmpty() || !trimmed.contains("kleinanzeigen.de")) {
-                return "https://www.kleinanzeigen.de/s-zu-verschenken/k0"
-            }
-            return ensureHttps(trimmed)
-        }
-
-        if (isEbay()) {
-            if (trimmed.isEmpty() || !trimmed.contains("ebay.de")) {
-                return "https://www.ebay.de/b/Restposten/bn_7115312781"
-            }
-            return ensureHttps(trimmed)
-        }
 
         val asin = getAsin()
         if (asin != null) {
@@ -104,9 +66,8 @@ data class Deal(
     }
 
     fun getAsin(): String? {
-        if (isKleinanzeigen() || isEbay()) return null
         val trimmed = dealUrl.trim()
-        val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b""")
+        val regex = Regex("""(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([B][A-Z0-9]{9})\b""")
         val match = regex.find(trimmed)
         if (match != null) {
             return match.groupValues[1].uppercase()
@@ -125,8 +86,6 @@ data class Deal(
     }
 
     fun getDirectCartUrl(): String {
-        if (isKleinanzeigen() || isEbay()) return getFormattedUrl()
-        
         val asin = getAsin()
         return if (asin != null) {
             val qty = getSuggestedQuantity()

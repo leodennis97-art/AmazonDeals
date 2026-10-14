@@ -300,10 +300,9 @@ fun FilterChipsRow(
     onSelectFilter: (String) -> Unit
 ) {
     val filters = listOf(
-        "Alle" to "⚡ Alle Deals",
-        "💥 Kaufe 2/3 zahle 1ct" to "💥 Kaufe 2/3 zahle 1ct",
-        "🏷️ 50% Rabatt" to "🏷️ 50% Rabatt",
-        "🛒 Amazon.de Original-Deals" to "🛒 Amazon.de Deals",
+        "Alle" to "⚡ Alle Amazon.de Deals",
+        "💥 Kaufe 2/3 zahle 1ct" to "💥 Multibuy Glitches",
+        "🏷️ 50% Rabatt" to "🏷️ 50% Rabatt-Gutscheine",
         "Mega-Filter (>=95%)" to "🔥 ≥95% Preisfehler",
         "Favoriten" to "❤️ Favoriten ($favoritesCount)"
     )
@@ -398,20 +397,7 @@ fun DealCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (deal.isKleinanzeigen()) {
-                        Surface(
-                            color = Color(0xFF86D000),
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                "🏷️ Kleinanzeigen.de",
-                                color = Color.Black,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    } else if (deal.isGlitch) {
+                    if (deal.isGlitch) {
                         Surface(
                             color = Color(0xFFEF4444),
                             shape = RoundedCornerShape(6.dp)
@@ -430,7 +416,7 @@ fun DealCard(
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
-                                "GUTSCHEIN",
+                                "🛒 AMAZON.DE GUTSCHEIN",
                                 color = Color.White,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 fontSize = 10.sp,
@@ -573,42 +559,23 @@ fun DealCard(
             // Action Buttons
             val productUrl = deal.getFormattedUrl()
 
-            if (deal.isKleinanzeigen()) {
-                Button(
-                    onClick = {
-                        openUrlSafely(context, productUrl, isCartUrl = false)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF86D000))
-                ) {
-                    Text(
-                        text = "💬 Auf Kleinanzeigen.de ansehen",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                }
-            } else {
-                Button(
-                    onClick = {
-                        openUrlSafely(context, productUrl, isCartUrl = false)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
-                ) {
-                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "👉 Zum Amazon Produkt / Angebot",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
-                }
+            Button(
+                onClick = {
+                    openUrlSafely(context, productUrl, isCartUrl = false)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+            ) {
+                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "👉 Zum Amazon Produkt / Angebot",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
