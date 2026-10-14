@@ -206,7 +206,9 @@ class DealRepository(private val context: Context) {
                                 category = obj.optString("category", "Allgemein"),
                                 platform = obj.optString("platform", defaultPlatform),
                                 originalPrice = obj.optString("originalPrice", ""),
-                                discountPercent = obj.optInt("discountPercent", if (obj.optBoolean("isGlitch")) 99 else 50)
+                                discountPercent = obj.optInt("discountPercent", if (obj.optBoolean("isGlitch")) 99 else 50),
+                                cheapestWebPrice = obj.optString("cheapestWebPrice", ""),
+                                cheapestWebUrl = obj.optString("cheapestWebUrl", "")
                             )
                         )
                     }

@@ -1,5 +1,7 @@
 package com.example.amazondeals.data.model
 
+import android.net.Uri
+
 data class Deal(
     val id: String,
     val title: String,
@@ -15,9 +17,17 @@ data class Deal(
     val category: String = "Allgemein",
     val platform: String = "Amazon.de",
     val originalPrice: String = "",
-    val discountPercent: Int = 99
+    val discountPercent: Int = 99,
+    val cheapestWebPrice: String = "",
+    val cheapestWebUrl: String = ""
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
+
+    fun getCheapestComparisonUrl(): String {
+        if (cheapestWebUrl.isNotBlank()) return cheapestWebUrl
+        val cleanTitle = title.replace(Regex("""[^\w\s]"""), "").trim()
+        return "https://www.google.com/search?tbm=shop&q=${Uri.encode(cleanTitle)}"
+    }
 
     fun getClaimInstructions(): List<String> {
         val qty = getSuggestedQuantity()

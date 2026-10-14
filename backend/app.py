@@ -310,6 +310,10 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
                 deal_id = str(hash(link + str(now_ms)))
 
+                clean_title_query = re.sub(r'[^\w\s]', '', title)[:40].strip()
+                cheapest_web_url = f"https://www.google.com/search?tbm=shop&q={urllib.parse.quote_plus(clean_title_query)}"
+                cheapest_web_price = f"Günstigster Netzpreis: {price_str} (Idealo / Web)"
+
                 local_deals.append({
                     "id": deal_id,
                     "title": title[:100],
@@ -326,7 +330,9 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "platform": "Amazon.de",
                     "originalPrice": "UVP",
                     "discountPercent": discount_percent,
-                    "couponActive": True
+                    "couponActive": True,
+                    "cheapestWebPrice": cheapest_web_price,
+                    "cheapestWebUrl": cheapest_web_url
                 })
     except Exception as e:
         logger.error(f"Error scraping feed {rss_url}: {e}")

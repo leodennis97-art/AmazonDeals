@@ -554,7 +554,63 @@ fun DealCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // KI Web Price Comparison Container
+            Surface(
+                color = Color(0xFF1E293B),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0xFF3B82F6).copy(alpha = 0.4f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "🤖 KI-Günstigster Netzpreis:",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF60A5FA)
+                        )
+                        Text(
+                            text = if (deal.cheapestWebPrice.isNotEmpty()) deal.cheapestWebPrice else "Günstigstes Produkt im Netz",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            openUrlSafely(context, deal.getCheapestComparisonUrl(), isCartUrl = false)
+                        },
+                        shape = RoundedCornerShape(6.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        border = BorderStroke(1.dp, Color(0xFF3B82F6))
+                    ) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = Color(0xFF60A5FA)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Im Netz prüfen",
+                            fontSize = 10.sp,
+                            color = Color(0xFF60A5FA),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Action Buttons
             val productUrl = deal.getFormattedUrl()
