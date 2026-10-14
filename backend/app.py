@@ -218,10 +218,16 @@ import urllib.parse
 
 def extract_asin(text_or_url):
     # STRICT ASIN MATCHING ONLY.
-    # Prevents grabbing random hashes or image IDs that start with 'B' causing 404 pages.
-    match = re.search(r'(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b', text_or_url)
+    # Must be preceded by Amazon specific paths OR be exactly an ASIN key starting with B
+    match = re.search(r'(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([B][A-Z0-9]{9})\b', text_or_url)
     if match:
         return match.group(1).upper()
+
+    # Secondary check: If the text explicitly contains amazon.de, try to find any 10-char string starting with B
+    if "amazon.de" in text_or_url.lower():
+        fallback = re.search(r'\b(B[0-9A-Z]{9})\b', text_or_url)
+        if fallback:
+            return fallback.group(1).upper()
     return None
 
 def is_comparison_site(url):
