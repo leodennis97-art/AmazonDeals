@@ -423,72 +423,16 @@ def scrape_amazon_deals():
         for future in concurrent.futures.as_completed(amazon_futures + rss_futures):
             scraped_deals.extend(future.result())
 
-    # Fallback verified pool of extreme deals (Always active Amazon DE links)
-    fallback_pool = [
-        {
-            "id": "extreme_1",
-            "title": "Apple AirTag 4er Pack - Glitch",
-            "description": "🟢 MEGA GLITCH: Lege 2 in den Warenkorb und zahle nur 1 Cent im Checkout.",
-            "price": "0.01 €",
-            "couponText": "🟢 MEGA GLITCH: Kaufe 2 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/dp/B0935DNDT5",
-            "imageUrl": "",
-            "timestamp": now_ms - 120000,
-            "isGlitch": True,
-            "botName": "🔥 Aggressive Bot #999",
-            "aiConfidence": 99,
-            "category": "Elektronik",
-            "platform": "Amazon.de",
-            "originalPrice": "119.00 €",
-            "discountPercent": 199,
-            "couponActive": True
-        },
-        {
-            "id": "extreme_2",
-            "title": "Amazon Echo Dot (5. Gen) - Preisfehler",
-            "description": "🟢 MEGA GLITCH: Lege 3 Artikel in den Warenkorb, zahle 1ct an der Kasse.",
-            "price": "0.01 €",
-            "couponText": "🟢 MEGA GLITCH: Kaufe 3 zahle 1ct",
-            "dealUrl": "https://www.amazon.de/dp/B0BQRB33XW",
-            "imageUrl": "",
-            "timestamp": now_ms - 1800000,
-            "isGlitch": True,
-            "botName": "☕ Haushalt Bot #1000",
-            "aiConfidence": 99,
-            "category": "Haushalt",
-            "platform": "Amazon.de",
-            "originalPrice": "64.99 €",
-            "discountPercent": 199,
-            "couponActive": True
-        },
-        {
-            "id": "extreme_3",
-            "title": "Amazon Fire TV Stick - Rabatt",
-            "description": "🟢 50% Preisnachlass: Gutschein auf der Produktseite aktivieren.",
-            "price": "50% Rabatt",
-            "couponText": "🟢 Gutschein Aktiv: 50% Rabatt",
-            "dealUrl": "https://www.amazon.de/dp/B08C1W55L6",
-            "imageUrl": "",
-            "timestamp": now_ms - 3600000,
-            "isGlitch": False,
-            "botName": "⚡ Elektronik Bot #888",
-            "aiConfidence": 98,
-            "category": "Elektronik",
-            "platform": "Amazon.de",
-            "originalPrice": "44.99 €",
-            "discountPercent": 50,
-            "couponActive": True
-        }
-    ]
-
+    # DYNAMIC SORTING: Highest discounts and freshest glitches dynamically floating to the top!
+    # No hardcoded/fixed fallback pool!
     filtered_fresh_deals = [d for d in scraped_deals if (now_ms - d.get("timestamp", now_ms)) <= ONE_WEEK_MS]
-
-    for fb in fallback_pool:
-        if not any(d["id"] == fb["id"] for d in filtered_fresh_deals):
-            filtered_fresh_deals.append(fb)
+    filtered_fresh_deals.sort(
+        key=lambda x: (x.get("discountPercent", 0), 1 if x.get("isGlitch", False) else 0, x.get("timestamp", 0)),
+        reverse=True
+    )
 
     LATEST_DEALS = filtered_fresh_deals
-    logger.info(f"Scan complete. Total verified active deals: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
+    logger.info(f"Scan complete. Total 100% dynamic live deals active: {len(LATEST_DEALS)}. Running next scan in 30 seconds.")
 
 @app.route('/', methods=['GET'])
 def index():
