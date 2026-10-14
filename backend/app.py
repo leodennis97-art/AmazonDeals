@@ -214,9 +214,6 @@ HTML_TEMPLATE = """
 </html>
 """
 
-    pass
-"""
-
 def extract_asin(text_or_url):
     # Search for standard Amazon ASIN patterns (10 chars, uppercase letters and digits, starting with B usually but not strictly required if following /dp/)
     match = re.search(r'(?i)(?:/dp/|/gp/product/|/product/|\bASIN=|\basin=|\bASIN\.1=)([A-Z0-9]{10})\b', text_or_url)
