@@ -216,13 +216,9 @@ fun HomeScreen(
     if (showSettingsDialog) {
         SettingsDialog(
             currentUrl = state.backendUrl,
-            currentKeywords = state.keywords.joinToString(", "),
             onDismiss = { showSettingsDialog = false },
-            onSave = { newUrl, newKeywords ->
+            onSave = { newUrl ->
                 viewModel.updateBackendUrl(newUrl)
-                viewModel.updateKeywords(
-                    newKeywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                )
                 showSettingsDialog = false
             }
         )
@@ -772,67 +768,30 @@ fun DealCard(
 @Composable
 fun SettingsDialog(
     currentUrl: String,
-    currentKeywords: String,
     onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit
+    onSave: (String) -> Unit
 ) {
     var url by remember { mutableStateOf(currentUrl) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cloud Backend & Einstellungen", fontWeight = FontWeight.Bold) },
+        title = { Text("Cloud Backend Verbindung", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
-                    label = { Text("Cloud Backend URL") },
+                    label = { Text("Cloud / ngrok Backend URL") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp)
                 )
-
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Lock,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "KI-Alarm-Filter (Schreibgeschützt)",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "0.01€, 2 für 0.01€, 1ct, Sparen, 50% Rabatt, Gutschein, Preisfehler, 99%",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "🔒 Automatisch von den 100 KI-Bots optimiert.",
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    }
-                }
             }
         },
         confirmButton = {
             Button(
-                onClick = { onSave(url, "0.01€,2 für 0.01€,1ct,Sparen,50% Rabatt,Gutschein,Preisfehler,99%") },
-                shape = RoundedCornerShape(8.dp)
+                onClick = { onSave(url) },
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text("Speichern")
             }
