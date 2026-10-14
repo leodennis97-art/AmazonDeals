@@ -94,18 +94,17 @@ data class Deal(
     }
 
     fun getFormattedUrl(): String {
-        val trimmed = dealUrl.trim()
-
         val asin = getAsin()
         if (asin != null) {
             return "https://www.amazon.de/dp/$asin"
         }
 
-        if (trimmed.isEmpty() || !trimmed.contains("amazon.de")) {
-            return "https://www.amazon.de/coupons"
+        val trimmed = dealUrl.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return trimmed
         }
 
-        return ensureHttps(trimmed)
+        return "https://www.amazon.de/dp/$trimmed"
     }
 
     private fun ensureHttps(url: String): String {

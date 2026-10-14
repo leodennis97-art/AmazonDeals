@@ -325,11 +325,11 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 seen_urls.add(link)
                 asin = extract_asin(full_content) or extract_asin(link)
 
-                if asin:
-                    deal_url = f"https://www.amazon.de/dp/{asin}"
-                else:
-                    clean_title_query = re.sub(r'[^\w\s]', '', title)[:40].strip()
-                    deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(clean_title_query)}"
+                # STRICT DIRECT PRODUCT PAGE GUARANTEE: Only accept deals with a valid Amazon ASIN!
+                if not asin:
+                    continue
+
+                deal_url = f"https://www.amazon.de/dp/{asin}"
 
                 price_str, discount_percent, is_glitch, coupon_text = parse_price_and_discount(title, clean_text)
 
