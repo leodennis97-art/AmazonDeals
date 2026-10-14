@@ -56,23 +56,20 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
 
     try {
         val uri = Uri.parse(formattedUrl)
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addCategory(Intent.CATEGORY_BROWSABLE)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
-        // DIRECT LAUNCH: Open product page link immediately in Chrome
+        // DIRECT LAUNCH: Open directly in the native Amazon App if installed!
         try {
-            val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addCategory(Intent.CATEGORY_BROWSABLE)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                setPackage("com.android.chrome")
-            }
-            context.startActivity(chromeIntent)
+            intent.setPackage("com.amazon.mShop.android.shopping")
+            context.startActivity(intent)
             return
         } catch (_: Exception) {
-            // Fallback to default browser
-            val browserIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addCategory(Intent.CATEGORY_BROWSABLE)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(browserIntent)
+            // Amazon App not installed, open in default Web Browser / Chrome
+            intent.setPackage(null)
+            context.startActivity(intent)
         }
     } catch (e: Exception) {
         e.printStackTrace()
