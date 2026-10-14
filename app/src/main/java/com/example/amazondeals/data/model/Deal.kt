@@ -17,6 +17,8 @@ data class Deal(
     val originalPrice: String = "",
     val discountPercent: Int = 99
 ) {
+    fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
+
     fun isKleinanzeigen(): Boolean {
         return platform.lowercase().contains("kleinanzeigen") || dealUrl.lowercase().contains("kleinanzeigen.de")
     }

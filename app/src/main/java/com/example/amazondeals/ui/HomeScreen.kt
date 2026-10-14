@@ -333,8 +333,8 @@ fun FilterChipsRow(
     onSelectFilter: (String) -> Unit
 ) {
     val filters = listOf(
-        "Alle" to "💥 Alle Preisfehler (≥95%)",
-        "95%-100% Preisfehler" to "🔥 95%-100% Rabatt",
+        "Alle" to "💥 Mega-Filter (≥95% Rabatt)",
+        "Mega-Filter (>=95%)" to "🔥 ≥95% Preisfehler",
         "99% / Gratis" to "💥 99% / Gratis",
         "Amazon.de" to "🛒 Amazon.de",
         "Kleinanzeigen.de" to "🏷️ Kleinanzeigen.de",

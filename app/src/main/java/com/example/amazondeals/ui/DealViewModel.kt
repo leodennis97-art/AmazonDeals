@@ -143,8 +143,13 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyFiltersAndSearch(filter: String, query: String) {
-        val allDeals = _uiState.value.deals
+        val allDeals = _uiState.value.deals.sortedWith(
+            compareByDescending<Deal> { it.isMegaGlitch() }
+                .thenByDescending { it.discountPercent }
+                .thenBy { if (it.price.contains("0.01") || it.price.contains("0.00")) 0 else 1 }
+        )
         var result = when (filter) {
+            "Mega-Filter (>=95%)" -> allDeals.filter { it.isMegaGlitch() }
             "95%-100% Preisfehler" -> allDeals.filter { it.discountPercent >= 95 || it.isGlitch }
             "75%-199% Rabatt" -> allDeals.filter { it.discountPercent >= 75 || it.isGlitch }
             "99% / Gratis" -> allDeals.filter { it.discountPercent >= 90 || it.isGlitch || it.price.contains("0.00") || it.price.contains("0.01") }
