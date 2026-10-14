@@ -233,17 +233,21 @@ def is_comparison_site(url):
     return any(comp in url_lower for comp in COMPARISON_SITES)
 
 def is_link_verified_reachable(url):
-    if "amazon.de/dp/" in url:
-        return True # Assume reconstructed ASIN links are fundamentally valid paths, prevents blocking by bot-protection
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        res = requests.head(url, headers=headers, timeout=2.5, allow_redirects=True)
-        if res.status_code in [200, 301, 302, 307, 308]:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        }
+        res = requests.get(url, headers=headers, timeout=4.0, allow_redirects=True)
+        # Check for Amazon's typical 404 page content (dogs of amazon) or standard 404
+        if res.status_code == 404 or "Tut uns leid. Die eingegebene Webadresse ist keine funktionsfähige Seite" in res.text or "Suchen Sie etwas?" in res.text:
+            return False
+        if res.status_code in [200, 301, 302]:
             return True
-        res_get = requests.get(url, headers=headers, timeout=2.5, allow_redirects=True)
-        return res_get.status_code in [200, 301, 302]
+        return False
     except Exception:
-        return True
+        return False
 
 def classify_category_bot(title, description):
     text = f"{title} {description}".lower()
@@ -291,6 +295,10 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
             if asin and (is_multibuy_glitch or is_fifty_percent):
                 seen_urls.add(link)
                 deal_url = f"https://www.amazon.de/dp/{asin}"
+
+                # STRICT LIVE URL VALIDATION - Ignore 404 Dog pages!
+                if not is_link_verified_reachable(deal_url):
+                    continue
 
                 if is_multibuy_glitch:
                     price = "0.01 €"
