@@ -17,7 +17,7 @@ APP_VERSION = "v2.1.0"
 LATEST_DEALS = []
 ONE_WEEK_MS = 7 * 24 * 3600 * 1000
 
-COMPARISON_SITES = ["mydealz", "idealo", "geizhals", "billiger", "guenstiger", "check24"]
+COMPARISON_SITES = ["mydealz", "dealdoktor", "monsterdealz", "dealbunny", "idealo", "geizhals", "billiger", "guenstiger", "check24", "vergleich", "schnaeppchen"]
 
 BOT_NAMES = []
 for i in range(1, 16): BOT_NAMES.append(f"🤖 Drogerie Bot #{i}")
@@ -223,8 +223,8 @@ def scrape_amazon_deals():
     now_ms = int(time.time() * 1000)
 
     rss_urls = [
-        "https://www.dealdoktor.de/feed/",
-        "https://www.monsterdealz.de/feed"
+        "https://www.amazon.de/gp/rss/bestsellers/ref=zg_bs_rss_link",
+        "https://www.kleinanzeigen.de/s-zu-verschenken/k0"
     ]
 
     item_counter = 0
