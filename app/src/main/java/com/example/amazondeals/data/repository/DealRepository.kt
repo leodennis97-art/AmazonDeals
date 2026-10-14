@@ -228,15 +228,15 @@ class DealRepository(private val context: Context) {
         return listOf(
             Deal(
                 id = "mock_1",
-                title = "[🤖 Drogerie Bot] Amazon Gutscheinkarte - Glitch",
+                title = "[🤖 Elektronik Bot] Apple AirTag 4er Pack - Glitch",
                 description = "Aktiviere den Gutschein im Bezahlvorgang auf Amazon.de. Kombinierbar mit Spar-Abo.",
                 price = "0.01 €",
                 couponText = "Sparen: Erhalte 2 für 0.01€",
-                dealUrl = "https://www.amazon.de/dp/B004Z2E2S0",
+                dealUrl = "https://www.amazon.de/dp/B0935DNDT5",
                 timestamp = now - 300000,
                 isGlitch = true,
                 platform = "Amazon.de",
-                originalPrice = "24.99 €",
+                originalPrice = "119.00 €",
                 discountPercent = 99
             ),
             Deal(
@@ -254,15 +254,15 @@ class DealRepository(private val context: Context) {
             ),
             Deal(
                 id = "mock_3",
-                title = "[☕ Haushalt Bot] Amazon Echo Dot - Preisfehler",
+                title = "[☕ Haushalt Bot] Amazon Echo Dot (5. Gen) - Preisfehler",
                 description = "Coupons im Checkout aktivieren. 50% Ersparnis durch Rabattgutschein.",
                 price = "0.01 €",
                 couponText = "Kaufe 3 zahle 1ct (Auto-Gutschein)",
-                dealUrl = "https://www.amazon.de/dp/B09B8XFCCH",
+                dealUrl = "https://www.amazon.de/dp/B0BQRB33XW",
                 timestamp = now - 1800000,
                 isGlitch = true,
                 platform = "Amazon.de",
-                originalPrice = "19.99 €",
+                originalPrice = "64.99 €",
                 discountPercent = 99
             ),
             Deal(
@@ -271,11 +271,11 @@ class DealRepository(private val context: Context) {
                 description = "Schnäppchen & Starker Preisnachlass mit 50% Coupon auf Amazon.de.",
                 price = "9.99 €",
                 couponText = "50% Rabatt Gutschein",
-                dealUrl = "https://www.amazon.de/dp/B08C1KN5J2",
+                dealUrl = "https://www.amazon.de/dp/B08C1W55L6",
                 timestamp = now - 3600000,
                 isGlitch = false,
                 platform = "Amazon.de",
-                originalPrice = "19.99 €",
+                originalPrice = "44.99 €",
                 discountPercent = 50
             )
         )
