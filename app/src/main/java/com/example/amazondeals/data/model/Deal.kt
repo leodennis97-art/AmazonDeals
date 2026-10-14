@@ -82,19 +82,19 @@ data class Deal(
 
         return when {
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
-                "2. Lege exakt $qty Stück in deinen Warenkorb.",
-                "3. Der Preisfehler (0,01 €) wird an der Kasse automatisch abgezogen."
+                "1. Öffne das Produkt unten auf Amazon.de (Seite zeigt vollen Preis an).",
+                "2. Lege exakt $qty Stück in den Warenkorb.",
+                "3. An der Kasse (im Checkout) wird der Preisfehler auf 0,01 € reduziert!"
             )
             couponText.contains("50%") || textLower.contains("50%") || textLower.contains("gutschein") -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
-                "2. Aktiviere das Häkchen bei 'Gutschein einlösen' unter dem Preis.",
-                "3. Der 50% Rabatt wird im letzten Bestellschritt abgezogen."
+                "1. Öffne das Produkt unten auf Amazon.de (Seite zeigt vollen Preis an).",
+                "2. WICHTIG: Setze das Häkchen bei 'Gutschein einlösen' direkt unter dem Preis!",
+                "3. Der 50% Rabatt wird im letzten Bestellschritt an der Kasse abgezogen."
             )
             else -> listOf(
-                "1. Klicke unten auf 'Zum Amazon Produkt' (Fabrikneu).",
-                "2. Aktiviere etwaige Coupons auf der Produktseite.",
-                "3. Schließe die Bestellung ab."
+                "1. Öffne das Produkt unten auf Amazon.de.",
+                "2. WICHTIG: Aktiviere den Coupon / Rabattgutschein auf der Produktseite.",
+                "3. Der reduzierte Endpreis erscheint im Checkout."
             )
         }
     }

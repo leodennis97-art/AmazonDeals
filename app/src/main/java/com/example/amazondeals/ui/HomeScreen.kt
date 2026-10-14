@@ -636,6 +636,29 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
+            // Amazon Coupon Activation Warning Banner
+            Surface(
+                color = Color(0xFFFF9900).copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0xFFFF9900)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "⚠️ HINWEIS: Amazon zeigt vorerst den regulären Preis an. Auf Amazon das Kästchen 'Gutschein einlösen' ankreuzen!",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF9900),
+                        lineHeight = 14.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             // Wo Kaufen & Wo Verkaufen Arbitrage Dashboard
             Surface(
                 color = Color(0xFF1E293B),
