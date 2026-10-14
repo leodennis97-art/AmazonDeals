@@ -45,33 +45,21 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
         else -> "https://$trimmed"
     }
 
-    val uri = Uri.parse(formattedUrl)
-
     try {
-        if (isCartUrl) {
-            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                addCategory(Intent.CATEGORY_BROWSABLE)
-            }
-            val chooser = Intent.createChooser(intent, "🛒 Warenkorb im Browser öffnen")
-            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(chooser)
-        } else {
-            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
+        val uri = Uri.parse(formattedUrl)
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Fix for Android 11+ to force apps to resolve the link if possible
+            addCategory(Intent.CATEGORY_BROWSABLE)
         }
+        
+        // Force browser chooser to bypass broken Amazon App deep links
+        val chooser = Intent.createChooser(intent, "Angebot öffnen mit...")
+        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(chooser)
+
     } catch (e: Exception) {
         e.printStackTrace()
-        try {
-            val fallbackIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(Intent.createChooser(fallbackIntent, "Öffnen mit Browser"))
-        } catch (e2: Exception) {
-            e2.printStackTrace()
-        }
     }
 }
 
