@@ -45,142 +45,176 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AmazonDeals 95%+ Extreme Preisfehler KI-Bots</title>
+    <title>AmazonDeals PRO &mdash; Der ultimative Deal Scanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: #141414;
+            --accent: #FF9900;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #262626;
+        }
+
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #f8fafc;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
         }
-        .card-custom {
-            background: rgba(30, 41, 59, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+
+        .container-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 540px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .badge-status {
-            background: #10b981;
-            color: #ffffff;
-            font-size: 0.9rem;
-            padding: 6px 14px;
-            border-radius: 30px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.3); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        .btn-download {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: #ffffff;
-            font-weight: 700;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 12px;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-            text-decoration: none;
+
+        .logo-icon {
+            font-size: 42px;
+            color: var(--accent);
+            margin-bottom: 24px;
             display: inline-block;
         }
-        .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
-            color: #ffffff;
-        }
-        .btn-paypal {
-            background: #ffc439;
-            color: #111111;
+
+        h1 {
+            font-size: 28px;
             font-weight: 800;
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-        }
-        .btn-paypal:hover {
-            background: #f2ba32;
-            color: #000000;
-        }
-        .btn-api {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #cbd5e1;
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .btn-api:hover {
-            background: rgba(255, 255, 255, 0.05);
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
             color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 0 auto 36px auto;
+            max-width: 400px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .features-list li {
+            font-size: 15px;
+            margin-bottom: 16px;
+            color: #d1d5db;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .features-list li i {
+            color: var(--accent);
+            margin-top: 4px;
+            font-size: 14px;
+        }
+
+        .btn-download {
+            background-color: var(--accent);
+            color: #000000;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .btn-download:hover {
+            background-color: #e68a00;
+            color: #000000;
+            transform: translateY(-2px);
+        }
+
+        .btn-paypal {
+            background-color: transparent;
+            border: 1px solid #333333;
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px 32px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+
+        .btn-paypal:hover {
+            border-color: #FFC439;
+            color: #FFC439;
+            background-color: rgba(255, 196, 57, 0.05);
+        }
+
+        .footer-text {
+            margin-top: 32px;
+            font-size: 12px;
+            color: #6b7280;
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card card-custom p-4 p-md-5 text-center">
-                    <div class="mb-3">
-                        <span class="badge-status">
-                            <span class="pulse-dot"></span> 💥 KI-Bots Aktiv (Mindestens 95% Ersparnis Filter)
-                        </span>
-                    </div>
+    <div class="container-box">
+        <div class="logo-icon">
+            <i class="fa-solid fa-cart-arrow-down"></i>
+        </div>
 
-                    <h1 class="fw-bold mb-2">🛒 AmazonDeals PRO</h1>
-                    <p class="text-secondary small mb-4">Version {{ version }} &bull; 95%+ Extreme Discount Radar</p>
+        <h1>AmazonDeals PRO</h1>
+        <p class="subtitle">Verpasse nie wieder einen Preisfehler. Sichere dir exklusive Deals, bevor sie ausverkauft sind.</p>
 
-                    <p class="text-light leading-relaxed mb-4">
-                        Kategorie-spezifische KI-Bots scannen direkte Verkaufsseiten (Amazon.de, Kleinanzeigen.de) nach Preisfehlern mit <strong>mindestens 95% bis 100% Preisnachlass</strong> (0.01 € Glitches & Gratis).
-                    </p>
+        <ul class="features-list">
+            <li>
+                <i class="fa-solid fa-bolt"></i>
+                <span><strong>Echtzeit-Push-Benachrichtigungen</strong> direkt auf dein Smartphone bei extremen Preisfehlern (z. B. 0,01€).</span>
+            </li>
+            <li>
+                <i class="fa-solid fa-robot"></i>
+                <span><strong>KI-Massen-Scan Engine</strong> durchsucht Amazon.de alle 30 Sekunden automatisch nach versteckten Rabatten.</span>
+            </li>
+            <li>
+                <i class="fa-solid fa-filter"></i>
+                <span><strong>Smart Filter</strong> für 50% Rabatt-Gutscheine und exklusive Multibuy-Aktionen (Kaufe 3, zahle 1).</span>
+            </li>
+        </ul>
 
-                    <div class="p-3 mb-4 rounded-3 text-start" style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05);">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-secondary small">Extreme Preisfehler (>=95%):</span>
-                            <span class="fw-bold text-warning">{{ deals_count }} Preisfehler</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-secondary small">Filter-Garantie:</span>
-                            <span class="badge bg-danger">&ge; 95% Ersparnis &bull; Verifiziert</span>
-                        </div>
-                    </div>
+        <a href="/download" class="btn-download">
+            <i class="fa-brands fa-android me-2"></i> App Herunterladen (.APK)
+        </a>
 
-                    <div class="d-grid gap-3">
-                        <a href="/download" class="btn-download">
-                            📱 Android App Herunterladen (.APK)
-                        </a>
-                        <a href="https://www.paypal.com/ncp/payment/FK8JDAFFUGYMA" target="_blank" class="btn-paypal">
-                            💳 1 Monat Lizenz Kaufen (PayPal)
-                        </a>
-                        <a href="/deals" target="_blank" class="btn-api">
-                            🔍 Live JSON API Ansehen (/deals)
-                        </a>
-                    </div>
+        <a href="https://www.paypal.com/ncp/payment/FK8JDAFFUGYMA" target="_blank" class="btn-paypal">
+            <i class="fa-brands fa-paypal me-2"></i> 1 Monat PRO Lizenz erwerben
+        </a>
 
-                    <div class="mt-4 pt-3 border-top border-secondary text-secondary small">
-                        Registriere dich nach der Installation in der App und schalte deine Lizenz frei.
-                    </div>
-                </div>
-            </div>
+        <div class="footer-text">
+            Version {{ version }} &bull; Live Cloud Sync &bull; Secure Connection
         </div>
     </div>
 </body>
 </html>
+"""
+
+    pass
 """
 
 def extract_asin(text_or_url):
