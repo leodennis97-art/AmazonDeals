@@ -184,9 +184,10 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // Dynamically re-sort category deals strictly by highest trading profit margin!
+        // Dynamically re-sort deals: >= 90% Rabatt & Glitches ALWAYS FIRST at the top!
         result = result.sortedWith(
-            compareByDescending<Deal> { it.getTradingProfitMarginEuros() }
+            compareByDescending<Deal> { it.discountPercent >= 90 || it.isGlitch }
+                .thenByDescending { it.getTradingProfitMarginEuros() }
                 .thenByDescending { it.discountPercent }
                 .thenByDescending { it.timestamp }
         )

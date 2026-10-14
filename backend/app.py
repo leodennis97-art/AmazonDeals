@@ -404,8 +404,14 @@ def scrape_amazon_deals():
         for future in concurrent.futures.as_completed(rss_futures):
             scraped_deals.extend(future.result())
 
+    # STRICT PRIORITY: Items with >= 90% discount or 0.01€ Glitches ALWAYS at the top!
     scraped_deals.sort(
-        key=lambda x: (x.get("marginEuros", 0), x.get("discountPercent", 0), 1 if x.get("isGlitch", False) else 0, x.get("timestamp", 0)),
+        key=lambda x: (
+            1 if (x.get("discountPercent", 0) >= 90 or x.get("isGlitch", False)) else 0,
+            x.get("marginEuros", 0),
+            x.get("discountPercent", 0),
+            x.get("timestamp", 0)
+        ),
         reverse=True
     )
 
