@@ -1,10 +1,13 @@
 package com.example.amazondeals.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.text.format.DateUtils
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -51,10 +54,9 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
         val intent = Intent(Intent.ACTION_VIEW, uri).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        
+
         if (formattedUrl.contains("amazon.de")) {
             // Force it to open in a web browser (like Chrome), completely bypassing the Amazon App
-            // because the Amazon App handles deep links poorly and throws 404/CS11 errors.
             try {
                 val browserIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
                     data = uri
@@ -62,8 +64,7 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
                 }
                 context.startActivity(browserIntent)
                 return
-            } catch (e: Exception) {
-                // If API < 15 or no browser found, fallback to Chrome package directly
+            } catch (_: Exception) {
                 try {
                     val chromeIntent = Intent(Intent.ACTION_VIEW, uri).apply {
                         addCategory(Intent.CATEGORY_BROWSABLE)
@@ -72,13 +73,11 @@ fun openUrlSafely(context: Context, rawUrl: String, isCartUrl: Boolean = false) 
                     }
                     context.startActivity(chromeIntent)
                     return
-                } catch (e2: Exception) {
-                    // Ignore, fallback to chooser below
+                } catch (_: Exception) {
                 }
             }
         }
-        
-        // Fallback Chooser
+
         val chooser = Intent.createChooser(intent, "Angebot im Browser öffnen...")
         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(chooser)
@@ -96,6 +95,8 @@ fun HomeScreen(
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     var showSettingsDialog by remember { mutableStateOf(false) }
+    var showVipManagementDialog by remember { mutableStateOf(false) }
+    var selectedTradingDeal by remember { mutableStateOf<Deal?>(null) }
 
     Scaffold(
         topBar = {
@@ -131,6 +132,22 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    if (state.isLicenseActive) {
+                        Surface(
+                            color = Color(0xFFFF9900).copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, Color(0xFFFF9900)),
+                            modifier = Modifier.clickable { showVipManagementDialog = true }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text("👑 VIP", fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFFF9900))
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     IconButton(onClick = { viewModel.refreshDeals() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Aktualisieren")
                     }
@@ -206,6 +223,7 @@ fun HomeScreen(
                             rankIndex = if (index < 3) index else -1,
                             isFavorite = viewModel.isFavorite(deal.id),
                             onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
+                            onOpenTradingDialog = { selectedTradingDeal = it },
                             context = context
                         )
                     }
@@ -222,6 +240,21 @@ fun HomeScreen(
                 viewModel.updateBackendUrl(newUrl)
                 showSettingsDialog = false
             }
+        )
+    }
+
+    if (showVipManagementDialog) {
+        VipManagementDialog(
+            state = state,
+            onDismiss = { showVipManagementDialog = false }
+        )
+    }
+
+    selectedTradingDeal?.let { deal ->
+        VipTradingDialog(
+            deal = deal,
+            context = context,
+            onDismiss = { selectedTradingDeal = null }
         )
     }
 }
@@ -301,6 +334,7 @@ fun FilterChipsRow(
 ) {
     val filters = listOf(
         "Alle" to "⚡ Alle Amazon.de Deals",
+        "VIP Trading" to "📈 VIP Trading (Resell)",
         "💥 Kaufe 2/3 zahle 1ct" to "💥 Multibuy Glitches",
         "🏷️ 50% Rabatt" to "🏷️ 50% Rabatt-Gutscheine",
         "Mega-Filter (>=95%)" to "🔥 ≥95% Preisfehler",
@@ -328,6 +362,7 @@ fun DealCard(
     rankIndex: Int = -1,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
+    onOpenTradingDialog: (Deal) -> Unit,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -636,10 +671,26 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // VIP Trading & Share Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                OutlinedButton(
+                    onClick = { onOpenTradingDialog(deal) },
+                    modifier = Modifier.weight(1.3f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFF10B981)),
+                    contentPadding = PaddingValues(vertical = 4.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF10B981))
+                ) {
+                    Text(
+                        text = "📈 VIP Trading (+${String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())})",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 OutlinedButton(
                     onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -652,17 +703,172 @@ fun DealCard(
                         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.weight(0.7f),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Angebot teilen", fontSize = 11.sp)
+                    Text("Teilen", fontSize = 11.sp)
                 }
             }
         }
     }
+}
+
+@Composable
+fun VipTradingDialog(
+    deal: Deal,
+    context: Context,
+    onDismiss: () -> Unit
+) {
+    val templateText = deal.getKleinanzeigenTemplateText()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("📈 VIP Trading & Marge", fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = deal.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    maxLines = 2
+                )
+
+                // Margin Calculation Card
+                Surface(
+                    color = Color(0xFF10B981).copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, Color(0xFF10B981))
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("🛒 Günstigster Kaufpreis:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(deal.price, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("🏷️ Kleinanzeigen Verkaufpreis:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(String.format(Locale.GERMANY, "%.2f €", deal.getEstimatedResalePriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFF10B981).copy(alpha = 0.3f))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("💰 Ihre Reingewinn-Marge:", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                            Text(
+                                text = "+${String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())} (+${deal.getTradingProfitMarginPercent()}%)",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFF10B981)
+                            )
+                        }
+                    }
+                }
+
+                Text("📋 Kleinanzeigen Verkaufsvorlage:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+
+                OutlinedTextField(
+                    value = templateText,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth().height(140.dp),
+                    textStyle = TextStyle(fontSize = 11.sp),
+                    shape = RoundedCornerShape(8.dp)
+                )
+
+                Button(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Kleinanzeigen Vorlage", templateText)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "Vorlage in Zwischenablage kopiert! 📋", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Vorlage für Kleinanzeigen kopieren", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Schließen")
+            }
+        }
+    )
+}
+
+@Composable
+fun VipManagementDialog(
+    state: DealUiState,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("👑 VIP Geräte & Zugangsverwaltung", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Surface(
+                    color = Color(0xFFFF9900).copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900))
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("VIP Status:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Aktiv & Verifiziert 👑", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("E-Mail:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(if (state.savedEmail.isNotEmpty()) state.savedEmail else "leodennis97@gmail.com", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("Lizenzschlüssel:", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(if (state.savedLicenseKey.isNotEmpty()) state.savedLicenseKey else "VIP-LIFETIME", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text("💻 Gerät-Verwaltung:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("• Dieses Android-Gerät ist registriert und freigeschaltet.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("• Unbegrenzte Push-Benachrichtigungen aktiv.", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss, shape = RoundedCornerShape(8.dp)) {
+                Text("Fertig")
+            }
+        }
+    )
 }
 
 @Composable

@@ -1,6 +1,7 @@
 package com.example.amazondeals.data.model
 
 import android.net.Uri
+import java.util.Locale
 
 data class Deal(
     val id: String,
@@ -22,6 +23,43 @@ data class Deal(
     val cheapestWebUrl: String = ""
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
+
+    fun getEstimatedResalePriceEuros(): Double {
+        val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 1.0
+        val orig = originalPrice.replace("€", "").replace(",", ".").trim().toDoubleOrNull() ?: (purchase * 2.0)
+        val resale = if (orig > purchase) orig * 0.85 else purchase * 1.8
+        return (resale).coerceAtLeast(purchase + 5.0)
+    }
+
+    fun getTradingProfitMarginEuros(): Double {
+        val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 0.01
+        return (getEstimatedResalePriceEuros() - purchase).coerceAtLeast(0.0)
+    }
+
+    fun getTradingProfitMarginPercent(): Int {
+        val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 0.01
+        if (purchase <= 0) return 100
+        return ((getTradingProfitMarginEuros() / purchase) * 100).toInt()
+    }
+
+    fun getKleinanzeigenTemplateText(): String {
+        val resalePriceFormatted = String.format(Locale.GERMANY, "%.2f €", getEstimatedResalePriceEuros())
+        return """
+            Neu & OVP: $title
+            
+            Preis: $resalePriceFormatted (Festpreis)
+            Zustand: Fabrikneu & Ungeöffnet in Originalverpackung
+            
+            Hallo! Ich verkaufe hier ein nagelneues, unbenutztes $title.
+            
+            Details:
+            - Zustand: 100% Neu, unbenutzt & in OVP
+            - Aus tierfreiem Nichtraucherhaushalt
+            - Abholung vor Ort oder schneller Versand möglich
+            
+            Bei Interesse oder Fragen einfach kurz eine Nachricht schreiben!
+        """.trimIndent()
+    }
 
     fun getCheapestComparisonUrl(): String {
         if (cheapestWebUrl.isNotBlank()) return cheapestWebUrl
