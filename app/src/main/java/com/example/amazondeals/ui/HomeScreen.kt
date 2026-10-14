@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -145,12 +145,6 @@ fun HomeScreen(
                 onRequestPermission = onRequestNotificationPermission
             )
 
-            // TOP 3 Ersparnisse Banner
-            Top3SavingsSection(
-                deals = state.deals,
-                context = context
-            )
-
             // Search Bar
             SearchBarSection(
                 query = state.searchQuery,
@@ -164,7 +158,7 @@ fun HomeScreen(
                 onSelectFilter = { viewModel.applyFilter(it) }
             )
 
-            // Deals List
+            // Deals List (Top Ersparnisse an der Spitze)
             if (state.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -200,9 +194,10 @@ fun HomeScreen(
                     contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 16.dp, end = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(state.filteredDeals, key = { it.id }) { deal ->
+                    itemsIndexed(state.filteredDeals, key = { _, deal -> deal.id }) { index, deal ->
                         DealCard(
                             deal = deal,
+                            rankIndex = if (index < 3) index else -1,
                             isFavorite = viewModel.isFavorite(deal.id),
                             onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
                             context = context
@@ -222,142 +217,6 @@ fun HomeScreen(
                 showSettingsDialog = false
             }
         )
-    }
-}
-
-@Composable
-fun Top3SavingsSection(
-    deals: List<Deal>,
-    context: Context
-) {
-    val topDeals = remember(deals) {
-        deals.sortedWith(
-            compareByDescending<Deal> { it.isGlitch }
-                .thenBy { if (it.price.contains("0.01")) 0 else 1 }
-        ).take(3)
-    }
-
-    if (topDeals.isEmpty()) return
-
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🏆", fontSize = 18.sp)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "TOP 3 ERSPARNISSE",
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 15.sp,
-                    color = Color(0xFFFF9900)
-                )
-            }
-
-            Surface(
-                color = Color(0xFFEF4444).copy(alpha = 0.15f),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "Höchster Rabatt",
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFEF4444)
-                )
-            }
-        }
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(topDeals.size) { index ->
-                val deal = topDeals[index]
-                val rankLabel = when (index) {
-                    0 -> "🥇 #1 TOP ERSPARNIS"
-                    1 -> "🥈 #2 TOP ERSPARNIS"
-                    else -> "🥉 #3 TOP ERSPARNIS"
-                }
-
-                Card(
-                    modifier = Modifier
-                        .width(260.dp)
-                        .clickable { openUrlSafely(context, deal.getFormattedUrl(), isCartUrl = false) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    border = BorderStroke(1.5.dp, Brush.horizontalGradient(listOf(Color(0xFFFF9900), Color(0xFFEF4444))))
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = rankLabel,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFFFF9900)
-                            )
-
-                            Text(
-                                text = deal.price,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Text(
-                            text = deal.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            maxLines = 2,
-                            lineHeight = 18.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = "🏷️ ${deal.couponText}",
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Button(
-                            onClick = { openUrlSafely(context, deal.getFormattedUrl(), isCartUrl = false) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
-                        ) {
-                            Text(
-                                text = "👉 Zum Produkt / Angebot",
-                                color = Color.Black,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -534,6 +393,7 @@ fun FilterChipsRow(
 @Composable
 fun DealCard(
     deal: Deal,
+    rankIndex: Int = -1,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     context: Context
@@ -544,9 +404,60 @@ fun DealCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+        border = BorderStroke(
+            width = if (rankIndex >= 0) 1.5.dp else 1.dp,
+            color = if (rankIndex >= 0) Color(0xFFFF9900) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Rank Badge at top of card
+            if (rankIndex == 0) {
+                Surface(
+                    color = Color(0xFFFF9900).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900)),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(
+                        text = "🏆 #1 TOP ERSPARNIS AN DER SPITZE",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFFF9900)
+                    )
+                }
+            } else if (rankIndex == 1) {
+                Surface(
+                    color = Color(0xFFFF9900).copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.7f)),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(
+                        text = "🥈 #2 TOP ERSPARNIS",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFFF9900)
+                    )
+                }
+            } else if (rankIndex == 2) {
+                Surface(
+                    color = Color(0xFFFF9900).copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(
+                        text = "🥉 #3 TOP ERSPARNIS",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFFFF9900)
+                    )
+                }
+            }
+
             // Header Row: Badge & Price & Favorite
             Row(
                 modifier = Modifier.fillMaxWidth(),
