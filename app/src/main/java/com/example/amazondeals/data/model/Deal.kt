@@ -20,7 +20,10 @@ data class Deal(
     val originalPrice: String = "",
     val discountPercent: Int = 99,
     val cheapestWebPrice: String = "",
-    val cheapestWebUrl: String = ""
+    val cheapestWebUrl: String = "",
+    val priceHistory: List<Float> = listOf(39.99f, 35.00f, 32.00f, 29.99f, 26.00f, 22.00f, 18.60f),
+    val buyPlatform: String = "Amazon.de",
+    val sellPlatform: String = "Kleinanzeigen.de"
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
 

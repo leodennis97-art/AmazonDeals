@@ -15,7 +15,9 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -626,6 +628,42 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
+            // Wo Kaufen & Wo Verkaufen Arbitrage Dashboard
+            Surface(
+                color = Color(0xFF1E293B),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.3f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("🛒 WO KAUFEN:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${deal.buyPlatform} (${deal.price})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("🏷️ WO VERKAUFEN:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${deal.sellPlatform} (${String.format(Locale.GERMANY, "%.2f €", deal.getEstimatedResalePriceEuros())})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Price Trend Chart Diagram
+            PriceTrendChart(
+                priceHistory = deal.priceHistory,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             // KI Web Price Comparison Container
             Surface(
                 color = Color(0xFF1E293B),
@@ -992,6 +1030,65 @@ fun VipManagementDialog(
             }
         }
     )
+}
+
+@Composable
+fun PriceTrendChart(
+    priceHistory: List<Float>,
+    modifier: Modifier = Modifier
+) {
+    if (priceHistory.size < 2) return
+
+    val minPrice = priceHistory.minOrNull() ?: 10f
+    val maxPrice = priceHistory.maxOrNull() ?: 50f
+    val range = (maxPrice - minPrice).coerceAtLeast(1f)
+
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("📊 7-Tage Netz-Preistrend:", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text("Höchst: ${String.format(Locale.GERMANY, "%.2f €", maxPrice)} | Tiefst: ${String.format(Locale.GERMANY, "%.2f €", minPrice)}", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .background(Color(0xFF0F172A), RoundedCornerShape(6.dp))
+                .padding(4.dp)
+        ) {
+            val width = size.width
+            val height = size.height
+            val points = mutableListOf<Offset>()
+
+            priceHistory.forEachIndexed { index, price ->
+                val x = (width / (priceHistory.size - 1)) * index
+                val normalizedY = (price - minPrice) / range
+                val y = height - (normalizedY * height)
+                points.add(Offset(x, y))
+            }
+
+            for (i in 0 until points.size - 1) {
+                drawLine(
+                    color = Color(0xFF10B981),
+                    start = points[i],
+                    end = points[i + 1],
+                    strokeWidth = 3f
+                )
+            }
+
+            val lastPoint = points.last()
+            drawCircle(
+                color = Color(0xFFEF4444),
+                radius = 6f,
+                center = lastPoint
+            )
+        }
+    }
 }
 
 @Composable

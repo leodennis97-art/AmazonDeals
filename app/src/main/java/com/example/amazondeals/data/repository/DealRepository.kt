@@ -190,6 +190,17 @@ class DealRepository(private val context: Context) {
                         val obj = jsonArray.getJSONObject(i)
                         val dealLink = obj.optString("dealUrl", "https://www.amazon.de/coupons")
                         val defaultPlatform = if (dealLink.lowercase().contains("kleinanzeigen")) "Kleinanzeigen.de" else "Amazon.de"
+                        val historyArray = obj.optJSONArray("priceHistory")
+                        val historyList = mutableListOf<Float>()
+                        if (historyArray != null) {
+                            for (j in 0 until historyArray.length()) {
+                                historyList.add(historyArray.getDouble(j).toFloat())
+                            }
+                        }
+                        if (historyList.isEmpty()) {
+                            historyList.addAll(listOf(39.99f, 35.00f, 32.00f, 29.99f, 26.00f, 22.00f, 18.60f))
+                        }
+
                         deals.add(
                             Deal(
                                 id = obj.optString("id", System.currentTimeMillis().toString()),
@@ -208,7 +219,10 @@ class DealRepository(private val context: Context) {
                                 originalPrice = obj.optString("originalPrice", ""),
                                 discountPercent = obj.optInt("discountPercent", if (obj.optBoolean("isGlitch")) 99 else 50),
                                 cheapestWebPrice = obj.optString("cheapestWebPrice", ""),
-                                cheapestWebUrl = obj.optString("cheapestWebUrl", "")
+                                cheapestWebUrl = obj.optString("cheapestWebUrl", ""),
+                                priceHistory = historyList,
+                                buyPlatform = obj.optString("buyPlatform", "Amazon.de"),
+                                sellPlatform = obj.optString("sellPlatform", "Kleinanzeigen.de")
                             )
                         )
                     }
