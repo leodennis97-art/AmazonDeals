@@ -969,16 +969,40 @@ fun VipManagementDialog(
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
-                            Text("👥 Registrierte VIP-Benutzer:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text("• leodennis97@gmail.com (Master VIP Owner)", fontSize = 11.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
-                            Text("• PayPal Kunden (Automatischer Freischalt-Status)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("👥 Alle Registrierten Benutzer:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            // Master VIP Owner
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("👑 leodennis97@gmail.com", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                                Text("Master VIP Owner", fontSize = 10.sp, color = Color(0xFFFF9900), fontWeight = FontWeight.ExtraBold)
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                            // PayPal PRO Users
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("💳 kunde_paypal@gmx.de", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
+                                Text("PRO (PayPal)", fontSize = 10.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                            // Normal Registered Users (Standard / Gratis)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("📱 user_test2026@web.de", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Standard (Gratis)", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text("📱 kauf_interessent@gmail.com", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Standard (Gratis)", fontSize = 10.sp, color = Color(0xFF94A3B8))
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Text("🔑 Neuer Lizenzcode Generieren:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    Text("🔑 Neuer VIP-Lizenzcode Generieren:", fontWeight = FontWeight.Bold, fontSize = 12.sp)
 
                     Button(
                         onClick = {
