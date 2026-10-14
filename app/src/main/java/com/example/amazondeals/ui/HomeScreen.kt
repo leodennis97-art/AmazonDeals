@@ -9,6 +9,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.text.format.DateUtils
 import android.widget.Toast
+import com.example.amazondeals.service.ProductScreenWatcherService
 import com.example.amazondeals.service.ScreenScannerService
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -335,16 +336,19 @@ fun StatusHeaderCard(
             // 24/7 Screen-Watcher & Floating Bubble Activation Button
             Button(
                 onClick = {
-                    if (Settings.canDrawOverlays(context)) {
-                        ScreenScannerService.startService(context)
-                        Toast.makeText(context, "🚀 24/7 KI Preis-Watcher & Floating Bubble Aktiviert!", Toast.LENGTH_SHORT).show()
-                    } else {
+                    if (!Settings.canDrawOverlays(context)) {
                         val intent = Intent(
                             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                             Uri.parse("package:${context.packageName}")
                         ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
                         context.startActivity(intent)
-                        Toast.makeText(context, "Bitte erteile die 'Über anderen Apps einblenden' Berechtigung.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "Bitte 'Über anderen Apps einblenden' aktivieren.", Toast.LENGTH_LONG).show()
+                    } else if (!ProductScreenWatcherService.isAccessibilityEnabled(context)) {
+                        ProductScreenWatcherService.openAccessibilitySettings(context)
+                        Toast.makeText(context, "Bitte aktiviere den 'Amazon Deals KI Bildschirm-Watcher' in den Barrierefreiheit-Einstellungen.", Toast.LENGTH_LONG).show()
+                    } else {
+                        ScreenScannerService.startService(context)
+                        Toast.makeText(context, "🚀 Echtzeit KI Bildschirm-Überwachung & Floating Bubble AKTIV!", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -354,7 +358,7 @@ fun StatusHeaderCard(
                 Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.Black)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "💬 24/7 KI Screen-Watcher & Floating Bubble starten",
+                    text = "💬 Echtzeit KI Bildschirm-Scan & Floating Bubble aktivieren",
                     color = Color.Black,
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp

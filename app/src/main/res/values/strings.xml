@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Amazon Deals</string>
+    <string name="accessibility_service_desc">Liest den Bildschirm in Echtzeit, um aktuell angezeigte Produkte automatisch mit dem günstigsten Internetpreis zu vergleichen.</string>
 </resources>
