@@ -25,7 +25,10 @@ data class Deal(
     val buyPlatform: String = "Amazon.de",
     val sellPlatform: String = "Kleinanzeigen.de",
     val promoCode: String = "",
-    val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f)
+    val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f),
+    val dropshippingRoi: Float = 39.7f,
+    val resellStrategy: String = "Arbitrage Resell (Amazon ➔ Kleinanzeigen)",
+    val isAutonomouslyDiscovered: Boolean = true
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
 

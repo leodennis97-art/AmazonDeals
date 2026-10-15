@@ -292,7 +292,7 @@ fun StatusHeaderCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "🚀 $dealsCount Deals (10.000+ KI-Bots)",
+                        text = "🚀 $dealsCount Deals (10.000+ KI-Bots & Selbst-Coder Engine)",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = Color(0xFFEF4444)
@@ -717,6 +717,14 @@ fun DealCard(
                     ) {
                         Text("⚡ DEIN VERKAUFSPREIS (1ct BILLIGER):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(String.format(Locale.GERMANY, "%.2f €", deal.getMyResalePriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFFF9900).copy(alpha = 0.2f))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("📈 DROPSHIPPING / ARBITRAGE ROI:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                        Text("+${String.format(Locale.GERMANY, "%.1f %%", deal.dropshippingRoi)} ROI", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
                     }
                 }
             }

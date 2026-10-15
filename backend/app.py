@@ -10,6 +10,7 @@ import feedparser
 from bs4 import BeautifulSoup
 from apscheduler.schedulers.background import BackgroundScheduler
 import concurrent.futures
+from ai_self_coder import autonomous_ai
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -367,6 +368,10 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "Saturn": round(p_num * 1.75, 2)
                 }
 
+                # Calculate Dropshipping & Resell ROI
+                roi_percent = round((margin_euros / max(p_num, 0.01)) * 100, 1)
+                strategy_name = "Dropshipping Direct Fulfillment" if is_glitch else "Arbitrage Resell (Amazon ➔ Kleinanzeigen)"
+
                 local_deals.append({
                     "id": deal_id,
                     "title": title[:100],
@@ -392,7 +397,10 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                     "buyPlatform": "Amazon.de",
                     "sellPlatform": "Kleinanzeigen.de",
                     "resalePriceEuros": resale_price,
-                    "marginEuros": margin_euros
+                    "marginEuros": margin_euros,
+                    "dropshippingRoi": roi_percent,
+                    "resellStrategy": strategy_name,
+                    "isAutonomouslyDiscovered": True
                 })
     except Exception as e:
         logger.error(f"Error scraping feed {rss_url}: {e}")
@@ -400,10 +408,16 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
 def scrape_amazon_deals():
     global LATEST_DEALS
-    logger.info("🚀 10.000+ AI BOT NETWORK: Launching 20 parallel Threads for Hyper Mass Crawling...")
+    logger.info("🚀 10.000+ AI BOT NETWORK & AUTONOMOUS AI CODER: Hyper Mass Crawling launching...")
     scraped_deals = []
     seen_urls = set()
     now_ms = int(time.time() * 1000)
+
+    # Run Autonomous AI Self-Coder to discover new sources & synthesize scripts
+    try:
+        autonomous_ai.run_autonomous_discovery()
+    except Exception as e:
+        logger.error(f"Error running autonomous AI discovery: {e}")
 
     rss_urls = [
         "https://www.dealdoktor.de/feed/",

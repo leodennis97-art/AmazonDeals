@@ -241,7 +241,10 @@ class DealRepository(private val context: Context) {
                                 buyPlatform = obj.optString("buyPlatform", "Amazon.de"),
                                 sellPlatform = obj.optString("sellPlatform", "Kleinanzeigen.de"),
                                 promoCode = obj.optString("promoCode", ""),
-                                vendorPrices = vendorMap
+                                vendorPrices = vendorMap,
+                                dropshippingRoi = obj.optDouble("dropshippingRoi", 39.7).toFloat(),
+                                resellStrategy = obj.optString("resellStrategy", "Arbitrage Resell (Amazon ➔ Kleinanzeigen)"),
+                                isAutonomouslyDiscovered = obj.optBoolean("isAutonomouslyDiscovered", true)
                             )
                         )
                     }
