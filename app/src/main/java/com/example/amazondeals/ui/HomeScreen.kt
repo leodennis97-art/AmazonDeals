@@ -419,14 +419,14 @@ fun DealCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         border = BorderStroke(
             width = if (rankIndex >= 0) 1.5.dp else 1.dp,
             color = if (rankIndex >= 0) Color(0xFFFF9900) else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         )
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             // Dynamic Category Rank Badge at top of card
             val marginFormatted = String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())
             if (rankIndex == 0) {
@@ -434,11 +434,11 @@ fun DealCard(
                     color = Color(0xFFFF9900).copy(alpha = 0.15f),
                     shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                 ) {
                     Text(
                         text = "🏆 #1 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -449,11 +449,11 @@ fun DealCard(
                     color = Color(0xFFFF9900).copy(alpha = 0.12f),
                     shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.7f)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                 ) {
                     Text(
                         text = "🥈 #2 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -464,11 +464,11 @@ fun DealCard(
                     color = Color(0xFFFF9900).copy(alpha = 0.1f),
                     shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, Color(0xFFFF9900).copy(alpha = 0.5f)),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
                 ) {
                     Text(
                         text = "🥉 #3 HÖCHSTE MARGE $categoryTag: +$marginFormatted",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFFF9900)
@@ -491,8 +491,8 @@ fun DealCard(
                             Text(
                                 "⚡ ECHTER PREISFEHLER VERIFIZIERT",
                                 color = Color.White,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.ExtraBold
                             )
                         }
@@ -504,14 +504,14 @@ fun DealCard(
                             Text(
                                 "🛒 AMAZON.DE GUTSCHEIN",
                                 color = Color.White,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     Surface(
                         color = Color(0xFFEF4444).copy(alpha = 0.15f),
@@ -519,8 +519,8 @@ fun DealCard(
                     ) {
                         Text(
                             text = "-${deal.discountPercent}%",
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = Color(0xFFEF4444)
                         )
@@ -531,7 +531,7 @@ fun DealCard(
                     if (deal.originalPrice.isNotEmpty()) {
                         Text(
                             text = deal.originalPrice,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = TextStyle(textDecoration = TextDecoration.LineThrough)
                         )
@@ -541,34 +541,35 @@ fun DealCard(
                     Text(
                         text = deal.price,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 17.sp,
+                        fontSize = 15.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
 
                     IconButton(
                         onClick = onToggleFavorite,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorit",
                             tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Title (Tapping title directly opens the Amazon product page!)
             Text(
                 text = deal.title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                lineHeight = 20.sp,
+                fontSize = 13.sp,
+                lineHeight = 17.sp,
+                maxLines = 2,
                 modifier = Modifier.clickable {
                     openUrlSafely(context, productUrl, isCartUrl = false)
                 }
