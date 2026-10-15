@@ -176,11 +176,34 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
 
         if (query.trim().isNotEmpty()) {
             val q = query.trim().lowercase()
-            result = result.filter {
-                it.title.lowercase().contains(q) ||
-                it.description.lowercase().contains(q) ||
-                it.couponText.lowercase().contains(q) ||
-                it.price.lowercase().contains(q)
+            val asinUpper = query.trim().uppercase()
+
+            if (asinUpper.matches(Regex("^B[A-Z0-9]{9}$"))) {
+                val directAsinDeal = Deal(
+                    id = "asin_$asinUpper",
+                    title = "Amazon.de Produkt (ASIN $asinUpper)",
+                    description = "Direkt gesuchtes Amazon.de Produkt mit ASIN Code $asinUpper.",
+                    price = "Angebots-Preis",
+                    couponText = "🟢 ASIN Code Treffer",
+                    dealUrl = "https://www.amazon.de/dp/$asinUpper/?_encoding=UTF8&pd_rd_i=$asinUpper&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t",
+                    isGlitch = true,
+                    botName = "🔎 ASIN Search Bot",
+                    platform = "Amazon.de",
+                    discountPercent = 75,
+                    originalPrice = "UVP",
+                    buyPlatform = "Amazon.de",
+                    sellPlatform = "Kleinanzeigen.de"
+                )
+                val existingMatch = allDeals.firstOrNull { it.getAsin() == asinUpper }
+                result = listOf(existingMatch ?: directAsinDeal)
+            } else {
+                result = result.filter {
+                    it.title.lowercase().contains(q) ||
+                    it.description.lowercase().contains(q) ||
+                    it.couponText.lowercase().contains(q) ||
+                    it.price.lowercase().contains(q) ||
+                    (it.getAsin()?.lowercase()?.contains(q) == true)
+                }
             }
         }
 

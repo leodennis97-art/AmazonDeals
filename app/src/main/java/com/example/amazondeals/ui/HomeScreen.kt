@@ -164,6 +164,27 @@ fun HomeScreen(
                 context = context
             )
 
+            // ASIN Code Search Bar
+            OutlinedTextField(
+                value = state.searchQuery,
+                onValueChange = { viewModel.updateSearchQuery(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 2.dp),
+                placeholder = { Text("🔎 ASIN Code eingeben (z. B. B08C1W55L6)...", fontSize = 12.sp) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) },
+                trailingIcon = {
+                    if (state.searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.updateSearchQuery("") }) {
+                            Icon(Icons.Default.Close, contentDescription = "Löschen", modifier = Modifier.size(18.dp))
+                        }
+                    }
+                },
+                singleLine = true,
+                textStyle = TextStyle(fontSize = 13.sp),
+                shape = RoundedCornerShape(10.dp)
+            )
+
             // Filter Chips
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
