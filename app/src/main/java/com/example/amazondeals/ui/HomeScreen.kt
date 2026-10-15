@@ -225,19 +225,27 @@ fun HomeScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(top = 8.dp, bottom = 120.dp, start = 14.dp, end = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(top = 6.dp, bottom = 100.dp, start = 12.dp, end = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(state.filteredDeals, key = { _, deal -> deal.id }) { index, deal ->
-                        DealCard(
-                            deal = deal,
-                            rankIndex = if (index < 3) index else -1,
-                            selectedFilterName = state.selectedFilter,
-                            isFavorite = viewModel.isFavorite(deal.id),
-                            onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
-                            onOpenTradingDialog = { selectedTradingDeal = it },
-                            context = context
-                        )
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = fadeIn(animationSpec = tween(250)) + slideInVertically(
+                                initialOffsetY = { it / 3 },
+                                animationSpec = spring(stiffness = Spring.StiffnessLow)
+                            )
+                        ) {
+                            DealCard(
+                                deal = deal,
+                                rankIndex = if (index < 3) index else -1,
+                                selectedFilterName = state.selectedFilter,
+                                isFavorite = viewModel.isFavorite(deal.id),
+                                onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
+                                onOpenTradingDialog = { selectedTradingDeal = it },
+                                context = context
+                            )
+                        }
                     }
                 }
             }
