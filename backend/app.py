@@ -577,6 +577,47 @@ def index():
         deals_count=len(LATEST_DEALS)
     )
 
+REGISTERED_ACCOUNTS = {
+    "leodennis97@gmail.com": {
+        "email": "leodennis97@gmail.com",
+        "role": "Master VIP Owner",
+        "registeredAt": int(time.time() * 1000),
+        "isBanned": False,
+        "licenseKey": "VIP-LIFETIME"
+    }
+}
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json(silent=True) or {}
+    email = data.get('email', '').strip().lower()
+
+    if not email:
+        return jsonify({"status": "ERROR", "message": "E-Mail ist erforderlich"}), 400
+
+    role = "Master VIP Owner" if email == "leodennis97@gmail.com" else "Standard (Gratis)"
+    license_key = "VIP-LIFETIME" if email == "leodennis97@gmail.com" else ""
+
+    REGISTERED_ACCOUNTS[email] = {
+        "email": email,
+        "role": role,
+        "registeredAt": int(time.time() * 1000),
+        "isBanned": False,
+        "licenseKey": license_key
+    }
+
+    logger.info(f"Neues Cloud Konto registriert: {email} ({role})")
+
+    return jsonify({
+        "status": "SUCCESS",
+        "message": "Konto in der Cloud registriert!",
+        "user": REGISTERED_ACCOUNTS[email]
+    })
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    return jsonify(list(REGISTERED_ACCOUNTS.values()))
+
 @app.route('/verify_license', methods=['POST'])
 def verify_license():
     data = request.get_json(silent=True) or {}

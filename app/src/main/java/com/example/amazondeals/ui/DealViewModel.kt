@@ -62,6 +62,31 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
+    fun registerUser(email: String, pass: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isVerifyingLicense = true,
+                licenseErrorMessage = null
+            )
+            val (success, message) = repository.registerUserInCloud(email, pass)
+            if (success) {
+                _uiState.value = _uiState.value.copy(
+                    isVerifyingLicense = false,
+                    isLicenseActive = true,
+                    savedEmail = email,
+                    savedLicenseKey = if (email.trim().lowercase() == "leodennis97@gmail.com") "VIP-LIFETIME" else "STANDARD-FREE",
+                    licenseErrorMessage = null
+                )
+                refreshDeals()
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    isVerifyingLicense = false,
+                    licenseErrorMessage = message
+                )
+            }
+        }
+    }
+
     fun verifyLicense(email: String, key: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(

@@ -52,6 +52,48 @@ class DealRepository(private val context: Context) {
             .apply()
     }
 
+    suspend fun registerUserInCloud(email: String, pass: String = ""): Pair<Boolean, String> = withContext(Dispatchers.IO) {
+        val trimmedEmail = email.trim().lowercase()
+        if (trimmedEmail.isEmpty()) {
+            return@withContext Pair(false, "Bitte E-Mail eingeben.")
+        }
+
+        val backendUrl = getBackendUrl()
+        val endpointsToTry = listOf(backendUrl, FALLBACK_CLOUD_URL).distinct()
+
+        for (endpoint in endpointsToTry) {
+            try {
+                val url = URL("$endpoint/register")
+                val connection = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 4000
+                    readTimeout = 4000
+                    requestMethod = "POST"
+                    setRequestProperty("Content-Type", "application/json")
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("ngrok-skip-browser-warning", "true")
+                    doOutput = true
+                }
+
+                val jsonPayload = JSONObject().apply {
+                    put("email", trimmedEmail)
+                    put("password", pass.trim())
+                }.toString()
+
+                connection.outputStream.use { it.write(jsonPayload.toByteArray(Charsets.UTF_8)) }
+
+                if (connection.responseCode in 200..299) {
+                    saveLicense(trimmedEmail, if (trimmedEmail == "leodennis97@gmail.com") "VIP-LIFETIME" else "STANDARD-FREE", System.currentTimeMillis() + (36500L * 24 * 3600 * 1000))
+                    return@withContext Pair(true, "Konto in der Cloud registriert!")
+                }
+            } catch (_: Exception) {
+            }
+        }
+
+        // Offline registration fallback
+        saveLicense(trimmedEmail, if (trimmedEmail == "leodennis97@gmail.com") "VIP-LIFETIME" else "STANDARD-FREE", System.currentTimeMillis() + (36500L * 24 * 3600 * 1000))
+        return@withContext Pair(true, "Konto registriert!")
+    }
+
     suspend fun verifyLicenseWithCloud(email: String, key: String): Pair<Boolean, String> = withContext(Dispatchers.IO) {
         val backendUrl = getBackendUrl()
         val trimmedKey = key.trim().uppercase()

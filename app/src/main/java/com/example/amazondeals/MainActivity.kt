@@ -50,6 +50,9 @@ class MainActivity : ComponentActivity() {
                         errorMessage = state.licenseErrorMessage,
                         onVerifyLicense = { email, key ->
                             viewModel.verifyLicense(email, key)
+                        },
+                        onRegisterUser = { email, pass ->
+                            viewModel.registerUser(email, pass)
                         }
                     )
                 } else {
