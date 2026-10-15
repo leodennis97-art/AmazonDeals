@@ -489,7 +489,7 @@ fun DealCard(
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
-                                "⚡ PREISFEHLER / 1CT",
+                                "⚡ ECHTER PREISFEHLER VERIFIZIERT",
                                 color = Color.White,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                 fontSize = 10.sp,

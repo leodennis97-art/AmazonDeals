@@ -328,15 +328,13 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
 
             is_amazon = "amazon" in full_content or "amzn" in full_content or "amazon" in link.lower() or extract_asin(full_content) or extract_asin(link)
 
-            # STRICT COUPON & PROMO CODE FILTER:
-            # Only accept products that REALLY offer an active coupon, promo code, or glitch discount!
-            has_real_coupon = any(k in full_content for k in [
-                "gutschein", "coupon", "rabattcode", "code", "sparen", "aktionscode",
-                "häkchen", "0.01", "1ct", "glitch", "preisfehler", "2 für", "3 für",
-                "kaufe 2", "kaufe 3", "halber preis", "50%"
+            # STRICT REAL PRICE ERROR & GLITCH FILTER:
+            # Only accept genuine Preisfehler / Glitches / 0.01€ / 90%+ discounts!
+            is_verified_glitch = is_glitch or discount_percent >= 90 or any(kw in full_content for kw in [
+                "preisfehler", "glitch", "0.01", "1ct", "90%", "99%", "2 für 0.01", "3 für 0.01"
             ])
 
-            if not has_real_coupon:
+            if not is_verified_glitch:
                 continue
 
             if is_amazon or ("kleinanzeigen" not in full_content and "ebay" not in full_content):
