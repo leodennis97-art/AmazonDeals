@@ -116,6 +116,10 @@ data class Deal(
         }
 
         val trimmed = dealUrl.trim()
+        if (trimmed.contains("/s?k=") || trimmed.contains("amazon.de/s?")) {
+            return "https://www.amazon.de/coupons"
+        }
+
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
             return trimmed
         }
