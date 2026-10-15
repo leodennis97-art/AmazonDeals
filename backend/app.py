@@ -277,17 +277,23 @@ def parse_price_and_discount(title, description):
     # STRICT 0.01€ / 1CT CHECK IN TITLE ONLY to prevent false price overwrites on regular products (e.g. 18.81€)
     is_one_cent = any(g in title.lower() for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01"])
 
-    price_match = re.search(r'(?:für|nur|ab)\s*(\d+(?:[.,]\d+)?)\s*€', title, re.IGNORECASE)
+    # Step 1: Remove savings / bonus / per-unit numbers like "110€ Ersparnis" or "200€ Prämie" or "pro Kilo"
+    cleaned_title = re.sub(r'\d+(?:[.,]\d+)?\s*€\s*(?:Ersparnis|Prämie|Bonus|pro Kilo|Gutschein|Guthaben)', '', title, flags=re.IGNORECASE)
+
+    # Step 2: Look specifically for "für nur XX,XX€" or "für XX,XX€"
+    price_match = re.search(r'für\s+(?:nur\s+)?(\d+(?:[.,]\d+)?)\s*€', cleaned_title, re.IGNORECASE)
     if not price_match:
-        price_match = re.search(r'(\d+(?:[.,]\d+)?)\s*€', title)
+        all_prices = re.findall(r'(\d+(?:[.,]\d+)?)\s*€', cleaned_title)
+        price_val = all_prices[-1].replace(',', '.') + " €" if all_prices else "Sonderpreis"
+    else:
+        price_val = price_match.group(1).replace(',', '.') + " €"
 
     if is_one_cent:
         price_val = "0.01 €"
         discount_val = 199
         is_glitch_flag = True
         coupon_text = "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
-    elif price_match:
-        price_val = price_match.group(1).replace(',', '.') + " €"
+    elif price_val != "Sonderpreis":
         is_glitch_flag = False
         discount_match = re.search(r'(\d{1,2})\s*%\s*(?:rabatt|coupon|gutschein)?', title, re.IGNORECASE)
         discount_val = int(discount_match.group(1)) if discount_match else ("50" if "50%" in text else 35)
