@@ -86,6 +86,7 @@ fun HomeScreen(
     var showSettingsDialog by remember { mutableStateOf(false) }
     var showVipManagementDialog by remember { mutableStateOf(false) }
     var selectedTradingDeal by remember { mutableStateOf<Deal?>(null) }
+    var selectedStationDeal by remember { mutableStateOf<Deal?>(null) }
 
     Scaffold(
         topBar = {
@@ -222,6 +223,7 @@ fun HomeScreen(
                                 isFavorite = viewModel.isFavorite(deal.id),
                                 onToggleFavorite = { viewModel.toggleFavorite(deal.id) },
                                 onOpenTradingDialog = { selectedTradingDeal = it },
+                                onOpenStationDialog = { selectedStationDeal = it },
                                 context = context
                             )
                         }
@@ -254,6 +256,14 @@ fun HomeScreen(
             deal = deal,
             context = context,
             onDismiss = { selectedTradingDeal = null }
+        )
+    }
+
+    selectedStationDeal?.let { deal ->
+        StationFlippingDialog(
+            deal = deal,
+            context = context,
+            onDismiss = { selectedStationDeal = null }
         )
     }
 }
@@ -334,6 +344,7 @@ fun FilterChipsRow(
 ) {
     val filters = listOf(
         "Alle" to "⚡ Alle Amazon.de Deals",
+        "Station Flipping" to "🚉 Station Flipping (Bar-Marge)",
         "VIP Trading" to "📈 VIP Trading (Resell)",
         "💥 Kaufe 2/3 zahle 1ct" to "💥 Multibuy Glitches",
         "🏷️ 50% Rabatt" to "🏷️ 50% Rabatt-Gutscheine",
@@ -364,6 +375,7 @@ fun DealCard(
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
     onOpenTradingDialog: (Deal) -> Unit,
+    onOpenStationDialog: (Deal) -> Unit,
     context: Context
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -795,22 +807,37 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // VIP Trading & Share Row
+            // VIP Trading & Station Flipping & Share Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 OutlinedButton(
                     onClick = { onOpenTradingDialog(deal) },
-                    modifier = Modifier.weight(1.3f),
+                    modifier = Modifier.weight(1.1f),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(1.dp, Color(0xFF10B981)),
                     contentPadding = PaddingValues(vertical = 4.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF10B981))
                 ) {
                     Text(
-                        text = "📈 VIP Trading (+${String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())})",
-                        fontSize = 11.sp,
+                        text = "📈 VIP Resell (+${String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())})",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = { onOpenStationDialog(deal) },
+                    modifier = Modifier.weight(1.1f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900)),
+                    contentPadding = PaddingValues(vertical = 4.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF9900))
+                ) {
+                    Text(
+                        text = "🚉 Station Flip",
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -827,17 +854,87 @@ fun DealCard(
                         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(Intent.createChooser(shareIntent, "Deal teilen"))
                     },
-                    modifier = Modifier.weight(0.7f),
+                    modifier = Modifier.weight(0.8f),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Teilen", fontSize = 11.sp)
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(12.dp))
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text("Teilen", fontSize = 10.sp)
                 }
             }
         }
     }
+}
+
+@Composable
+fun StationFlippingDialog(
+    deal: Deal,
+    context: Context,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("🚉 Station Flipping Strategy", fontWeight = FontWeight.Bold)
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = deal.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    maxLines = 2
+                )
+
+                Surface(
+                    color = Color(0xFFFF9900).copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, Color(0xFFFF9900))
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = "📍 Abhol-Station: ${deal.stationPickupLocation}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF9900)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        deal.getStationFlippingStrategySteps().forEach { step ->
+                            Text(
+                                text = step,
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                lineHeight = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        val productUrl = deal.getFormattedUrl()
+                        openUrlSafely(context, productUrl, isCartUrl = false)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+                ) {
+                    Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Produkt zur Station bestellen", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Schließen")
+            }
+        }
+    )
 }
 
 @Composable
