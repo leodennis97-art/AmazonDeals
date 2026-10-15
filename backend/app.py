@@ -627,6 +627,19 @@ def verify_license():
     if not email:
         return jsonify({"status": "ERROR", "error": "Bitte E-Mail-Adresse angeben."}), 400
 
+    if email not in REGISTERED_ACCOUNTS and email != "leodennis97@gmail.com":
+        return jsonify({
+            "status": "NOT_REGISTERED",
+            "error": "Benutzerkonto nicht in der Cloud gefunden. Bitte zuerst registrieren!"
+        }), 400
+
+    user_info = REGISTERED_ACCOUNTS.get(email, {})
+    if user_info.get("isBanned", False):
+        return jsonify({
+            "status": "BANNED",
+            "error": "Dein Benutzerkonto wurde vom Administrator gebannt."
+        }), 403
+
     if email == "leodennis97@gmail.com":
         expiry_ms = int((time.time() + (36500 * 24 * 3600)) * 1000)
         return jsonify({
@@ -639,7 +652,7 @@ def verify_license():
     if not license_key:
         return jsonify({"status": "ERROR", "error": "Bitte Lizenzcode angeben."}), 400
 
-    if license_key in VALID_LICENSES or license_key.startswith("PAYPAL") or license_key.startswith("PRO") or license_key == "ADMIN":
+    if license_key in VALID_LICENSES or license_key.startswith("PAYPAL") or license_key.startswith("PRO") or license_key == "ADMIN" or license_key == user_info.get("licenseKey"):
         expiry_ms = int((time.time() + (30 * 24 * 3600)) * 1000)
         return jsonify({
             "status": "ACTIVE",

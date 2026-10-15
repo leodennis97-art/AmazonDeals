@@ -89,9 +89,8 @@ class DealRepository(private val context: Context) {
             }
         }
 
-        // Offline registration fallback
-        saveLicense(trimmedEmail, if (trimmedEmail == "leodennis97@gmail.com") "VIP-LIFETIME" else "STANDARD-FREE", System.currentTimeMillis() + (36500L * 24 * 3600 * 1000))
-        return@withContext Pair(true, "Konto registriert!")
+        // STRICT MANDATORY CLOUD CHECK: Reject registration if no Cloud connection!
+        return@withContext Pair(false, "Keine Serververbindung zur Cloud. Registrierung abgelehnt!")
     }
 
     suspend fun verifyLicenseWithCloud(email: String, key: String): Pair<Boolean, String> = withContext(Dispatchers.IO) {
@@ -150,19 +149,17 @@ class DealRepository(private val context: Context) {
                     if (status == "ACTIVE" || status == "SUCCESS") {
                         saveLicense(trimmedEmail, trimmedKey, expiry)
                         return@withContext Pair(true, message)
+                    } else {
+                        val errorMsg = json.optString("error", "Ungültiger Lizenzcode oder Benutzer nicht in Cloud gefunden.")
+                        return@withContext Pair(false, errorMsg)
                     }
                 }
             } catch (_: Exception) {
             }
         }
 
-        if (trimmedKey.length >= 8) {
-            val thirtyDaysMs = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000)
-            saveLicense(trimmedEmail, trimmedKey, thirtyDaysMs)
-            return@withContext Pair(true, "Lizenz aktiviert (PRO Modus)!")
-        }
-
-        return@withContext Pair(false, "Verbindung zur Cloud fehlgeschlagen. Bitte Internetverbindung prüfen.")
+        // STRICT MANDATORY CLOUD CHECK: Reject login if no Cloud connection!
+        return@withContext Pair(false, "Keine Serververbindung zur Cloud. Login abgelehnt!")
     }
 
     fun getBackendUrl(): String {
