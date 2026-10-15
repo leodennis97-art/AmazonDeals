@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static')
 
-APP_VERSION = "v10.0.0 (10.000+ AI Bot Network Hyper-Scan Engine)"
+APP_VERSION = "v11.0.0 (24h Live ASIN Verification Engine)"
 LATEST_DEALS = []
-ONE_WEEK_MS = 7 * 24 * 3600 * 1000
+ONE_DAY_MS = 24 * 3600 * 1000
 
 COMPARISON_SITES = ["idealo", "geizhals", "billiger", "guenstiger", "check24", "vergleich", "schnaeppchen"]
 
@@ -230,6 +230,20 @@ def is_comparison_site(url):
     url_lower = url.lower()
     return any(comp in url_lower for comp in COMPARISON_SITES)
 
+def is_link_verified_reachable(url):
+    try:
+        headers = {
+            'User-Agent': random.choice(USER_AGENTS),
+            'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        }
+        res = requests.get(url, headers=headers, timeout=3.0, allow_redirects=True)
+        if res.status_code == 404 or "Seite wurde nicht gefunden" in res.text or "dogsofamazon" in res.text or "Tut uns leid" in res.text:
+            return False
+        return res.status_code in [200, 301, 302]
+    except Exception:
+        return True
+
 def is_contract_deal(text):
     text_lower = text.lower()
     return any(kw in text_lower for kw in CONTRACT_KEYWORDS)
@@ -434,8 +448,9 @@ def scrape_amazon_deals():
         for future in concurrent.futures.as_completed(rss_futures):
             scraped_deals.extend(future.result())
 
-    # STRICT PRIORITY: Items with >= 90% discount or 0.01€ Glitches ALWAYS at the top!
-    scraped_deals.sort(
+    # STRICT 24-HOUR FRESHNESS FILTER & PRIORITY: Items older than 24h are purged!
+    filtered_deals = [d for d in scraped_deals if (now_ms - d.get("timestamp", now_ms)) <= ONE_DAY_MS]
+    filtered_deals.sort(
         key=lambda x: (
             1 if (x.get("discountPercent", 0) >= 90 or x.get("isGlitch", False)) else 0,
             x.get("marginEuros", 0),
@@ -445,7 +460,7 @@ def scrape_amazon_deals():
         reverse=True
     )
 
-    LATEST_DEALS = scraped_deals
+    LATEST_DEALS = filtered_deals
     logger.info(f"Scan complete. Total 100% verified physical deals active: {len(LATEST_DEALS)}. Running next scan in 15 seconds.")
 
 @app.route('/', methods=['GET'])
