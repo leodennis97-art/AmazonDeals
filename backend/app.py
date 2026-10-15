@@ -260,28 +260,31 @@ def parse_price_and_discount(title, description):
     code_match = re.search(r'(?:code|gutschein|gutscheincode|rabattcode):\s*([A-Z0-9]{4,15})', f"{title} {description}", re.IGNORECASE)
     promo_code = code_match.group(1).upper() if code_match else ("RABATT50" if "50%" in text else "")
 
-    is_one_cent = any(g in text for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01", "preisfehler", "glitch"])
-
-    if is_one_cent:
-        return "0.01 €", 199, True, "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct", promo_code
+    # STRICT 0.01€ / 1CT CHECK IN TITLE ONLY to prevent false price overwrites on regular products (e.g. 18.81€)
+    is_one_cent = any(g in title.lower() for g in ["0.01", "0,01", "1ct", "1 cent", "2 für 0.01", "3 für 0.01"])
 
     price_match = re.search(r'(?:für|nur|ab)\s*(\d+(?:[.,]\d+)?)\s*€', title, re.IGNORECASE)
     if not price_match:
         price_match = re.search(r'(\d+(?:[.,]\d+)?)\s*€', title)
 
-    price_val = price_match.group(1).replace(',', '.') + " €" if price_match else "Sonderpreis"
-
-    discount_match = re.search(r'(\d{1,2})\s*%\s*(?:rabatt|coupon|gutschein)?', title, re.IGNORECASE)
-    if discount_match:
-        discount_val = int(discount_match.group(1))
-    elif "halber preis" in text:
-        discount_val = 50
+    if is_one_cent:
+        price_val = "0.01 €"
+        discount_val = 199
+        is_glitch_flag = True
+        coupon_text = "🟢 MEGA GLITCH: Kaufe 2/3 zahle 1ct"
+    elif price_match:
+        price_val = price_match.group(1).replace(',', '.') + " €"
+        is_glitch_flag = False
+        discount_match = re.search(r'(\d{1,2})\s*%\s*(?:rabatt|coupon|gutschein)?', title, re.IGNORECASE)
+        discount_val = int(discount_match.group(1)) if discount_match else ("50" if "50%" in text else 35)
+        coupon_text = f"🟢 Rabatt Gutschein (-{discount_val}%)"
     else:
-        discount_val = 75
+        price_val = "Sonderpreis"
+        is_glitch_flag = False
+        discount_val = 50
+        coupon_text = "🟢 Top Angebot"
 
-    coupon_text = f"🟢 Rabatt Gutschein (-{discount_val}%)" if discount_val >= 10 else "🟢 Top Angebot"
-
-    return price_val, discount_val, False, coupon_text, promo_code
+    return price_val, discount_val, is_glitch_flag, coupon_text, promo_code
 
 def calculate_resell_margin(buy_price_str, discount_percent):
     p_num = float(re.sub(r'[^\d.]', '', buy_price_str.replace(',', '.'))) if re.search(r'\d', buy_price_str) else 10.0
