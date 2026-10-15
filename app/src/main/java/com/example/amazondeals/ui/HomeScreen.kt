@@ -164,27 +164,6 @@ fun HomeScreen(
                 context = context
             )
 
-            // ASIN Code Search Bar
-            OutlinedTextField(
-                value = state.searchQuery,
-                onValueChange = { viewModel.updateSearchQuery(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 2.dp),
-                placeholder = { Text("🔎 ASIN Code eingeben (z. B. B08C1W55L6)...", fontSize = 12.sp) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) },
-                trailingIcon = {
-                    if (state.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateSearchQuery("") }) {
-                            Icon(Icons.Default.Close, contentDescription = "Löschen", modifier = Modifier.size(18.dp))
-                        }
-                    }
-                },
-                singleLine = true,
-                textStyle = TextStyle(fontSize = 13.sp),
-                shape = RoundedCornerShape(10.dp)
-            )
-
             // Filter Chips
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
@@ -301,81 +280,47 @@ fun StatusHeaderCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(12.dp),
+            .padding(horizontal = 10.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFEF4444).copy(alpha = alpha))
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "🚀 $dealsCount Deals (10.000+ KI-Bots & Selbst-Coder Engine)",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        color = Color(0xFFEF4444)
-                    )
-                }
-
-                if (totalSavings > 0) {
-                    Surface(
-                        color = Color(0xFF10B981).copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = "💰 ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF10B981)
-                        )
-                    }
-                }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFEF4444).copy(alpha = alpha))
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = "🚀 $dealsCount Deals (10.000+ KI-Bots)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                    color = Color(0xFFEF4444)
+                )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            // 24/7 Screen-Watcher & Floating Bubble Activation Button
-            Button(
-                onClick = {
-                    if (!Settings.canDrawOverlays(context)) {
-                        val intent = Intent(
-                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                            Uri.parse("package:${context.packageName}")
-                        ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-                        context.startActivity(intent)
-                        Toast.makeText(context, "Bitte 'Über anderen Apps einblenden' aktivieren.", Toast.LENGTH_LONG).show()
-                    } else if (!ProductScreenWatcherService.isAccessibilityEnabled(context)) {
-                        ProductScreenWatcherService.openAccessibilitySettings(context)
-                        Toast.makeText(context, "Bitte aktiviere den 'Amazon Deals KI Bildschirm-Watcher' in den Barrierefreiheit-Einstellungen.", Toast.LENGTH_LONG).show()
-                    } else {
-                        ScreenScannerService.startService(context)
-                        Toast.makeText(context, "🚀 Echtzeit KI Bildschirm-Überwachung & Floating Bubble AKTIV!", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
-            ) {
-                Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.Black)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "💬 Echtzeit KI Bildschirm-Scan & Floating Bubble aktivieren",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp
-                )
+            if (totalSavings > 0) {
+                Surface(
+                    color = Color(0xFF10B981).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = "💰 ${String.format(Locale.GERMANY, "%.2f €", totalSavings)}",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF10B981)
+                    )
+                }
             }
         }
     }
