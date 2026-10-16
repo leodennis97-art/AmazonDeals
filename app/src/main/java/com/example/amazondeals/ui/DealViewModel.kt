@@ -7,6 +7,8 @@ import com.example.amazondeals.data.model.Deal
 import com.example.amazondeals.data.repository.DealRepository
 import com.example.amazondeals.notification.NotificationHelper
 import com.example.amazondeals.worker.DealCheckWorker
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +46,16 @@ class DealViewModel(application: Application) : AndroidViewModel(application) {
         checkLicenseState()
         refreshDeals()
         DealCheckWorker.schedule(application)
+        startPeriodic3MinCloudSync()
+    }
+
+    private fun startPeriodic3MinCloudSync() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(3 * 60 * 1000L) // 3 Minutes Realtime Cloud Sync
+                refreshDeals()
+            }
+        }
     }
 
     fun loadSettings() {

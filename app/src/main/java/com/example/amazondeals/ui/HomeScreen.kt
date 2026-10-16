@@ -302,7 +302,7 @@ fun StatusHeaderCard(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "📈 $dealsCount Aktive Einkommens-Quellen (CashFlow AI Engine)",
+                    text = "📈 $dealsCount Quellen (3 Min Cloud-Sync)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp,
                     color = Color(0xFF00E676)
