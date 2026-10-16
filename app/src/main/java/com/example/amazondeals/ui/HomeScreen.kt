@@ -662,7 +662,7 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Wo Kaufen & Wo Verkaufen Arbitrage Dashboard
+            // Wo Kaufen & Wo Verkaufen Arbitrage & Kleinanzeigen Market Status Dashboard
             Surface(
                 color = Color(0xFF1E293B),
                 shape = RoundedCornerShape(8.dp),
@@ -674,16 +674,16 @@ fun DealCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("🛒 KAUFPREIS (NEU & OVP):", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${deal.buyPlatform} (${deal.price})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
+                        Text("🛒 SHOP / HÄNDLER:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${deal.merchantName} (${deal.price})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFF9900))
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("🏷️ KLEINANZEIGEN TIEFSTPREIS:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(String.format(Locale.GERMANY, "%.2f €", deal.getLowestKleinanzeigenMarketPriceEuros()), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
+                        Text("📊 KLEINANZEIGEN MARKT:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("${deal.kleinanzeigenOfferCount} Inserate (${String.format(Locale.GERMANY, "%.2f €", deal.getLowestKleinanzeigenMarketPriceEuros())})", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
                     }
                     Spacer(modifier = Modifier.height(2.dp))
                     Row(
@@ -698,8 +698,8 @@ fun DealCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("📈 DROPSHIPPING / ARBITRAGE ROI:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
-                        Text("+${String.format(Locale.GERMANY, "%.1f %%", deal.dropshippingRoi)} ROI", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
+                        Text("📈 REINGEWINN / MARGE:", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
+                        Text("+${String.format(Locale.GERMANY, "%.2f €", deal.getTradingProfitMarginEuros())}", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF10B981))
                     }
                 }
             }

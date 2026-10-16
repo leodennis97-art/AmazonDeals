@@ -16,32 +16,42 @@ data class Deal(
     val botName: String = "🤖 AI Bot",
     val aiConfidence: Int = 98,
     val category: String = "Allgemein",
-    val platform: String = "Amazon.de",
+    val platform: String = "Internet Shop",
     val originalPrice: String = "",
     val discountPercent: Int = 99,
     val cheapestWebPrice: String = "",
     val cheapestWebUrl: String = "",
     val priceHistory: List<Float> = listOf(39.99f, 35.00f, 32.00f, 29.99f, 26.00f, 22.00f, 18.60f),
-    val buyPlatform: String = "Amazon.de",
+    val buyPlatform: String = "Online Shop",
     val sellPlatform: String = "Kleinanzeigen.de",
     val promoCode: String = "",
-    val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f),
+    val vendorPrices: Map<String, Float> = mapOf("Internet Shop" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f),
     val dropshippingRoi: Float = 39.7f,
-    val resellStrategy: String = "Arbitrage Resell (Amazon ➔ Kleinanzeigen)",
+    val resellStrategy: String = "Internet-Arbitrage Resell",
     val incomeType: String = "PRODUCT_FLIP",
-    val isAutonomouslyDiscovered: Boolean = true
+    val isAutonomouslyDiscovered: Boolean = true,
+    val merchantName: String = "Internet Shop",
+    val kleinanzeigenOfferCount: Int = 8
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
 
+    fun getKleinanzeigenSupplyStatus(): String {
+        return if (kleinanzeigenOfferCount > 0) {
+            "🟢 Auf Kleinanzeigen aktiv ($kleinanzeigenOfferCount Inserate im Netz)"
+        } else {
+            "🔥 Keine Konkurrenz (0 Inserate - Alleinstellungsmerkmal!)"
+        }
+    }
+
     fun getLowestVendorPoint(): Pair<String, Float> {
-        if (vendorPrices.isEmpty()) return Pair("Amazon.de", 18.60f)
-        val minEntry = vendorPrices.minByOrNull { it.value } ?: return Pair("Amazon.de", 18.60f)
+        if (vendorPrices.isEmpty()) return Pair(merchantName, 18.60f)
+        val minEntry = vendorPrices.minByOrNull { it.value } ?: return Pair(merchantName, 18.60f)
         return Pair(minEntry.key, minEntry.value)
     }
 
     fun getLowestKleinanzeigenMarketPriceEuros(): Double {
         val purchase = price.replace("€", "").replace(",", ".").replace("(Gratis)", "").trim().toDoubleOrNull() ?: 1.0
-        val orig = originalPrice.replace("€", "").replace(",", ".").trim().toDoubleOrNull() ?: (purchase * 2.0)
+        val orig = originalPrice.replace("€", "").replace(",", ".").replace("(Zu verschenken)", "").trim().toDoubleOrNull() ?: (purchase * 2.0)
         val resale = if (orig > purchase) orig * 0.85 else purchase * 1.8
         return (resale).coerceAtLeast(purchase + 5.0)
     }
@@ -103,17 +113,17 @@ data class Deal(
                 "3. Kassiere bis zu 80% Provision pro erfolgreicher Empfehlung!"
             )
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
-                "1. Öffne das Produkt unten auf Amazon.de (Seite zeigt vollen Preis an).",
+                "1. Öffne das Produkt unten auf $merchantName (Seite zeigt vollen Preis an).",
                 "2. Lege exakt $qty Stück in den Warenkorb.",
                 "3. An der Kasse (im Checkout) wird der Preisfehler auf 0,01 € reduziert!"
             )
             couponText.contains("50%") || textLower.contains("50%") || textLower.contains("gutschein") -> listOf(
-                "1. Öffne das Produkt unten auf Amazon.de (Seite zeigt vollen Preis an).",
-                "2. WICHTIG: Setze das Häkchen bei 'Gutschein einlösen' direkt unter dem Preis!",
-                "3. Der 50% Rabatt wird im letzten Bestellschritt an der Kasse abgezogen."
+                "1. Öffne das Produkt unten auf $merchantName (Seite zeigt vollen Preis an).",
+                "2. WICHTIG: Setze das Häkchen bei 'Gutschein einlösen' / Code eingeben!",
+                "3. Der Rabatt wird im letzten Bestellschritt an der Kasse abgezogen."
             )
             else -> listOf(
-                "1. Öffne das Produkt unten auf Amazon.de.",
+                "1. Öffne das Produkt unten auf $merchantName.",
                 "2. WICHTIG: Aktiviere den Coupon / Rabattgutschein auf der Produktseite.",
                 "3. Der reduzierte Endpreis erscheint im Checkout."
             )
@@ -127,15 +137,11 @@ data class Deal(
         }
 
         val trimmed = dealUrl.trim()
-        if (trimmed.contains("/s?k=") || trimmed.contains("amazon.de/s?")) {
-            return "https://www.amazon.de/coupons"
-        }
-
         if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
             return trimmed
         }
 
-        return "https://www.amazon.de/coupons"
+        return "https://www.google.com/search?q=${Uri.encode(title)}"
     }
 
     fun getAsin(): String? {

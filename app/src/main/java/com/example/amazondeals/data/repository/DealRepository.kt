@@ -277,14 +277,16 @@ class DealRepository(private val context: Context) {
                                 cheapestWebPrice = obj.optString("cheapestWebPrice", ""),
                                 cheapestWebUrl = obj.optString("cheapestWebUrl", ""),
                                 priceHistory = historyList,
-                                buyPlatform = obj.optString("buyPlatform", "Amazon.de"),
+                                buyPlatform = obj.optString("buyPlatform", "Online-Shop"),
                                 sellPlatform = obj.optString("sellPlatform", "Kleinanzeigen.de"),
                                 promoCode = obj.optString("promoCode", ""),
                                 vendorPrices = vendorMap,
                                 dropshippingRoi = obj.optDouble("dropshippingRoi", 39.7).toFloat(),
-                                resellStrategy = obj.optString("resellStrategy", "Arbitrage Resell (Amazon ➔ Kleinanzeigen)"),
+                                resellStrategy = obj.optString("resellStrategy", "Internet-Arbitrage Resell"),
                                 incomeType = obj.optString("incomeType", "PRODUCT_FLIP"),
-                                isAutonomouslyDiscovered = obj.optBoolean("isAutonomouslyDiscovered", true)
+                                isAutonomouslyDiscovered = obj.optBoolean("isAutonomouslyDiscovered", true),
+                                merchantName = obj.optString("merchantName", "Online-Shop"),
+                                kleinanzeigenOfferCount = obj.optInt("kleinanzeigenOfferCount", 8)
                             )
                         )
                     }
