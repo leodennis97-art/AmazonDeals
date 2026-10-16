@@ -112,7 +112,7 @@ data class Deal(
     fun getFormattedUrl(): String {
         val asin = getAsin()
         if (asin != null) {
-            return "https://www.amazon.de/dp/$asin/?_encoding=UTF8&pd_rd_i=$asin&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
+            return "https://www.amazon.de/dp/$asin"
         }
 
         val trimmed = dealUrl.trim()
@@ -124,7 +124,7 @@ data class Deal(
             return trimmed
         }
 
-        return "https://www.amazon.de/dp/$trimmed/?_encoding=UTF8&pd_rd_i=$trimmed&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
+        return "https://www.amazon.de/coupons"
     }
 
     fun getAsin(): String? {
@@ -134,8 +134,7 @@ data class Deal(
         if (match != null) {
             return match.groupValues[1].uppercase()
         }
-        val fallbackRegex = Regex("""\b(B[0-9A-Z]{9})\b""")
-        return fallbackRegex.find(trimmed)?.groupValues?.get(1)?.uppercase()
+        return null
     }
 
     fun getSuggestedQuantity(): Int {

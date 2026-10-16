@@ -340,10 +340,9 @@ def fetch_and_parse_feed(rss_url, seen_urls, now_ms):
                 asin = extract_asin(full_content) or extract_asin(link)
 
                 if asin:
-                    deal_url = f"https://www.amazon.de/dp/{asin}/?_encoding=UTF8&pd_rd_i={asin}&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t"
+                    deal_url = f"https://www.amazon.de/dp/{asin}"
                 else:
-                    clean_title_query = re.sub(r'[^\w\s]', '', title)[:40].strip()
-                    deal_url = f"https://www.amazon.de/s?k={urllib.parse.quote_plus(clean_title_query)}"
+                    deal_url = "https://www.amazon.de/coupons"
 
                 price_str, discount_percent, is_glitch, coupon_text, promo_code = parse_price_and_discount(title, clean_text)
 
@@ -413,7 +412,7 @@ def get_verified_global_glitches(now_ms):
             "price": "0.01 €",
             "couponText": "🟢 ECHTER PREISFEHLER VERIFIZIERT (-99%)",
             "promoCode": "GLITCH100",
-            "dealUrl": "https://www.amazon.de/dp/B0935DNDT5/?_encoding=UTF8&pd_rd_i=B0935DNDT5&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t",
+            "dealUrl": "https://www.amazon.de/dp/B0935DNDT5",
             "imageUrl": "",
             "timestamp": now_ms - 10000,
             "isGlitch": True,
@@ -443,7 +442,7 @@ def get_verified_global_glitches(now_ms):
             "price": "0.01 €",
             "couponText": "🟢 ECHTER PREISFEHLER VERIFIZIERT (-99%)",
             "promoCode": "ECHO99",
-            "dealUrl": "https://www.amazon.de/dp/B0BQRB33XW/?_encoding=UTF8&pd_rd_i=B0BQRB33XW&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t",
+            "dealUrl": "https://www.amazon.de/dp/B0BQRB33XW",
             "imageUrl": "",
             "timestamp": now_ms - 20000,
             "isGlitch": True,
@@ -473,7 +472,7 @@ def get_verified_global_glitches(now_ms):
             "price": "0.01 €",
             "couponText": "🟢 ECHTER PREISFEHLER VERIFIZIERT (-99%)",
             "promoCode": "STICK4K",
-            "dealUrl": "https://www.amazon.de/dp/B08C1W55L6/?_encoding=UTF8&pd_rd_i=B08C1W55L6&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t",
+            "dealUrl": "https://www.amazon.de/dp/B08C1W55L6",
             "imageUrl": "",
             "timestamp": now_ms - 30000,
             "isGlitch": True,
@@ -503,7 +502,7 @@ def get_verified_global_glitches(now_ms):
             "price": "0.01 €",
             "couponText": "🟢 ECHTER PREISFEHLER VERIFIZIERT (-99%)",
             "promoCode": "PS5GLITCH",
-            "dealUrl": "https://www.amazon.de/dp/B08H99BPJN/?_encoding=UTF8&pd_rd_i=B08H99BPJN&ref_=sbx_be_s_sparkle_ssd_tt&pd_rd_plhdr=t",
+            "dealUrl": "https://www.amazon.de/dp/B08H99BPJN",
             "imageUrl": "",
             "timestamp": now_ms - 40000,
             "isGlitch": True,
