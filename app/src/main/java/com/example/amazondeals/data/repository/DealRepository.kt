@@ -283,6 +283,7 @@ class DealRepository(private val context: Context) {
                                 vendorPrices = vendorMap,
                                 dropshippingRoi = obj.optDouble("dropshippingRoi", 39.7).toFloat(),
                                 resellStrategy = obj.optString("resellStrategy", "Arbitrage Resell (Amazon ➔ Kleinanzeigen)"),
+                                incomeType = obj.optString("incomeType", "PRODUCT_FLIP"),
                                 isAutonomouslyDiscovered = obj.optBoolean("isAutonomouslyDiscovered", true)
                             )
                         )

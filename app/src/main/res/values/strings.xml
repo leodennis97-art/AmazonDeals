@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Amazon Deals</string>
-    <string name="accessibility_service_desc">Liest den Bildschirm in Echtzeit, um aktuell angezeigte Produkte automatisch mit dem günstigsten Internetpreis zu vergleichen.</string>
+    <string name="app_name">CashFlow AI PRO</string>
+    <string name="accessibility_service_desc">Liest den Bildschirm in Echtzeit, um aktuell angezeigte Produkte und Webseiten automatisch mit der CashFlow AI Einkommens-Engine zu vergleichen.</string>
 </resources>

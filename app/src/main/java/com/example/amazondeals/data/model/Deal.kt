@@ -28,6 +28,7 @@ data class Deal(
     val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f),
     val dropshippingRoi: Float = 39.7f,
     val resellStrategy: String = "Arbitrage Resell (Amazon ➔ Kleinanzeigen)",
+    val incomeType: String = "PRODUCT_FLIP",
     val isAutonomouslyDiscovered: Boolean = true
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
@@ -91,6 +92,16 @@ data class Deal(
         val textLower = "$title $description $couponText".lowercase()
 
         return when {
+            incomeType == "WEBSITE_FLIP" -> listOf(
+                "1. Klicke unten auf 'Ankauf auf Flippa / Sedo'.",
+                "2. Erwirbe die unterbewertete Webseite / Domain zum Ankaufspreis.",
+                "3. Biete die Webseite mit der Kopiervorlage zum doppelten Re-Valuation Preis an!"
+            )
+            incomeType == "AFFILIATE" -> listOf(
+                "1. Klicke unten auf 'Partnerprogramm beitreten'.",
+                "2. Generiere deinen persönlichen Affiliate-Empfehlungslink.",
+                "3. Kassiere bis zu 80% Provision pro erfolgreicher Empfehlung!"
+            )
             qty > 1 || isGlitch || discountPercent >= 99 -> listOf(
                 "1. Öffne das Produkt unten auf Amazon.de (Seite zeigt vollen Preis an).",
                 "2. Lege exakt $qty Stück in den Warenkorb.",

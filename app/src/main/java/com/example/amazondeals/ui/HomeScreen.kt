@@ -98,24 +98,25 @@ fun HomeScreen(
                                 .clip(CircleShape)
                                 .background(
                                     Brush.linearGradient(
-                                        colors = listOf(Color(0xFFFF9900), Color(0xFFFF5500))
+                                        colors = listOf(Color(0xFF00E676), Color(0xFFFFD700))
                                     )
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("🛒", fontSize = 18.sp)
+                            Text("💸", fontSize = 18.sp)
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "AmazonDeals PRO",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 17.sp
+                                text = "CashFlow AI PRO",
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 17.sp,
+                                color = Color.White
                             )
                             Text(
-                                text = "24/7 Glitch & Coupon Scanner",
+                                text = "Automatisierte Online-Einkommens Platform",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = Color(0xFF00E676)
                             )
                         }
                     }
@@ -301,10 +302,10 @@ fun StatusHeaderCard(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "🚀 $dealsCount Deals (10.000+ KI-Bots)",
+                    text = "📈 $dealsCount Aktive Einkommens-Quellen (CashFlow AI Engine)",
                     fontWeight = FontWeight.Bold,
                     fontSize = 11.sp,
-                    color = Color(0xFFEF4444)
+                    color = Color(0xFF00E676)
                 )
             }
 
@@ -333,11 +334,10 @@ fun FilterChipsRow(
     onSelectFilter: (String) -> Unit
 ) {
     val filters = listOf(
-        "Alle" to "⚡ Alle Amazon.de Deals",
-        "VIP Trading" to "📈 VIP Trading (Resell)",
-        "💥 Kaufe 2/3 zahle 1ct" to "💥 Multibuy Glitches",
-        "🏷️ 50% Rabatt" to "🏷️ 50% Rabatt-Gutscheine",
-        "Mega-Filter (>=95%)" to "🔥 ≥95% Preisfehler",
+        "Alle" to "⚡ Alle Einkommen",
+        "Produkt-Flipping" to "🛒 Produkt-Flipping",
+        "Website-Flipping" to "🌐 Website-Flipping",
+        "High-Affiliate" to "💰 High-Commission Affiliate",
         "Favoriten" to "❤️ Favoriten ($favoritesCount)"
     )
 
