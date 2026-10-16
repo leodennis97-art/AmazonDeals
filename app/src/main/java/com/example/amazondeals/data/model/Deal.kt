@@ -28,21 +28,9 @@ data class Deal(
     val vendorPrices: Map<String, Float> = mapOf("Amazon.de" to 18.60f, "Otto.de" to 29.99f, "MediaMarkt" to 34.90f, "Saturn" to 35.00f),
     val dropshippingRoi: Float = 39.7f,
     val resellStrategy: String = "Arbitrage Resell (Amazon ➔ Kleinanzeigen)",
-    val isAutonomouslyDiscovered: Boolean = true,
-    val isStationFlippingSuitable: Boolean = true,
-    val stationPickupLocation: String = "DHL Packstation & Lokale Abhol-Station"
+    val isAutonomouslyDiscovered: Boolean = true
 ) {
     fun isMegaGlitch(): Boolean = discountPercent >= 95 || isGlitch
-
-    fun getStationFlippingStrategySteps(): List<String> {
-        val margin = String.format(Locale.GERMANY, "%.2f €", getTradingProfitMarginEuros())
-        return listOf(
-            "1. 🚉 Station Kauf: Kaufe das Produkt günstig auf $buyPlatform ($price).",
-            "2. 📦 Station Lieferung: Lasse das Paket an deine nächste $stationPickupLocation liefern.",
-            "3. 💵 Bar-Abholung: Inseriere den Artikel auf $sellPlatform zur lokalen Bar-Abholung.",
-            "4. 💰 Reingewinn: Kassiere +$margin bar auf die Hand ohne Versandaufwand!"
-        )
-    }
 
     fun getLowestVendorPoint(): Pair<String, Float> {
         if (vendorPrices.isEmpty()) return Pair("Amazon.de", 18.60f)
