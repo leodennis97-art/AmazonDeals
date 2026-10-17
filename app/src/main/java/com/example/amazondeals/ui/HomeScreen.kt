@@ -771,25 +771,27 @@ fun DealCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Action Buttons
-            val productUrl = deal.getFormattedUrl()
+            // Dynamic Cheapest Merchant Buy Button
+            val lowestVendorPair = deal.getLowestVendorPoint()
+            val bestMerchant = deal.merchantName.ifBlank { lowestVendorPair.first }
+            val bestPrice = if (deal.price != "Sonderpreis") deal.price else String.format(Locale.GERMANY, "%.2f €", lowestVendorPair.second.toDouble())
 
             Button(
                 onClick = {
-                    openUrlSafely(context, productUrl, isCartUrl = false)
+                    openUrlSafely(context, deal.getFormattedUrl(), isCartUrl = false)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9900))
+                contentPadding = PaddingValues(vertical = 6.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676))
             ) {
-                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Black)
+                Icon(Icons.Default.ShoppingCart, contentDescription = null, modifier = Modifier.size(15.dp), tint = Color.Black)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "👉 Zum Amazon Produkt / Angebot",
+                    text = "🛒 Günstigster Shop: $bestMerchant ($bestPrice)",
                     color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 12.sp
                 )
             }
 
